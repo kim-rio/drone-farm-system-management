@@ -1,0 +1,45 @@
+services:
+
+  postgres:
+    image: postgis/postgis:17-3.5
+    container_name: dmfs-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: dmfs
+      POSTGRES_USER: dmfs
+      POSTGRES_PASSWORD: dmfs
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dmfs -d dmfs"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: dmfs-rabbitmq
+    restart: unless-stopped
+
+    environment:
+      RABBITMQ_DEFAULT_USER: dmfs
+      RABBITMQ_DEFAULT_PASS: dmfs
+
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+
+volumes:
+  postgres_data:
+  rabbitmq_data:
