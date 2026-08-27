@@ -1,0 +1,77 @@
+<div class="login-page">
+
+  <div class="login-card">
+
+    <div class="login-content">
+
+      <h1>DMFS</h1>
+
+      <p class="subtitle">
+        Drone Farm Management System
+      </p>
+
+      <h2>Sign in</h2>
+
+      <form class="login-form" (ngSubmit)="login()">
+
+        <div class="form-group">
+
+          <label for="email">
+            Email
+          </label>
+
+          <input
+            id="email"
+            type="email"
+            name="email"
+            [(ngModel)]="email"
+            placeholder="Enter your email"
+            autocomplete="email"
+            required
+          />
+
+        </div>
+
+        <div class="form-group">
+
+          <label for="password">
+            Password
+          </label>
+
+          <input
+            id="password"
+            type="password"
+            name="password"
+            [(ngModel)]="password"
+            placeholder="Enter your password"
+            autocomplete="current-password"
+            required
+          />
+
+        </div>
+
+        @if (errorMessage) {
+          <div class="error">
+            {{ errorMessage }}
+          </div>
+        }
+
+        <button
+          type="submit"
+          [disabled]="loading">
+
+          @if (loading) {
+            Signing in...
+          } @else {
+            Sign in
+          }
+
+        </button>
+
+      </form>
+
+    </div>
+
+  </div>
+
+</div>
