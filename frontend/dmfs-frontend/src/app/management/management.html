@@ -1,40 +1,33 @@
 <div
   class="dashboard"
-  [class.sidebar-closed]="!sidebarOpen"
+  [class.sidebar-open]="sidebarOpen"
 >
 
 
-  <!-- =====================================================
+  <!-- =================================
        SIDEBAR
-       ===================================================== -->
+       ================================= -->
 
-  <aside class="sidebar">
+  @if (sidebarOpen) {
 
+    <aside class="sidebar">
 
-    <!-- SIDEBAR HEADER -->
+      <!-- BRAND -->
 
-    <div class="sidebar-header">
+      <div class="brand">
 
-      <!--
-        THIS BUTTON NEVER MOVES.
-        It remains at the top-left of the sidebar.
-      -->
+        <button
+          type="button"
+          class="menu-button"
+          (click)="toggleSidebar()"
+          aria-label="Close navigation"
+        >
+          ☰
+        </button>
 
-      <button
-        type="button"
-        class="sidebar-toggle"
-        (click)="toggleSidebar()"
-        aria-label="Toggle navigation"
-      >
-        ☰
-      </button>
+        <div class="brand-text">
 
-
-      @if (sidebarOpen) {
-
-        <div class="sidebar-brand">
-
-          <strong>DMFS</strong>
+          <h1>DMFS</h1>
 
           <span>
             MANAGEMENT
@@ -42,18 +35,12 @@
 
         </div>
 
-      }
-
-    </div>
+      </div>
 
 
-    <!-- =================================================
-         NAVIGATION
-         ================================================= -->
+      <!-- NAVIGATION -->
 
-    @if (sidebarOpen) {
-
-      <nav class="sidebar-nav">
+      <nav class="navigation">
 
         @for (
           item of menuItems;
@@ -62,12 +49,14 @@
 
           <button
             type="button"
-            class="sidebar-link"
+            class="nav-item"
             [class.active]="item.route === '/management'"
             (click)="navigate(item.route)"
           >
 
-            <span class="sidebar-link-text">
+            <span class="nav-indicator"></span>
+
+            <span>
               {{ item.label }}
             </span>
 
@@ -77,23 +66,17 @@
 
       </nav>
 
-    }
+
+      <!-- SIDEBAR BOTTOM -->
+
+      <div class="sidebar-bottom">
 
 
-    <!-- =================================================
-         SIDEBAR BOTTOM
-         ================================================= -->
-
-    <div class="sidebar-bottom">
-
-
-      <!-- MANAGEMENT ACCOUNT -->
-
-      @if (sidebarOpen) {
+        <!-- ACCOUNT -->
 
         <button
           type="button"
-          class="account-button"
+          class="account"
           (click)="openSettings()"
         >
 
@@ -101,7 +84,7 @@
             {{ getInitials() }}
           </div>
 
-          <div class="account-info">
+          <div class="account-details">
 
             <strong>
               {{ user?.firstName }}
@@ -116,74 +99,70 @@
 
         </button>
 
-      }
 
+        <!-- LOGOUT -->
 
-      <!--
-        ROUND LOGOUT BUTTON
+        <button
+          type="button"
+          class="logout"
+          (click)="logout()"
+        >
 
-        When sidebar is open:
-        round button + Logout text
+          <span class="logout-circle">
+            ↪
+          </span>
 
-        When sidebar is closed:
-        only round button
-      -->
-
-      <button
-        type="button"
-        class="logout-button"
-        (click)="logout()"
-        aria-label="Logout"
-      >
-
-        <span class="logout-circle">
-          ↪
-        </span>
-
-        @if (sidebarOpen) {
-
-          <span class="logout-label">
+          <span class="logout-text">
             Logout
           </span>
 
-        }
+        </button>
 
-      </button>
+      </div>
 
-    </div>
+    </aside>
 
-  </aside>
+  }
 
 
-  <!-- =====================================================
+  <!-- =================================
        MAIN CONTENT
-       ===================================================== -->
+       ================================= -->
 
   <main class="main-content">
 
 
-    <!-- =================================================
+    <!-- =================================
          TOP BAR
-         ================================================= -->
+         ================================= -->
 
     <header class="topbar">
 
 
+      <!-- SINGLE MENU BUTTON -->
+
       <div class="topbar-left">
 
-        <!--
-          NO SECOND SIDEBAR BUTTON HERE.
+        @if (!sidebarOpen) {
 
-          The sidebar toggle stays inside the sidebar.
-        -->
+          <button
+            type="button"
+            class="open-menu-button"
+            (click)="toggleSidebar()"
+            aria-label="Open navigation"
+          >
+            ☰
+          </button>
+
+        }
 
       </div>
 
 
+      <!-- RIGHT SIDE -->
+
       <div class="topbar-right">
 
-
-        <!-- SETTINGS -->
 
         <button
           type="button"
@@ -193,8 +172,6 @@
           Settings
         </button>
 
-
-        <!-- USER -->
 
         <div class="top-user">
 
@@ -222,9 +199,9 @@
     </header>
 
 
-    <!-- =================================================
-         PAGE
-         ================================================= -->
+    <!-- =================================
+         PAGE CONTENT
+         ================================= -->
 
     <section class="page">
 
@@ -233,7 +210,10 @@
 
       <div class="page-header">
 
-        <div>
+
+        <!-- TITLE -->
+
+        <div class="title-area">
 
           <p class="eyebrow">
             MANAGEMENT PORTAL
@@ -249,12 +229,54 @@
 
         </div>
 
+
+        <!-- QUICK ACTIONS -->
+
+        <div class="quick-actions">
+
+
+          <button
+            type="button"
+            class="action-pill"
+            (click)="registerClient()"
+          >
+
+            <span class="plus">
+              +
+            </span>
+
+            <span>
+              Register Client
+            </span>
+
+          </button>
+
+
+          <button
+            type="button"
+            class="action-pill"
+            (click)="newSurveyRequest()"
+          >
+
+            <span class="plus">
+              +
+            </span>
+
+            <span>
+              New Survey Request
+            </span>
+
+          </button>
+
+
+        </div>
+
       </div>
 
 
-      <!-- =================================================
-           KPI CARDS
-           ================================================= -->
+      <!-- =================================
+           STATISTICS
+           ================================= -->
 
       <section class="stats">
 
@@ -284,12 +306,11 @@
       </section>
 
 
-      <!-- =================================================
-           ACTIVITY PROGRESS
-           ================================================= -->
+      <!-- =================================
+           ACTIVITY
+           ================================= -->
 
       <section class="section">
-
 
         <div class="section-heading">
 
@@ -300,7 +321,7 @@
             </p>
 
             <h3>
-              Activity progress
+              Activity Progress
             </h3>
 
           </div>
@@ -311,10 +332,9 @@
         <div class="progress-grid">
 
 
-          <!-- SURVEY REQUESTS -->
+          <!-- SURVEY -->
 
           <article class="progress-card">
-
 
             <div class="progress-header">
 
@@ -329,7 +349,6 @@
                 </p>
 
               </div>
-
 
               <button
                 type="button"
@@ -410,7 +429,6 @@
 
           <article class="progress-card">
 
-
             <div class="progress-header">
 
               <div>
@@ -424,7 +442,6 @@
                 </p>
 
               </div>
-
 
               <button
                 type="button"
@@ -505,7 +522,6 @@
 
           <article class="progress-card">
 
-
             <div class="progress-header">
 
               <div>
@@ -519,7 +535,6 @@
                 </p>
 
               </div>
-
 
               <button
                 type="button"
@@ -600,9 +615,9 @@
       </section>
 
 
-      <!-- =================================================
-           LOWER DASHBOARD
-           ================================================= -->
+      <!-- =================================
+           LOWER SECTION
+           ================================= -->
 
       <section class="lower-grid">
 
@@ -610,7 +625,6 @@
         <!-- FARM ACTIVITY -->
 
         <article class="farm-card">
-
 
           <div class="card-header">
 
@@ -629,7 +643,6 @@
               </p>
 
             </div>
-
 
             <button
               type="button"
@@ -686,11 +699,9 @@
 
             <div class="farm-progress-list">
 
-
               <div class="progress-line">
 
                 <div>
-
                   <span>
                     Surveys Completed
                   </span>
@@ -698,15 +709,10 @@
                   <strong>
                     0%
                   </strong>
-
                 </div>
 
                 <div class="line">
-
-                  <span
-                    [style.width.%]="0"
-                  ></span>
-
+                  <span></span>
                 </div>
 
               </div>
@@ -715,7 +721,6 @@
               <div class="progress-line">
 
                 <div>
-
                   <span>
                     Services Delivered
                   </span>
@@ -723,15 +728,10 @@
                   <strong>
                     0%
                   </strong>
-
                 </div>
 
                 <div class="line">
-
-                  <span
-                    [style.width.%]="0"
-                  ></span>
-
+                  <span></span>
                 </div>
 
               </div>
@@ -740,7 +740,6 @@
               <div class="progress-line">
 
                 <div>
-
                   <span>
                     Active Farms
                   </span>
@@ -748,15 +747,10 @@
                   <strong>
                     0%
                   </strong>
-
                 </div>
 
                 <div class="line">
-
-                  <span
-                    [style.width.%]="0"
-                  ></span>
-
+                  <span></span>
                 </div>
 
               </div>
@@ -771,7 +765,6 @@
         <!-- REPORTS -->
 
         <article class="reports-card">
-
 
           <div class="card-header">
 
@@ -790,7 +783,6 @@
               </p>
 
             </div>
-
 
             <button
               type="button"
@@ -886,7 +878,6 @@
         </article>
 
       </section>
-
 
     </section>
 

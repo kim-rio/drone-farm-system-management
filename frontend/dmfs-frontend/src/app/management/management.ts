@@ -7,7 +7,7 @@ interface MenuItem {
   route: string;
 }
 
-interface DashboardStat {
+interface Stat {
   title: string;
   value: number;
   description: string;
@@ -24,23 +24,10 @@ export class Management {
   private router = inject(Router);
   private authService = inject(AuthService);
 
-  /*
-   * SIDEBAR
-   */
   sidebarOpen = true;
 
-
-  /*
-   * CURRENT MANAGEMENT USER
-   */
   user = this.authService.getCurrentUser();
 
-
-  /*
-   * SIDEBAR MENU
-   *
-   * No Staff / Users section.
-   */
   menuItems: MenuItem[] = [
     {
       label: 'Dashboard',
@@ -76,14 +63,7 @@ export class Management {
     }
   ];
 
-
-  /*
-   * DASHBOARD STATISTICS
-   *
-   * These remain temporary until the
-   * management API is connected.
-   */
-  dashboardStats: DashboardStat[] = [
+  dashboardStats: Stat[] = [
     {
       title: 'Registered Clients',
       value: 0,
@@ -106,89 +86,94 @@ export class Management {
     }
   ];
 
-
-  /*
-   * EXISTING PERCENTAGES
-   *
-   * Keep these for now.
-   * They can later be connected to the backend.
-   */
   surveyProgress = 0;
-
   fieldOperationProgress = 0;
-
   dataAnalysisProgress = 0;
-
   farmProgress = 0;
 
 
-  /*
-   * TOGGLE SIDEBAR
-   */
+  /* ==============================
+     SIDEBAR
+     ============================== */
+
   toggleSidebar(): void {
     this.sidebarOpen = !this.sidebarOpen;
   }
 
 
-  /*
-   * NAVIGATION
-   */
+  /* ==============================
+     NAVIGATION
+     ============================== */
+
   navigate(route: string): void {
     this.router.navigate([route]);
   }
 
 
-  /*
-   * SETTINGS
-   */
+  /* ==============================
+     QUICK ACTIONS
+     ============================== */
+
+  registerClient(): void {
+    this.router.navigate(['/management/clients/register']);
+  }
+
+  newSurveyRequest(): void {
+    this.router.navigate(['/management/surveys/new']);
+  }
+
+
+  /* ==============================
+     SETTINGS
+     ============================== */
+
   openSettings(): void {
     this.router.navigate(['/management/settings']);
   }
 
 
-  /*
-   * LOGOUT
-   */
+  /* ==============================
+     LOGOUT
+     ============================== */
+
   logout(): void {
 
     this.authService.logout().subscribe({
-
       next: () => {
         this.router.navigate(['/login']);
       },
-
       error: () => {
         this.router.navigate(['/login']);
       }
-
     });
+
   }
 
 
-  /*
-   * USER INITIALS
-   */
+  /* ==============================
+     USER INITIALS
+     ============================== */
+
   getInitials(): string {
 
     if (!this.user) {
       return 'M';
     }
 
-    const firstName =
+    const first =
       this.user.firstName?.charAt(0) ?? '';
 
-    const lastName =
+    const last =
       this.user.lastName?.charAt(0) ?? '';
 
-    return (
-      firstName + lastName
-    ).toUpperCase();
+    return (first + last).toUpperCase();
   }
 
 
-  /*
-   * CIRCULAR PROGRESS
-   */
+  /* ==============================
+     CIRCLE PROGRESS
+     ============================== */
+
   getProgressOffset(progress: number): number {
 
     const circumference = 301.59;

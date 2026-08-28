@@ -1,17 +1,9 @@
 :host {
   display: block;
-
   min-height: 100vh;
   min-height: 100dvh;
-
-  color: #111111;
-
-  font-family:
-    Inter,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
+  color: #111;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 * {
@@ -22,238 +14,164 @@ button {
   font: inherit;
 }
 
-
-/* =====================================================
-   DASHBOARD
-   ===================================================== */
-
 .dashboard {
   min-height: 100vh;
   min-height: 100dvh;
-
   display: flex;
-
   background: #f7f7f5;
 }
 
 
-/* =====================================================
+/* =================================
    SIDEBAR
-   ===================================================== */
+   ================================= */
 
 .sidebar {
-  position: sticky;
-  top: 0;
+  position: fixed;
+  inset: 0 auto 0 0;
 
   width: 235px;
   height: 100vh;
   height: 100dvh;
 
-  flex-shrink: 0;
-
   display: flex;
   flex-direction: column;
 
-  padding: 20px 14px;
+  padding: 20px 15px;
 
-  background: #ffffff;
+  background: #fff;
 
   border-right: 1px solid #e5e5e3;
 
-  overflow: hidden;
-
-  transition:
-    width 0.2s ease;
+  z-index: 1000;
 }
 
 
-/* =====================================================
-   SIDEBAR HEADER
-   ===================================================== */
+/* =================================
+   BRAND
+   ================================= */
 
-.sidebar-header {
-  position: relative;
-
-  min-height: 55px;
+.brand {
+  min-height: 65px;
 
   display: flex;
   align-items: center;
 
-  padding-left: 48px;
+  gap: 12px;
 
-  margin-bottom: 15px;
+  padding: 0 8px 18px;
 }
 
+.menu-button,
+.open-menu-button {
+  width: 35px;
+  height: 35px;
 
-/*
- * THE TOGGLE NEVER MOVES.
- *
- * It is always positioned at:
- *
- * top: 0
- * left: 0
- */
-
-.sidebar-toggle {
-  position: absolute;
-
-  top: 0;
-  left: 0;
-
-  width: 34px;
-  height: 34px;
+  flex-shrink: 0;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  padding: 0;
-
   border: 1px solid #dededc;
   border-radius: 8px;
 
-  background: #ffffff;
-  color: #111111;
-
-  font-size: 16px;
+  background: #fff;
+  color: #111;
 
   cursor: pointer;
-
-  z-index: 10;
-
-  transition:
-    background 0.15s ease;
 }
 
-.sidebar-toggle:hover {
-  background: #f3f3f1;
+.menu-button:hover,
+.open-menu-button:hover {
+  background: #f1f1ef;
 }
 
-
-/* =====================================================
-   BRAND
-   ===================================================== */
-
-.sidebar-brand {
-  display: flex;
-  flex-direction: column;
-}
-
-.sidebar-brand strong {
-  color: #111111;
+.brand-text h1 {
+  margin: 0;
 
   font-size: 22px;
-  font-weight: 750;
-
-  line-height: 1;
-
-  letter-spacing: -0.8px;
+  font-weight: 700;
 }
 
-.sidebar-brand span {
-  margin-top: 4px;
+.brand-text span {
+  display: block;
 
-  color: #999999;
+  margin-top: 3px;
+
+  color: #888;
 
   font-size: 8px;
-  font-weight: 650;
+  font-weight: 700;
 
   letter-spacing: 1px;
 }
 
 
-/* =====================================================
+/* =================================
    NAVIGATION
-   ===================================================== */
+   ================================= */
 
-.sidebar-nav {
-  width: 100%;
-
+.navigation {
   display: flex;
   flex-direction: column;
-
-  gap: 2px;
+  gap: 3px;
 }
 
-
-/*
- * NO ICON BOXES.
- *
- * The menu is simply clean text.
- */
-
-.sidebar-link {
+.nav-item {
   position: relative;
 
   width: 100%;
-  min-height: 40px;
+  min-height: 42px;
 
   display: flex;
   align-items: center;
 
-  padding: 0 12px 0 16px;
+  padding: 0 12px;
 
   border: 0;
-  border-radius: 7px;
+  border-radius: 8px;
 
   background: transparent;
-
-  color: #707070;
+  color: #666;
 
   font-size: 11px;
-  font-weight: 500;
 
   text-align: left;
 
   cursor: pointer;
-
-  transition:
-    background 0.15s ease,
-    color 0.15s ease;
 }
 
-.sidebar-link:hover {
-  background: #f4f4f2;
-
-  color: #111111;
+.nav-item:hover {
+  background: #f3f3f1;
+  color: #111;
 }
 
-
-/*
- * ACTIVE ITEM
- */
-
-.sidebar-link.active {
-  background: #111111;
-
-  color: #ffffff;
+.nav-item.active {
+  background: #111;
+  color: #fff;
 }
 
-
-/*
- * Small clean active indicator.
- * No icon.
- */
-
-.sidebar-link.active::before {
-  content: "";
-
+.nav-indicator {
   position: absolute;
-
   left: 0;
 
-  width: 2px;
+  width: 3px;
+  height: 0;
+
+  border-radius: 5px;
+
+  background: #fff;
+}
+
+.nav-item.active .nav-indicator {
   height: 17px;
-
-  border-radius: 4px;
-
-  background: #ffffff;
 }
 
 
-/* =====================================================
+/* =================================
    SIDEBAR BOTTOM
-   ===================================================== */
+   ================================= */
 
 .sidebar-bottom {
   margin-top: auto;
@@ -268,11 +186,9 @@ button {
 }
 
 
-/* =====================================================
-   ACCOUNT
-   ===================================================== */
+/* ACCOUNT */
 
-.account-button {
+.account {
   width: 100%;
 
   display: flex;
@@ -283,24 +199,13 @@ button {
   padding: 9px;
 
   border: 0;
-  border-radius: 8px;
 
   background: transparent;
-
-  color: #111111;
 
   text-align: left;
 
   cursor: pointer;
-
-  transition:
-    background 0.15s ease;
 }
-
-.account-button:hover {
-  background: #f5f5f3;
-}
-
 
 .account-avatar {
   width: 36px;
@@ -314,74 +219,60 @@ button {
 
   border-radius: 50%;
 
-  background: #f0f0ee;
-
-  color: #111111;
+  background: #eeeeec;
+  color: #111;
 
   font-size: 10px;
   font-weight: 700;
 }
 
-
-.account-info {
+.account-details {
   min-width: 0;
-
-  display: flex;
-  flex-direction: column;
 }
 
+.account-details strong {
+  display: block;
 
-.account-info strong {
   overflow: hidden;
 
-  color: #111111;
-
   font-size: 10px;
-  font-weight: 650;
 
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+.account-details span {
+  display: block;
 
-.account-info span {
   margin-top: 3px;
 
-  color: #999999;
+  color: #999;
 
   font-size: 8px;
 }
 
 
-/* =====================================================
+/* =================================
    LOGOUT
-   ===================================================== */
+   ================================= */
 
-.logout-button {
+.logout {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
 
   gap: 5px;
 
   margin-top: 10px;
 
-  padding: 0;
-
   border: 0;
 
   background: transparent;
 
-  color: #555555;
+  color: #555;
 
   cursor: pointer;
 }
-
-
-/*
- * ROUND BUTTON
- */
 
 .logout-circle {
   width: 46px;
@@ -391,171 +282,128 @@ button {
   align-items: center;
   justify-content: center;
 
-  border: 1px solid #111111;
+  border: 1px solid #111;
   border-radius: 50%;
 
-  background: #ffffff;
-
-  color: #111111;
+  background: #fff;
+  color: #111;
 
   font-size: 20px;
+}
 
-  transition:
-    background 0.15s ease,
-    color 0.15s ease;
+.logout:hover .logout-circle {
+  background: #111;
+  color: #fff;
+}
+
+.logout-text {
+  font-size: 9px;
 }
 
 
-.logout-button:hover .logout-circle {
-  background: #111111;
-
-  color: #ffffff;
-}
-
-
-.logout-label {
-  font-size: 8px;
-  font-weight: 600;
-}
-
-
-/* =====================================================
-   CLOSED DESKTOP SIDEBAR
-   ===================================================== */
-
-.dashboard.sidebar-closed .sidebar {
-  width: 68px;
-}
-
-
-/*
- * BRAND disappears.
- */
-
-.dashboard.sidebar-closed .sidebar-brand {
-  display: none;
-}
-
-
-/*
- * Header remains exactly the same height.
- */
-
-.dashboard.sidebar-closed .sidebar-header {
-  padding-left: 0;
-
-  justify-content: center;
-}
-
-
-/*
- * Navigation disappears completely.
- *
- * This avoids the ugly square icon boxes
- * that were previously appearing.
- */
-
-.dashboard.sidebar-closed .sidebar-nav {
-  display: none;
-}
-
-
-/*
- * Account disappears.
- */
-
-.dashboard.sidebar-closed .account-button {
-  display: none;
-}
-
-
-/*
- * Logout stays centered.
- */
-
-.dashboard.sidebar-closed .logout-button {
-  margin-left: auto;
-  margin-right: auto;
-}
-
-
-/* =====================================================
+/* =================================
    MAIN CONTENT
-   ===================================================== */
+   ================================= */
 
 .main-content {
+  width: 100%;
   min-width: 0;
 
-  flex: 1;
+  margin-left: 235px;
 }
 
 
-/* =====================================================
+/* =================================
+   COLLAPSED STATE
+   ================================= */
+
+/*
+   IMPORTANT:
+
+   When the sidebar is closed, the sidebar
+   does NOT become a mini sidebar.
+
+   It is completely removed from the layout.
+*/
+
+.dashboard:not(.sidebar-open) .sidebar {
+  display: none;
+}
+
+.dashboard:not(.sidebar-open) .main-content {
+  margin-left: 0;
+}
+
+
+/* =================================
    TOPBAR
-   ===================================================== */
+   ================================= */
 
 .topbar {
-  min-height: 74px;
+  min-height: 72px;
 
   display: flex;
   align-items: center;
   justify-content: space-between;
 
-  padding: 15px 35px;
+  padding: 14px 35px;
 
-  background: #ffffff;
+  background: #fff;
 
-  border-bottom: 1px solid #e7e7e5;
+  border-bottom: 1px solid #e6e6e4;
 }
-
 
 .topbar-left {
-  flex: 1;
+  display: flex;
+  align-items: center;
 }
 
+.open-menu-button {
+  position: fixed;
+
+  top: 18px;
+  left: 18px;
+
+  z-index: 2000;
+}
 
 .topbar-right {
   display: flex;
   align-items: center;
 
-  gap: 20px;
+  gap: 18px;
 
   margin-left: auto;
 }
 
 
-/* =====================================================
+/* =================================
    SETTINGS
-   ===================================================== */
+   ================================= */
 
 .settings-button {
-  padding: 9px 16px;
+  padding: 8px 15px;
 
-  border: 1px solid #d7d7d5;
-  border-radius: 7px;
+  border: 1px solid #d9d9d7;
+  border-radius: 20px;
 
-  background: #ffffff;
+  background: #fff;
+  color: #111;
 
-  color: #111111;
-
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 600;
 
   cursor: pointer;
-
-  transition:
-    background 0.15s ease;
 }
-
 
 .settings-button:hover {
-  background: #f3f3f1;
+  background: #f1f1ef;
 }
 
 
-/* =====================================================
+/* =================================
    TOP USER
-   ===================================================== */
+   ================================= */
 
 .top-user {
   display: flex;
@@ -563,15 +411,14 @@ button {
 
   gap: 9px;
 
-  padding-left: 18px;
+  padding-left: 17px;
 
   border-left: 1px solid #e4e4e2;
 }
 
-
 .top-avatar {
-  width: 38px;
-  height: 38px;
+  width: 37px;
+  height: 37px;
 
   display: flex;
   align-items: center;
@@ -579,84 +426,81 @@ button {
 
   border-radius: 50%;
 
-  background: #111111;
+  background: #111;
+  color: #fff;
 
-  color: #ffffff;
-
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
 }
-
 
 .top-user-details strong {
   display: block;
 
   font-size: 10px;
-  font-weight: 650;
 }
-
 
 .top-user-details span {
   display: block;
 
   margin-top: 3px;
 
-  color: #999999;
+  color: #999;
 
   font-size: 8px;
-
-  letter-spacing: 0.5px;
 }
 
 
-/* =====================================================
+/* =================================
    PAGE
-   ===================================================== */
+   ================================= */
 
 .page {
   width: 100%;
   max-width: 1550px;
 
-  margin: 0 auto;
+  margin: auto;
 
   padding: 35px 40px 55px;
 }
 
 
-/* =====================================================
+/* =================================
    PAGE HEADER
-   ===================================================== */
+   ================================= */
 
 .page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+
+  gap: 25px;
+
   margin-bottom: 27px;
 }
 
+.title-area {
+  min-width: 0;
+}
 
 .eyebrow {
   margin: 0 0 6px;
 
-  color: #888888;
+  color: #888;
 
   font-size: 8px;
   font-weight: 700;
 
   letter-spacing: 1px;
-
-  text-transform: uppercase;
 }
-
 
 .page-header h2 {
   margin: 0;
-
-  color: #111111;
 
   font-size: 30px;
   font-weight: 700;
 
   letter-spacing: -1px;
 }
-
 
 .description {
   margin: 6px 0 0;
@@ -667,9 +511,57 @@ button {
 }
 
 
-/* =====================================================
+/* =================================
+   QUICK ACTIONS
+   ================================= */
+
+.quick-actions {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  flex-shrink: 0;
+}
+
+.action-pill {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 7px;
+
+  padding: 9px 14px;
+
+  border: 1px solid #d7d7d5;
+  border-radius: 999px;
+
+  background: #fff;
+  color: #111;
+
+  font-size: 9px;
+  font-weight: 600;
+
+  white-space: nowrap;
+
+  cursor: pointer;
+}
+
+.action-pill:hover {
+  background: #111;
+  border-color: #111;
+  color: #fff;
+}
+
+.plus {
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+
+/* =================================
    STAT CARDS
-   ===================================================== */
+   ================================= */
 
 .stats {
   display: grid;
@@ -682,86 +574,66 @@ button {
   margin-bottom: 38px;
 }
 
-
 .stat-card {
-  min-height: 145px;
+  min-height: 140px;
 
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 
-  padding: 20px;
+  padding: 19px;
 
-  background: #ffffff;
+  background: #fff;
 
   border: 1px solid #e5e5e3;
-
   border-radius: 10px;
-
-  box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.025);
 }
 
-
 .stat-label {
-  color: #777777;
+  color: #777;
 
   font-size: 9px;
   font-weight: 650;
 
-  letter-spacing: 0.3px;
-
   text-transform: uppercase;
 }
 
-
 .stat-number {
-  color: #111111;
-
   font-size: 34px;
   font-weight: 700;
-
-  line-height: 1;
-
-  letter-spacing: -1px;
 }
 
-
 .stat-description {
-  color: #999999;
+  color: #999;
 
   font-size: 9px;
 }
 
 
-/* =====================================================
+/* =================================
    SECTION
-   ===================================================== */
+   ================================= */
 
 .section {
   margin-bottom: 35px;
 }
 
-
 .section-heading {
   margin-bottom: 13px;
 }
 
-
 .section-heading h3,
 .card-header h3 {
   margin: 0;
-
-  color: #111111;
 
   font-size: 15px;
   font-weight: 650;
 }
 
 
-/* =====================================================
+/* =================================
    PROGRESS GRID
-   ===================================================== */
+   ================================= */
 
 .progress-grid {
   display: grid;
@@ -772,22 +644,18 @@ button {
   gap: 12px;
 }
 
-
 .progress-card {
-  min-height: 320px;
+  min-width: 0;
+
+  min-height: 315px;
 
   padding: 20px;
 
-  background: #ffffff;
+  background: #fff;
 
   border: 1px solid #e5e5e3;
-
   border-radius: 10px;
-
-  box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.025);
 }
-
 
 .progress-header,
 .card-header {
@@ -798,67 +666,52 @@ button {
   gap: 15px;
 }
 
-
 .progress-header h4 {
   margin: 0;
 
-  color: #111111;
-
   font-size: 12px;
-  font-weight: 650;
 }
-
 
 .progress-header p,
-.card-header > div > p:last-child {
+.card-header p:last-child {
   margin: 4px 0 0;
 
-  color: #999999;
+  color: #999;
 
   font-size: 9px;
 }
 
 
-/* =====================================================
+/* =================================
    VIEW BUTTON
-   ===================================================== */
+   ================================= */
 
 .view-button {
-  flex-shrink: 0;
-
   padding: 6px 10px;
 
+  flex-shrink: 0;
+
   border: 1px solid #d8d8d6;
+  border-radius: 999px;
 
-  border-radius: 20px;
-
-  background: #ffffff;
-
-  color: #333333;
+  background: #fff;
+  color: #333;
 
   font-size: 9px;
-  font-weight: 600;
 
   cursor: pointer;
-
-  transition:
-    background 0.15s ease,
-    color 0.15s ease;
 }
-
 
 .view-button:hover {
-  background: #111111;
-
-  border-color: #111111;
-
-  color: #ffffff;
+  background: #111;
+  border-color: #111;
+  color: #fff;
 }
 
 
-/* =====================================================
-   CIRCULAR PROGRESS
-   ===================================================== */
+/* =================================
+   CIRCLE
+   ================================= */
 
 .circle-container {
   position: relative;
@@ -869,14 +722,12 @@ button {
   margin: 20px auto 13px;
 }
 
-
 .progress-circle {
   width: 100%;
   height: 100%;
 
   transform: rotate(-90deg);
 }
-
 
 .circle-background,
 .circle-progress {
@@ -885,23 +736,19 @@ button {
   stroke-width: 8;
 }
 
-
 .circle-background {
   stroke: #ededeb;
 }
 
-
 .circle-progress {
-  stroke: #111111;
+  stroke: #111;
 
   stroke-linecap: round;
 
   stroke-dasharray: 301.59;
 
-  transition:
-    stroke-dashoffset 0.5s ease;
+  transition: stroke-dashoffset .4s ease;
 }
-
 
 .circle-value {
   position: absolute;
@@ -914,27 +761,22 @@ button {
   justify-content: center;
 }
 
-
 .circle-value strong {
-  color: #111111;
-
   font-size: 25px;
-  font-weight: 700;
 }
-
 
 .circle-value span {
   margin-top: 4px;
 
-  color: #888888;
+  color: #888;
 
   font-size: 9px;
 }
 
 
-/* =====================================================
-   PROGRESS LABELS
-   ===================================================== */
+/* =================================
+   LABELS
+   ================================= */
 
 .progress-labels {
   display: flex;
@@ -944,48 +786,33 @@ button {
 
   padding-top: 10px;
 
-  border-top: 1px solid #eeeeec;
+  border-top: 1px solid #eee;
 }
-
 
 .progress-labels div {
   display: flex;
-
   justify-content: space-between;
 
   font-size: 9px;
 }
 
-
 .progress-labels span {
-  color: #777777;
+  color: #777;
 }
 
 
-.progress-labels strong {
-  color: #111111;
-
-  font-weight: 650;
-}
-
-
-/* =====================================================
+/* =================================
    LOWER GRID
-   ===================================================== */
+   ================================= */
 
 .lower-grid {
   display: grid;
 
   grid-template-columns:
-    1.2fr 0.8fr;
+    1.2fr .8fr;
 
   gap: 12px;
 }
-
-
-/* =====================================================
-   FARM / REPORT CARDS
-   ===================================================== */
 
 .farm-card,
 .reports-card {
@@ -993,37 +820,27 @@ button {
 
   padding: 21px;
 
-  background: #ffffff;
+  background: #fff;
 
   border: 1px solid #e5e5e3;
-
   border-radius: 10px;
-
-  box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.025);
 }
 
 
-.card-header {
-  margin-bottom: 18px;
-}
-
-
-/* =====================================================
-   FARM PROGRESS
-   ===================================================== */
+/* =================================
+   FARM
+   ================================= */
 
 .farm-progress {
   display: grid;
 
   grid-template-columns:
-    0.9fr 1.1fr;
+    .9fr 1.1fr;
 
   align-items: center;
 
   gap: 25px;
 }
-
 
 .semi-circle-container {
   position: relative;
@@ -1031,16 +848,12 @@ button {
   width: 210px;
   max-width: 100%;
 
-  margin: 0 auto;
+  margin: auto;
 }
-
 
 .semi-circle {
   width: 100%;
-
-  display: block;
 }
-
 
 .semi-background,
 .semi-progress {
@@ -1051,19 +864,13 @@ button {
   stroke-linecap: round;
 }
 
-
 .semi-background {
   stroke: #ededeb;
 }
 
-
 .semi-progress {
-  stroke: #111111;
-
-  transition:
-    stroke-dasharray 0.5s ease;
+  stroke: #111;
 }
-
 
 .semi-value {
   position: absolute;
@@ -1077,27 +884,20 @@ button {
   align-items: center;
 }
 
-
 .semi-value strong {
-  color: #111111;
-
   font-size: 25px;
-  font-weight: 700;
 }
 
-
 .semi-value span {
-  margin-top: 2px;
-
-  color: #888888;
+  color: #888;
 
   font-size: 8px;
 }
 
 
-/* =====================================================
+/* =================================
    PROGRESS LINES
-   ===================================================== */
+   ================================= */
 
 .farm-progress-list {
   display: flex;
@@ -1106,10 +906,8 @@ button {
   gap: 18px;
 }
 
-
 .progress-line > div:first-child {
   display: flex;
-
   justify-content: space-between;
 
   margin-bottom: 7px;
@@ -1117,16 +915,9 @@ button {
   font-size: 9px;
 }
 
-
 .progress-line span {
-  color: #777777;
+  color: #777;
 }
-
-
-.progress-line strong {
-  color: #111111;
-}
-
 
 .line {
   width: 100%;
@@ -1139,25 +930,23 @@ button {
   background: #ededeb;
 }
 
-
 .line span {
   display: block;
 
   height: 100%;
 
-  background: #111111;
+  background: #111;
 }
 
 
-/* =====================================================
+/* =================================
    REPORTS
-   ===================================================== */
+   ================================= */
 
 .report-list {
   display: flex;
   flex-direction: column;
 }
-
 
 .report-row {
   min-height: 68px;
@@ -1167,52 +956,37 @@ button {
 
   gap: 11px;
 
-  border-bottom: 1px solid #eeeeec;
+  border-bottom: 1px solid #eee;
 }
-
 
 .report-row:last-child {
   border-bottom: 0;
 }
 
-
 .report-marker {
   width: 30px;
   height: 30px;
-
-  flex-shrink: 0;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
   border: 1px solid #dededc;
-
   border-radius: 6px;
 
-  color: #555555;
-
   font-size: 8px;
-  font-weight: 650;
 }
-
 
 .report-info {
   min-width: 0;
-
   flex: 1;
 }
-
 
 .report-info strong {
   display: block;
 
-  color: #111111;
-
   font-size: 10px;
-  font-weight: 650;
 }
-
 
 .report-info span {
   display: block;
@@ -1221,32 +995,29 @@ button {
 
   overflow: hidden;
 
-  color: #999999;
+  color: #999;
 
   font-size: 8px;
 
   text-overflow: ellipsis;
-
   white-space: nowrap;
 }
-
 
 .report-status {
   padding: 5px 8px;
 
   border: 1px solid #dededc;
+  border-radius: 999px;
 
-  border-radius: 20px;
-
-  color: #666666;
+  color: #666;
 
   font-size: 8px;
 }
 
 
-/* =====================================================
+/* =================================
    TABLET
-   ===================================================== */
+   ================================= */
 
 @media (max-width: 1150px) {
 
@@ -1255,23 +1026,19 @@ button {
     padding-right: 28px;
   }
 
-
   .stats {
     grid-template-columns:
       repeat(2, minmax(0, 1fr));
   }
-
 
   .progress-grid {
     grid-template-columns:
       repeat(2, minmax(0, 1fr));
   }
 
-
   .progress-card:last-child {
     grid-column: span 2;
   }
-
 
   .lower-grid {
     grid-template-columns: 1fr;
@@ -1280,143 +1047,51 @@ button {
 }
 
 
-/* =====================================================
-   SMALL TABLET
-   ===================================================== */
+/* =================================
+   SMALL SCREEN
+   ================================= */
 
 @media (max-width: 800px) {
 
   .sidebar {
-    width: 68px;
+    width: 220px;
   }
 
-
-  .sidebar-brand {
-    display: none;
+  .main-content {
+    margin-left: 220px;
   }
 
-
-  .sidebar-header {
-    padding-left: 0;
-
-    justify-content: center;
+  .dashboard:not(.sidebar-open) .main-content {
+    margin-left: 0;
   }
 
-
-  .sidebar-nav {
-    display: none;
+  .page-header {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
-
-  .account-button {
-    display: none;
-  }
-
-
-  .logout-button {
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-
-  .page {
-    padding-left: 22px;
-    padding-right: 22px;
-  }
-
-
-  .topbar {
-    padding-left: 22px;
-    padding-right: 22px;
+  .quick-actions {
+    width: 100%;
+    flex-wrap: wrap;
   }
 
 }
 
 
-/* =====================================================
+/* =================================
    MOBILE
-   ===================================================== */
+   ================================= */
 
 @media (max-width: 600px) {
 
-  /*
-   * MOBILE SIDEBAR
-   */
-
   .sidebar {
-    position: fixed;
-
-    top: 0;
-    left: 0;
-
     width: 235px;
-    height: 100dvh;
-
-    transform: translateX(0);
-
-    transition:
-      transform 0.2s ease;
-
-    box-shadow:
-      5px 0 20px rgba(0, 0, 0, 0.06);
-
-    z-index: 1000;
   }
 
-
-  /*
-   * CLOSED MOBILE SIDEBAR
-   *
-   * Completely leaves the screen.
-   */
-
-  .dashboard.sidebar-closed .sidebar {
-
-    width: 235px;
-
-    transform: translateX(-100%);
+  .main-content,
+  .dashboard:not(.sidebar-open) .main-content {
+    margin-left: 0;
   }
-
-
-  /*
-   * OPEN MOBILE SIDEBAR
-   */
-
-  .dashboard:not(.sidebar-closed) .sidebar-brand {
-    display: flex;
-  }
-
-
-  .dashboard:not(.sidebar-closed) .sidebar-header {
-    padding-left: 48px;
-
-    justify-content: flex-start;
-  }
-
-
-  .dashboard:not(.sidebar-closed) .sidebar-nav {
-    display: flex;
-  }
-
-
-  .dashboard:not(.sidebar-closed) .account-button {
-    display: flex;
-  }
-
-
-  .dashboard:not(.sidebar-closed) .logout-label {
-    display: inline;
-  }
-
-
-  /*
-   * MAIN CONTENT
-   */
-
-  .main-content {
-    width: 100%;
-  }
-
 
   .topbar {
     min-height: 65px;
@@ -1424,40 +1099,25 @@ button {
     padding: 12px 15px;
   }
 
-
-  .topbar-right {
-    gap: 10px;
-  }
-
-
-  .settings-button {
-    padding: 8px 11px;
-  }
-
-
-  .top-user-details {
-    display: none;
-  }
-
-
-  .top-user {
-    padding-left: 10px;
-  }
-
-
   .page {
     padding: 25px 14px 35px;
   }
-
 
   .page-header h2 {
     font-size: 25px;
   }
 
+  .quick-actions {
+    width: 100%;
 
-  /*
-   * STATS
-   */
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .action-pill {
+    justify-content: center;
+  }
 
   .stats {
     grid-template-columns:
@@ -1466,52 +1126,38 @@ button {
     gap: 8px;
   }
 
-
   .stat-card {
     min-height: 120px;
 
     padding: 15px;
   }
 
-
   .stat-number {
     font-size: 28px;
   }
-
-
-  /*
-   * PROGRESS
-   */
 
   .progress-grid {
     grid-template-columns: 1fr;
   }
 
-
   .progress-card:last-child {
     grid-column: auto;
   }
-
-
-  /*
-   * FARM
-   */
 
   .farm-progress {
     grid-template-columns: 1fr;
   }
 
-
-  .semi-circle-container {
-    width: 200px;
+  .top-user-details {
+    display: none;
   }
 
 }
 
 
-/* =====================================================
+/* =================================
    VERY SMALL PHONE
-   ===================================================== */
+   ================================= */
 
 @media (max-width: 390px) {
 
@@ -1519,41 +1165,14 @@ button {
     grid-template-columns: 1fr;
   }
 
-
-  .stat-card {
-    min-height: 105px;
-  }
-
-
   .topbar {
     padding-left: 12px;
     padding-right: 12px;
   }
 
-
   .page {
     padding-left: 12px;
     padding-right: 12px;
-  }
-
-
-  .settings-button {
-    font-size: 9px;
-  }
-
-}
-
-
-/* =====================================================
-   ACCESSIBILITY
-   ===================================================== */
-
-@media (prefers-reduced-motion: reduce) {
-
-  *,
-  *::before,
-  *::after {
-    transition: none !important;
   }
 
 }
