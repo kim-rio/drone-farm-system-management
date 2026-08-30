@@ -3,6 +3,10 @@ package com.dmfs.service.entity;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import com.dmfs.customer.entity.Customer;
+import com.dmfs.farm.entity.Block;
+import com.dmfs.farm.entity.Farm;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -21,6 +25,18 @@ public class ServiceRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "customer_id", nullable = false)
+    private Customer customer;
+
+    @ManyToOne
+    @JoinColumn(name = "farm_id", nullable = false)
+    private Farm farm;
+
+    @ManyToOne
+    @JoinColumn(name = "farm_block_id", nullable = false)
+    private Block farmBlock;
 
     @ManyToOne
     @JoinColumn(name = "service_catalogue_id", nullable = false)
@@ -54,6 +70,30 @@ public class ServiceRequest {
 
     public Long getId() {
         return id;
+    }
+
+    public Customer getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
+    }
+
+    public Farm getFarm() {
+        return farm;
+    }
+
+    public void setFarm(Farm farm) {
+        this.farm = farm;
+    }
+
+    public Block getFarmBlock() {
+        return farmBlock;
+    }
+
+    public void setFarmBlock(Block farmBlock) {
+        this.farmBlock = farmBlock;
     }
 
     public ServiceCatalogue getServiceCatalogue() {
