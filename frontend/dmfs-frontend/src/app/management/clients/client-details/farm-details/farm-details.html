@@ -1,0 +1,389 @@
+<div class="page">
+
+  <!-- ========================================= -->
+  <!-- HEADER -->
+  <!-- ========================================= -->
+
+  <div class="page-header">
+
+    <div class="header-left">
+
+      <button
+        type="button"
+        class="back-button"
+        (click)="backToClient()">
+
+        ← Back to Client
+
+      </button>
+
+      <h1>
+        Farm Details
+      </h1>
+
+    </div>
+
+
+    @if (farm) {
+
+      <button
+        type="button"
+        class="primary-button"
+        (click)="addBlock()">
+
+        + Add Block
+
+      </button>
+
+    }
+
+  </div>
+
+
+  <!-- ========================================= -->
+  <!-- FARM LOADING -->
+  <!-- ========================================= -->
+
+  @if (loading) {
+
+    <div class="state-card">
+      Loading farm...
+    </div>
+
+  }
+
+
+  <!-- ========================================= -->
+  <!-- FARM ERROR -->
+  <!-- ========================================= -->
+
+  @if (!loading && errorMessage) {
+
+    <div class="error-card">
+      {{ errorMessage }}
+    </div>
+
+  }
+
+
+  <!-- ========================================= -->
+  <!-- FARM DETAILS -->
+  <!-- ========================================= -->
+
+  @if (!loading && farm) {
+
+    <div class="farm-card">
+
+      <div class="farm-heading">
+
+        <div class="farm-icon">
+          F
+        </div>
+
+        <div>
+
+          <h2>
+            {{ farm.name }}
+          </h2>
+
+          <p>
+            Farm ID:
+            <strong>{{ farm.id }}</strong>
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="details-grid">
+
+        <div class="detail-item">
+
+          <span>Farm Name</span>
+
+          <strong>
+            {{ farm.name }}
+          </strong>
+
+        </div>
+
+
+        <div class="detail-item">
+
+          <span>Area</span>
+
+          <strong>
+            {{ farm.areaHectares ?? '—' }}
+            @if (farm.areaHectares !== null &&
+                 farm.areaHectares !== undefined) {
+              ha
+            }
+          </strong>
+
+        </div>
+
+
+        <div class="detail-item">
+
+          <span>Latitude</span>
+
+          <strong>
+            {{ farm.latitude ?? '—' }}
+          </strong>
+
+        </div>
+
+
+        <div class="detail-item">
+
+          <span>Longitude</span>
+
+          <strong>
+            {{ farm.longitude ?? '—' }}
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      @if (farm.description) {
+
+        <div class="description">
+
+          <span>
+            Description
+          </span>
+
+          <p>
+            {{ farm.description }}
+          </p>
+
+        </div>
+
+      }
+
+    </div>
+
+
+    <!-- ========================================= -->
+    <!-- BLOCKS -->
+    <!-- ========================================= -->
+
+    <div class="blocks-section">
+
+      <div class="section-header">
+
+        <div>
+
+          <h2>
+            Blocks
+          </h2>
+
+          <p>
+            Blocks and plots registered under this farm.
+          </p>
+
+        </div>
+
+        <button
+          type="button"
+          class="secondary-button"
+          (click)="addBlock()">
+
+          + Add Block
+
+        </button>
+
+      </div>
+
+
+      <!-- BLOCK LOADING -->
+
+      @if (blocksLoading) {
+
+        <div class="state-card">
+          Loading blocks...
+        </div>
+
+      }
+
+
+      <!-- BLOCK ERROR -->
+
+      @if (
+        !blocksLoading &&
+        blocksErrorMessage
+      ) {
+
+        <div class="error-card">
+          {{ blocksErrorMessage }}
+        </div>
+
+      }
+
+
+      <!-- NO BLOCKS -->
+
+      @if (
+        !blocksLoading &&
+        !blocksErrorMessage &&
+        blocks.length === 0
+      ) {
+
+        <div class="empty-card">
+
+          <h3>
+            No blocks registered
+          </h3>
+
+          <p>
+            Add the first block to this farm.
+          </p>
+
+          <button
+            type="button"
+            class="primary-button"
+            (click)="addBlock()">
+
+            Add First Block
+
+          </button>
+
+        </div>
+
+      }
+
+
+      <!-- BLOCKS -->
+
+      @if (
+        !blocksLoading &&
+        !blocksErrorMessage &&
+        blocks.length > 0
+      ) {
+
+        <div class="block-grid">
+
+          @for (
+            block of blocks;
+            track block.id
+          ) {
+
+            <div class="block-card">
+
+              <div class="block-header">
+
+                <div class="block-avatar">
+                  B
+                </div>
+
+                <div>
+
+                  <h3>
+                    {{ block.name }}
+                  </h3>
+
+                  <span>
+                    Block ID:
+                    {{ block.id }}
+                  </span>
+
+                </div>
+
+              </div>
+
+
+              <div class="block-details">
+
+                <div>
+
+                  <span>
+                    Area
+                  </span>
+
+                  <strong>
+
+                    @if (
+                      block.areaHectares !== null &&
+                      block.areaHectares !== undefined
+                    ) {
+
+                      {{ block.areaHectares }} ha
+
+                    } @else {
+
+                      —
+
+                    }
+
+                  </strong>
+
+                </div>
+
+
+                <div>
+
+                  <span>
+                    Latitude
+                  </span>
+
+                  <strong>
+                    {{ block.centerLatitude ?? '—' }}
+                  </strong>
+
+                </div>
+
+
+                <div>
+
+                  <span>
+                    Longitude
+                  </span>
+
+                  <strong>
+                    {{ block.centerLongitude ?? '—' }}
+                  </strong>
+
+                </div>
+
+              </div>
+
+
+              @if (block.description) {
+
+                <p class="block-description">
+                  {{ block.description }}
+                </p>
+
+              }
+
+            </div>
+
+          }
+
+        </div>
+
+      }
+
+    </div>
+
+  }
+
+</div>
+
+
+<!-- ========================================= -->
+<!-- ADD BLOCK MODAL -->
+<!-- ========================================= -->
+
+@if (showAddBlock && farm) {
+
+  <app-add-block
+    [farmId]="farm.id"
+    (closed)="closeAddBlock()"
+    (created)="blockCreated()">
+  </app-add-block>
+
+}

@@ -1,0 +1,428 @@
+<div class="page">
+
+  <!-- HEADER -->
+
+  <div class="page-header">
+
+    <div class="header-left">
+
+      <button
+        type="button"
+        class="back-button"
+        (click)="backToClients()">
+
+        ← Back to Clients
+
+      </button>
+
+      <h1>
+        Client Details
+      </h1>
+
+    </div>
+
+    @if (client) {
+
+      <button
+        type="button"
+        class="primary-button"
+        (click)="addFarm()">
+
+        + Add Farm
+
+      </button>
+
+    }
+
+  </div>
+
+
+  <!-- CLIENT LOADING -->
+
+  @if (loading) {
+
+    <div class="state-card">
+      Loading client...
+    </div>
+
+  }
+
+
+  <!-- CLIENT ERROR -->
+
+  @if (!loading && errorMessage) {
+
+    <div class="error-card">
+      {{ errorMessage }}
+    </div>
+
+  }
+
+
+  <!-- CLIENT -->
+
+  @if (!loading && client) {
+
+    <div class="client-card">
+
+      <div class="client-header">
+
+        <div class="client-avatar">
+          {{ getClientName().charAt(0).toUpperCase() }}
+        </div>
+
+        <div>
+
+          <h2>
+            {{ getClientName() }}
+          </h2>
+
+          <p>
+            Customer Code:
+            <strong>
+              {{ client.customerCode }}
+            </strong>
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="details-grid">
+
+        <div class="detail-item">
+
+          <span>First Name</span>
+
+          <strong>
+            {{ client.firstName || '—' }}
+          </strong>
+
+        </div>
+
+
+        <div class="detail-item">
+
+          <span>Last Name</span>
+
+          <strong>
+            {{ client.lastName || '—' }}
+          </strong>
+
+        </div>
+
+
+        <div class="detail-item">
+
+          <span>Company Name</span>
+
+          <strong>
+            {{ client.companyName || '—' }}
+          </strong>
+
+        </div>
+
+
+        <div class="detail-item">
+
+          <span>Customer Type</span>
+
+          <strong>
+            {{ client.type }}
+          </strong>
+
+        </div>
+
+
+        <div class="detail-item">
+
+          <span>Email</span>
+
+          <strong>
+            {{ client.email }}
+          </strong>
+
+        </div>
+
+
+        <div class="detail-item">
+
+          <span>Contact</span>
+
+          <strong>
+            {{ client.phone || '—' }}
+          </strong>
+
+        </div>
+
+
+        <div class="detail-item">
+
+          <span>Identification Number</span>
+
+          <strong>
+            {{ client.identificationNumber || '—' }}
+          </strong>
+
+        </div>
+
+
+        <div class="detail-item">
+
+          <span>TIN</span>
+
+          <strong>
+            {{ client.tin || '—' }}
+          </strong>
+
+        </div>
+
+
+        <div class="detail-item">
+
+          <span>Status</span>
+
+          <strong>
+            {{ client.status || 'ACTIVE' }}
+          </strong>
+
+        </div>
+
+
+        <div class="detail-item full">
+
+          <span>Address</span>
+
+          <strong>
+            {{ client.address || '—' }}
+          </strong>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- FARMS -->
+
+    <div class="farms-section">
+
+      <div class="section-header">
+
+        <div>
+
+          <h2>
+            Farms
+          </h2>
+
+          <p>
+            Select a farm to view its details and blocks.
+          </p>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="secondary-button"
+          (click)="addFarm()">
+
+          + Add Farm
+
+        </button>
+
+      </div>
+
+
+      <!-- FARMS LOADING -->
+
+      @if (farmsLoading) {
+
+        <div class="state-card">
+          Loading farms...
+        </div>
+
+      }
+
+
+      <!-- FARM ERROR -->
+
+      @if (!farmsLoading && farmErrorMessage) {
+
+        <div class="error-card">
+          {{ farmErrorMessage }}
+        </div>
+
+      }
+
+
+      <!-- NO FARMS -->
+
+      @if (
+        !farmsLoading &&
+        !farmErrorMessage &&
+        farms.length === 0
+      ) {
+
+        <div class="empty-card">
+
+          <h3>
+            No farms registered
+          </h3>
+
+          <p>
+            This client does not have any farms yet.
+          </p>
+
+          <button
+            type="button"
+            class="primary-button"
+            (click)="addFarm()">
+
+            Add First Farm
+
+          </button>
+
+        </div>
+
+      }
+
+
+      <!-- FARMS -->
+
+      @if (
+        !farmsLoading &&
+        !farmErrorMessage &&
+        farms.length > 0
+      ) {
+
+        <div class="farm-grid">
+
+          @for (
+            farm of farms;
+            track farm.id
+          ) {
+
+            <div
+              class="farm-card"
+              (click)="openFarm(farm)">
+
+              <div class="farm-card-header">
+
+                <div>
+
+                  <h3>
+                    {{ farm.name }}
+                  </h3>
+
+                  <span>
+                    Farm ID: {{ farm.id }}
+                  </span>
+
+                </div>
+
+                <span class="view-farm">
+                  View →
+                </span>
+
+              </div>
+
+
+              <div class="farm-details">
+
+                <div>
+
+                  <span>
+                    Area
+                  </span>
+
+                  <strong>
+
+                    @if (
+                      farm.areaHectares !== null &&
+                      farm.areaHectares !== undefined
+                    ) {
+
+                      {{ farm.areaHectares }} ha
+
+                    } @else {
+
+                      —
+
+                    }
+
+                  </strong>
+
+                </div>
+
+
+                <div>
+
+                  <span>
+                    Latitude
+                  </span>
+
+                  <strong>
+
+                    {{ farm.latitude ?? '—' }}
+
+                  </strong>
+
+                </div>
+
+
+                <div>
+
+                  <span>
+                    Longitude
+                  </span>
+
+                  <strong>
+
+                    {{ farm.longitude ?? '—' }}
+
+                  </strong>
+
+                </div>
+
+              </div>
+
+
+              @if (farm.description) {
+
+                <p class="farm-description">
+
+                  {{ farm.description }}
+
+                </p>
+
+              }
+
+            </div>
+
+          }
+
+        </div>
+
+      }
+
+    </div>
+
+  }
+
+</div>
+
+
+<!-- ADD FARM MODAL -->
+
+@if (showAddFarm && client) {
+
+  <app-add-farm
+    [customerId]="client.id"
+    (closed)="closeAddFarm()"
+    (created)="farmCreated()">
+  </app-add-farm>
+
+}
