@@ -1,0 +1,213 @@
+<div class="modal-backdrop">
+
+  <div
+    class="modal"
+    (click)="$event.stopPropagation()">
+
+    <div class="modal-header">
+
+      <div>
+        <h2>Register Client</h2>
+
+        <p>
+          Create a new client account.
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="close-button"
+        (click)="cancel()"
+        [disabled]="loading()">
+
+        ×
+
+      </button>
+
+    </div>
+
+
+    @if (errorMessage()) {
+
+      <div class="form-error">
+        {{ errorMessage() }}
+      </div>
+
+    }
+
+
+    @if (successMessage()) {
+
+      <div class="form-success">
+        {{ successMessage() }}
+      </div>
+
+    }
+
+
+    <form
+      #form="ngForm"
+      (ngSubmit)="register()">
+
+
+      <div class="form-group">
+
+        <label for="type">
+          Customer Type
+        </label>
+
+        <select
+          id="type"
+          name="type"
+          [(ngModel)]="client.type"
+          required>
+
+          <option value="INDIVIDUAL">
+            Individual
+          </option>
+
+          <option value="COMPANY">
+            Company
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="form-row">
+
+        <div class="form-group">
+
+          <label for="firstName">
+            First Name *
+          </label>
+
+          <input
+            id="firstName"
+            name="firstName"
+            type="text"
+            [(ngModel)]="client.firstName"
+            required>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="lastName">
+            Last Name *
+          </label>
+
+          <input
+            id="lastName"
+            name="lastName"
+            type="text"
+            [(ngModel)]="client.lastName"
+            required>
+
+        </div>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="email">
+          Email *
+        </label>
+
+        <input
+          id="email"
+          name="email"
+          type="email"
+          [(ngModel)]="client.email"
+          required>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="phone">
+          Contact *
+        </label>
+
+        <input
+          id="phone"
+          name="phone"
+          type="tel"
+          [(ngModel)]="client.phone"
+          required>
+
+      </div>
+
+
+      @if (client.type === 'COMPANY') {
+
+        <div class="form-group">
+
+          <label for="companyName">
+            Company Name
+          </label>
+
+          <input
+            id="companyName"
+            name="companyName"
+            type="text"
+            [(ngModel)]="client.companyName">
+
+        </div>
+
+      }
+
+
+      <div class="form-group">
+
+        <label for="password">
+          Initial Password *
+        </label>
+
+        <input
+          id="password"
+          name="password"
+          type="password"
+          [(ngModel)]="client.password"
+          required>
+
+      </div>
+
+
+      <div class="modal-actions">
+
+        <button
+          type="button"
+          class="secondary"
+          (click)="cancel()"
+          [disabled]="loading()">
+
+          Cancel
+
+        </button>
+
+
+        <button
+          type="submit"
+          class="primary"
+          [disabled]="loading() || !form.valid">
+
+          @if (loading()) {
+            Registering...
+          } @else {
+            Register Client
+          }
+
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>

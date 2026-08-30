@@ -1,11 +1,6 @@
 # Drone-Based Farm Service Management System
 
 ## Backend Setup
-
-This section explains how to run the DMFS backend after cloning the repository.
-
----
-
 ## Requirements
 
 Install:
@@ -14,31 +9,12 @@ Install:
 - Java JDK 21
 - Docker Desktop
 
-Verify the installations:
-
-```bash
-git --version
-java -version
-javac -version
-docker --version
-docker compose version
-
+V
 Java must be JDK 21.
 
 1. Clone the Repository
 git clone <REPOSITORY_URL>
 
-Enter the project:
-
-cd drone-farm-system-management
-
-Switch to develop:
-
-git checkout develop
-
-Pull the latest changes:
-
-git pull origin develop
 2. Start Docker
 
 Make sure Docker Desktop is running.
@@ -89,10 +65,15 @@ From the project root:
 
 docker compose down
 
-Start them again:
 
-docker compose up -d
-7. Useful Commands
+## Fronted  Setup
+USE ANGULAR
+1.npm install
+2.ng build
+3.ng serve
+
+
+Useful Commands
 
 Check Docker containers:
 
