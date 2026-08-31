@@ -9,6 +9,7 @@ import com.dmfs.farm.entity.Farm;
 import com.dmfs.farm.repository.BlockRepository;
 import com.dmfs.farm.repository.FarmRepository;
 import com.dmfs.service.entity.ServiceRequest;
+import com.dmfs.service.repository.ServiceCatalogueRepository;
 import com.dmfs.service.repository.ServiceRequestRepository;
 
 @Service
@@ -17,15 +18,18 @@ public class ServiceRequestService {
     private final ServiceRequestRepository serviceRequestRepository;
     private final FarmRepository farmRepository;
     private final BlockRepository blockRepository;
+    private final ServiceCatalogueRepository serviceCatalogueRepository;
 
     public ServiceRequestService(
             ServiceRequestRepository serviceRequestRepository,
             FarmRepository farmRepository,
-            BlockRepository blockRepository
+            BlockRepository blockRepository,
+            ServiceCatalogueRepository serviceCatalogueRepository
     ) {
         this.serviceRequestRepository = serviceRequestRepository;
         this.farmRepository = farmRepository;
         this.blockRepository = blockRepository;
+        this.serviceCatalogueRepository = serviceCatalogueRepository;
     }
 
     public List<ServiceRequest> getAllServiceRequests() {
@@ -92,6 +96,7 @@ public class ServiceRequestService {
     private void validateRelationships(
             ServiceRequest serviceRequest
     ) {
+
         if (serviceRequest.getCustomer() == null) {
             throw new RuntimeException(
                     "Customer is required"
@@ -129,6 +134,14 @@ public class ServiceRequestService {
         ).orElseThrow(() ->
                 new RuntimeException(
                         "Farm block not found"
+                )
+        );
+
+        serviceCatalogueRepository.findById(
+                serviceRequest.getServiceCatalogue().getId()
+        ).orElseThrow(() ->
+                new RuntimeException(
+                        "Service catalogue not found"
                 )
         );
 
