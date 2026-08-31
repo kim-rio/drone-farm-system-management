@@ -1,0 +1,187 @@
+<div
+  class="modal-overlay"
+  (click)="close()">
+
+  <div
+    class="block-modal"
+    (click)="stopClick($event)">
+
+    <div class="modal-header">
+
+      <div>
+
+        <span class="eyebrow">
+          FARM BLOCK
+        </span>
+
+        <h2>
+          Add Block
+        </h2>
+
+        <p>
+          Register a block or plot under this farm.
+        </p>
+
+      </div>
+
+      <button
+        type="button"
+        class="close-button"
+        (click)="close()"
+        [disabled]="loading">
+
+        ×
+
+      </button>
+
+    </div>
+
+
+    @if (errorMessage) {
+
+      <div class="message error">
+        {{ errorMessage }}
+      </div>
+
+    }
+
+
+    @if (successMessage) {
+
+      <div class="message success">
+        {{ successMessage }}
+      </div>
+
+    }
+
+
+    <form
+      #blockForm="ngForm"
+      (ngSubmit)="createBlock()">
+
+      <div class="form-group">
+
+        <label for="blockName">
+          Block Name *
+        </label>
+
+        <input
+          id="blockName"
+          name="blockName"
+          type="text"
+          [(ngModel)]="block.name"
+          placeholder="e.g. Block A"
+          required>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="description">
+          Description
+        </label>
+
+        <textarea
+          id="description"
+          name="description"
+          rows="3"
+          [(ngModel)]="block.description"
+          placeholder="Describe this block...">
+        </textarea>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="areaHectares">
+          Area (hectares)
+        </label>
+
+        <input
+          id="areaHectares"
+          name="areaHectares"
+          type="number"
+          min="0"
+          step="0.01"
+          [(ngModel)]="block.areaHectares"
+          placeholder="e.g. 20">
+
+      </div>
+
+
+      <div class="form-row">
+
+        <div class="form-group">
+
+          <label for="centerLatitude">
+            Center Latitude
+          </label>
+
+          <input
+            id="centerLatitude"
+            name="centerLatitude"
+            type="number"
+            step="any"
+            min="-90"
+            max="90"
+            [(ngModel)]="block.centerLatitude"
+            placeholder="-6.7924">
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="centerLongitude">
+            Center Longitude
+          </label>
+
+          <input
+            id="centerLongitude"
+            name="centerLongitude"
+            type="number"
+            step="any"
+            min="-180"
+            max="180"
+            [(ngModel)]="block.centerLongitude"
+            placeholder="39.2083">
+
+        </div>
+
+      </div>
+
+
+      <div class="modal-actions">
+
+        <button
+          type="button"
+          class="secondary-button"
+          (click)="close()"
+          [disabled]="loading">
+
+          Cancel
+
+        </button>
+
+        <button
+          type="submit"
+          class="primary-button"
+          [disabled]="loading || !blockForm.valid">
+
+          @if (loading) {
+            Adding...
+          } @else {
+            Add Block
+          }
+
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>

@@ -1,0 +1,886 @@
+<div
+  class="dashboard"
+  [class.sidebar-open]="sidebarOpen"
+>
+
+
+  <!-- =================================
+       SIDEBAR
+       ================================= -->
+
+  @if (sidebarOpen) {
+
+    <aside class="sidebar">
+
+      <!-- BRAND -->
+
+      <div class="brand">
+
+        <button
+          type="button"
+          class="menu-button"
+          (click)="toggleSidebar()"
+          aria-label="Close navigation"
+        >
+          ☰
+        </button>
+
+        <div class="brand-text">
+
+          <h1>DMFS</h1>
+
+          <span>
+            MANAGEMENT
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- NAVIGATION -->
+
+      <nav class="navigation">
+
+        @for (
+          item of menuItems;
+          track item.route
+        ) {
+
+          <button
+            type="button"
+            class="nav-item"
+            [class.active]="item.route === '/management'"
+            (click)="navigate(item.route)"
+          >
+
+            <span class="nav-indicator"></span>
+
+            <span>
+              {{ item.label }}
+            </span>
+
+          </button>
+
+        }
+
+      </nav>
+
+
+      <!-- SIDEBAR BOTTOM -->
+
+      <div class="sidebar-bottom">
+
+
+        <!-- ACCOUNT -->
+
+        <button
+          type="button"
+          class="account"
+          (click)="openSettings()"
+        >
+
+          <div class="account-avatar">
+            {{ getInitials() }}
+          </div>
+
+          <div class="account-details">
+
+            <strong>
+              {{ user?.firstName }}
+              {{ user?.lastName }}
+            </strong>
+
+            <span>
+              Management Account
+            </span>
+
+          </div>
+
+        </button>
+
+
+        <!-- LOGOUT -->
+
+        <button
+          type="button"
+          class="logout"
+          (click)="logout()"
+        >
+
+          <span class="logout-circle">
+            ↪
+          </span>
+
+          <span class="logout-text">
+            Logout
+          </span>
+
+        </button>
+
+      </div>
+
+    </aside>
+
+  }
+
+
+  <!-- =================================
+       MAIN CONTENT
+       ================================= -->
+
+  <main class="main-content">
+
+
+    <!-- =================================
+         TOP BAR
+         ================================= -->
+
+    <header class="topbar">
+
+
+      <!-- SINGLE MENU BUTTON -->
+
+      <div class="topbar-left">
+
+        @if (!sidebarOpen) {
+
+          <button
+            type="button"
+            class="open-menu-button"
+            (click)="toggleSidebar()"
+            aria-label="Open navigation"
+          >
+            ☰
+          </button>
+
+        }
+
+      </div>
+
+
+      <!-- RIGHT SIDE -->
+
+      <div class="topbar-right">
+
+
+        <button
+          type="button"
+          class="settings-button"
+          (click)="openSettings()"
+        >
+          Settings
+        </button>
+
+
+        <div class="top-user">
+
+          <div class="top-avatar">
+            {{ getInitials() }}
+          </div>
+
+          <div class="top-user-details">
+
+            <strong>
+              {{ user?.firstName }}
+              {{ user?.lastName }}
+            </strong>
+
+            <span>
+              MANAGEMENT
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </header>
+
+
+    <!-- =================================
+         PAGE CONTENT
+         ================================= -->
+
+    <section class="page">
+
+
+      <!-- PAGE HEADER -->
+
+      <div class="page-header">
+
+
+        <!-- TITLE -->
+
+        <div class="title-area">
+
+          <p class="eyebrow">
+            MANAGEMENT PORTAL
+          </p>
+
+          <h2>
+            Dashboard
+          </h2>
+
+          <p class="description">
+            Overview of clients, farms and field operations.
+          </p>
+
+        </div>
+
+
+        <!-- QUICK ACTIONS -->
+
+        <div class="quick-actions">
+
+
+          <button
+            type="button"
+            class="action-pill"
+            (click)="registerClient()"
+          >
+
+            <span class="plus">
+              +
+            </span>
+
+            <span>
+              Register Client
+            </span>
+
+          </button>
+
+
+          <button
+            type="button"
+            class="action-pill"
+            (click)="newSurveyRequest()"
+          >
+
+            <span class="plus">
+              +
+            </span>
+
+            <span>
+              New Survey Request
+            </span>
+
+          </button>
+
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================
+           STATISTICS
+           ================================= -->
+
+      <section class="stats">
+
+        @for (
+          stat of dashboardStats;
+          track stat.title
+        ) {
+
+          <article class="stat-card">
+
+            <span class="stat-label">
+              {{ stat.title }}
+            </span>
+
+            <strong class="stat-number">
+              {{ stat.value }}
+            </strong>
+
+            <span class="stat-description">
+              {{ stat.description }}
+            </span>
+
+          </article>
+
+        }
+
+      </section>
+
+
+      <!-- =================================
+           ACTIVITY
+           ================================= -->
+
+      <section class="section">
+
+        <div class="section-heading">
+
+          <div>
+
+            <p class="eyebrow">
+              OPERATIONS
+            </p>
+
+            <h3>
+              Activity Progress
+            </h3>
+
+          </div>
+
+        </div>
+
+
+        <div class="progress-grid">
+
+
+          <!-- SURVEY -->
+
+          <article class="progress-card">
+
+            <div class="progress-header">
+
+              <div>
+
+                <h4>
+                  Survey Requests
+                </h4>
+
+                <p>
+                  Survey workflow progress
+                </p>
+
+              </div>
+
+              <button
+                type="button"
+                class="view-button"
+                (click)="navigate('/management/surveys')"
+              >
+                View
+              </button>
+
+            </div>
+
+
+            <div class="circle-container">
+
+              <svg
+                class="progress-circle"
+                viewBox="0 0 120 120"
+              >
+
+                <circle
+                  class="circle-background"
+                  cx="60"
+                  cy="60"
+                  r="48"
+                />
+
+                <circle
+                  class="circle-progress"
+                  cx="60"
+                  cy="60"
+                  r="48"
+                  [style.stroke-dashoffset]="
+                    getProgressOffset(surveyProgress)
+                  "
+                />
+
+              </svg>
+
+
+              <div class="circle-value">
+
+                <strong>
+                  {{ surveyProgress }}%
+                </strong>
+
+                <span>
+                  Pending
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <div class="progress-labels">
+
+              <div>
+                <span>Pending</span>
+                <strong>0%</strong>
+              </div>
+
+              <div>
+                <span>Approved</span>
+                <strong>0%</strong>
+              </div>
+
+              <div>
+                <span>Completed</span>
+                <strong>0%</strong>
+              </div>
+
+            </div>
+
+          </article>
+
+
+          <!-- FIELD OPERATIONS -->
+
+          <article class="progress-card">
+
+            <div class="progress-header">
+
+              <div>
+
+                <h4>
+                  Field Operations
+                </h4>
+
+                <p>
+                  Drone operation progress
+                </p>
+
+              </div>
+
+              <button
+                type="button"
+                class="view-button"
+                (click)="navigate('/management/operations')"
+              >
+                View
+              </button>
+
+            </div>
+
+
+            <div class="circle-container">
+
+              <svg
+                class="progress-circle"
+                viewBox="0 0 120 120"
+              >
+
+                <circle
+                  class="circle-background"
+                  cx="60"
+                  cy="60"
+                  r="48"
+                />
+
+                <circle
+                  class="circle-progress"
+                  cx="60"
+                  cy="60"
+                  r="48"
+                  [style.stroke-dashoffset]="
+                    getProgressOffset(fieldOperationProgress)
+                  "
+                />
+
+              </svg>
+
+
+              <div class="circle-value">
+
+                <strong>
+                  {{ fieldOperationProgress }}%
+                </strong>
+
+                <span>
+                  Active
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <div class="progress-labels">
+
+              <div>
+                <span>Active</span>
+                <strong>0%</strong>
+              </div>
+
+              <div>
+                <span>Completed</span>
+                <strong>0%</strong>
+              </div>
+
+              <div>
+                <span>On Hold</span>
+                <strong>0%</strong>
+              </div>
+
+            </div>
+
+          </article>
+
+
+          <!-- DATA ANALYSIS -->
+
+          <article class="progress-card">
+
+            <div class="progress-header">
+
+              <div>
+
+                <h4>
+                  Data Analysis
+                </h4>
+
+                <p>
+                  Image processing progress
+                </p>
+
+              </div>
+
+              <button
+                type="button"
+                class="view-button"
+                (click)="navigate('/management/analysis')"
+              >
+                View
+              </button>
+
+            </div>
+
+
+            <div class="circle-container">
+
+              <svg
+                class="progress-circle"
+                viewBox="0 0 120 120"
+              >
+
+                <circle
+                  class="circle-background"
+                  cx="60"
+                  cy="60"
+                  r="48"
+                />
+
+                <circle
+                  class="circle-progress"
+                  cx="60"
+                  cy="60"
+                  r="48"
+                  [style.stroke-dashoffset]="
+                    getProgressOffset(dataAnalysisProgress)
+                  "
+                />
+
+              </svg>
+
+
+              <div class="circle-value">
+
+                <strong>
+                  {{ dataAnalysisProgress }}%
+                </strong>
+
+                <span>
+                  Processed
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <div class="progress-labels">
+
+              <div>
+                <span>Processing</span>
+                <strong>0%</strong>
+              </div>
+
+              <div>
+                <span>Completed</span>
+                <strong>0%</strong>
+              </div>
+
+              <div>
+                <span>Review</span>
+                <strong>0%</strong>
+              </div>
+
+            </div>
+
+          </article>
+
+        </div>
+
+      </section>
+
+
+      <!-- =================================
+           LOWER SECTION
+           ================================= -->
+
+      <section class="lower-grid">
+
+
+        <!-- FARM ACTIVITY -->
+
+        <article class="farm-card">
+
+          <div class="card-header">
+
+            <div>
+
+              <p class="eyebrow">
+                FARM SERVICES
+              </p>
+
+              <h3>
+                Farm Activity
+              </h3>
+
+              <p>
+                Overall service progress.
+              </p>
+
+            </div>
+
+            <button
+              type="button"
+              class="view-button"
+              (click)="navigate('/management/farms')"
+            >
+              View
+            </button>
+
+          </div>
+
+
+          <div class="farm-progress">
+
+
+            <div class="semi-circle-container">
+
+              <svg
+                viewBox="0 0 200 120"
+                class="semi-circle"
+              >
+
+                <path
+                  class="semi-background"
+                  d="M 20 100 A 80 80 0 0 1 180 100"
+                />
+
+                <path
+                  class="semi-progress"
+                  d="M 20 100 A 80 80 0 0 1 180 100"
+                  pathLength="100"
+                  [style.stroke-dasharray]="
+                    farmProgress + ' 100'
+                  "
+                />
+
+              </svg>
+
+
+              <div class="semi-value">
+
+                <strong>
+                  {{ farmProgress }}%
+                </strong>
+
+                <span>
+                  Overall Progress
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <div class="farm-progress-list">
+
+              <div class="progress-line">
+
+                <div>
+                  <span>
+                    Surveys Completed
+                  </span>
+
+                  <strong>
+                    0%
+                  </strong>
+                </div>
+
+                <div class="line">
+                  <span></span>
+                </div>
+
+              </div>
+
+
+              <div class="progress-line">
+
+                <div>
+                  <span>
+                    Services Delivered
+                  </span>
+
+                  <strong>
+                    0%
+                  </strong>
+                </div>
+
+                <div class="line">
+                  <span></span>
+                </div>
+
+              </div>
+
+
+              <div class="progress-line">
+
+                <div>
+                  <span>
+                    Active Farms
+                  </span>
+
+                  <strong>
+                    0%
+                  </strong>
+                </div>
+
+                <div class="line">
+                  <span></span>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </article>
+
+
+        <!-- REPORTS -->
+
+        <article class="reports-card">
+
+          <div class="card-header">
+
+            <div>
+
+              <p class="eyebrow">
+                REPORTING
+              </p>
+
+              <h3>
+                Recent Reports
+              </h3>
+
+              <p>
+                Latest reports and analysis.
+              </p>
+
+            </div>
+
+            <button
+              type="button"
+              class="view-button"
+              (click)="navigate('/management/reports')"
+            >
+              View
+            </button>
+
+          </div>
+
+
+          <div class="report-list">
+
+
+            <div class="report-row">
+
+              <div class="report-marker">
+                01
+              </div>
+
+              <div class="report-info">
+
+                <strong>
+                  Operational Reports
+                </strong>
+
+                <span>
+                  Field and drone operation performance
+                </span>
+
+              </div>
+
+              <span class="report-status">
+                0%
+              </span>
+
+            </div>
+
+
+            <div class="report-row">
+
+              <div class="report-marker">
+                02
+              </div>
+
+              <div class="report-info">
+
+                <strong>
+                  Survey Reports
+                </strong>
+
+                <span>
+                  Farm survey and assessment results
+                </span>
+
+              </div>
+
+              <span class="report-status">
+                0%
+              </span>
+
+            </div>
+
+
+            <div class="report-row">
+
+              <div class="report-marker">
+                03
+              </div>
+
+              <div class="report-info">
+
+                <strong>
+                  Data Analysis Reports
+                </strong>
+
+                <span>
+                  Processed imagery and analytical results
+                </span>
+
+              </div>
+
+              <span class="report-status">
+                0%
+              </span>
+
+            </div>
+
+
+          </div>
+
+        </article>
+
+      </section>
+
+    </section>
+
+  </main>
+
+</div>

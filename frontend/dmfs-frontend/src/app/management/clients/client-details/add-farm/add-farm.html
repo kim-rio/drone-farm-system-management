@@ -1,0 +1,194 @@
+<div
+  class="modal-overlay"
+  (click)="close()">
+
+  <div
+    class="farm-modal"
+    (click)="stopClick($event)">
+
+    <div class="modal-header">
+
+      <div>
+        <span class="eyebrow">
+          FARM MANAGEMENT
+        </span>
+
+        <h2>Add Farm</h2>
+
+        <p>
+          Register a new farm for this client.
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="close-button"
+        (click)="close()"
+        [disabled]="loading">
+
+        ×
+
+      </button>
+
+    </div>
+
+
+    @if (errorMessage) {
+
+      <div class="message error">
+        {{ errorMessage }}
+      </div>
+
+    }
+
+
+    @if (successMessage) {
+
+      <div class="message success">
+        {{ successMessage }}
+      </div>
+
+    }
+
+
+    <form
+      #farmForm="ngForm"
+      (ngSubmit)="createFarm()">
+
+      <div class="form-group">
+
+        <label for="farmName">
+          Farm Name *
+        </label>
+
+        <input
+          id="farmName"
+          name="farmName"
+          type="text"
+          [(ngModel)]="farm.name"
+          placeholder="e.g. Kijani Farm"
+          required>
+
+      </div>
+
+
+      <div class="form-row">
+
+        <div class="form-group">
+
+          <label for="latitude">
+            Latitude *
+          </label>
+
+          <input
+            id="latitude"
+            name="latitude"
+            type="number"
+            step="any"
+            min="-90"
+            max="90"
+            [(ngModel)]="farm.latitude"
+            placeholder="-6.7924"
+            required>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="longitude">
+            Longitude *
+          </label>
+
+          <input
+            id="longitude"
+            name="longitude"
+            type="number"
+            step="any"
+            min="-180"
+            max="180"
+            [(ngModel)]="farm.longitude"
+            placeholder="39.2083"
+            required>
+
+        </div>
+
+      </div>
+
+
+      <div class="location-help">
+
+        Location is stored as a geographic point.
+        Enter decimal coordinates.
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="areaHectares">
+          Area (hectares)
+        </label>
+
+        <input
+          id="areaHectares"
+          name="areaHectares"
+          type="number"
+          min="0"
+          step="0.01"
+          [(ngModel)]="farm.areaHectares"
+          placeholder="e.g. 50">
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="description">
+          Description
+        </label>
+
+        <textarea
+          id="description"
+          name="description"
+          rows="4"
+          [(ngModel)]="farm.description"
+          placeholder="Describe the farm...">
+        </textarea>
+
+      </div>
+
+
+      <div class="modal-actions">
+
+        <button
+          type="button"
+          class="secondary-button"
+          (click)="close()"
+          [disabled]="loading">
+
+          Cancel
+
+        </button>
+
+
+        <button
+          type="submit"
+          class="primary-button"
+          [disabled]="loading || farmForm.invalid">
+
+          @if (loading) {
+            Adding...
+          } @else {
+            Add Farm
+          }
+
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>

@@ -1,0 +1,1178 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  min-height: 100dvh;
+  color: #111;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button {
+  font: inherit;
+}
+
+.dashboard {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  background: #f7f7f5;
+}
+
+
+/* =================================
+   SIDEBAR
+   ================================= */
+
+.sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+
+  width: 235px;
+  height: 100vh;
+  height: 100dvh;
+
+  display: flex;
+  flex-direction: column;
+
+  padding: 20px 15px;
+
+  background: #fff;
+
+  border-right: 1px solid #e5e5e3;
+
+  z-index: 1000;
+}
+
+
+/* =================================
+   BRAND
+   ================================= */
+
+.brand {
+  min-height: 65px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 0 8px 18px;
+}
+
+.menu-button,
+.open-menu-button {
+  width: 35px;
+  height: 35px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid #dededc;
+  border-radius: 8px;
+
+  background: #fff;
+  color: #111;
+
+  cursor: pointer;
+}
+
+.menu-button:hover,
+.open-menu-button:hover {
+  background: #f1f1ef;
+}
+
+.brand-text h1 {
+  margin: 0;
+
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.brand-text span {
+  display: block;
+
+  margin-top: 3px;
+
+  color: #888;
+
+  font-size: 8px;
+  font-weight: 700;
+
+  letter-spacing: 1px;
+}
+
+
+/* =================================
+   NAVIGATION
+   ================================= */
+
+.navigation {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.nav-item {
+  position: relative;
+
+  width: 100%;
+  min-height: 42px;
+
+  display: flex;
+  align-items: center;
+
+  padding: 0 12px;
+
+  border: 0;
+  border-radius: 8px;
+
+  background: transparent;
+  color: #666;
+
+  font-size: 11px;
+
+  text-align: left;
+
+  cursor: pointer;
+}
+
+.nav-item:hover {
+  background: #f3f3f1;
+  color: #111;
+}
+
+.nav-item.active {
+  background: #111;
+  color: #fff;
+}
+
+.nav-indicator {
+  position: absolute;
+  left: 0;
+
+  width: 3px;
+  height: 0;
+
+  border-radius: 5px;
+
+  background: #fff;
+}
+
+.nav-item.active .nav-indicator {
+  height: 17px;
+}
+
+
+/* =================================
+   SIDEBAR BOTTOM
+   ================================= */
+
+.sidebar-bottom {
+  margin-top: auto;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  padding-top: 18px;
+
+  border-top: 1px solid #e7e7e5;
+}
+
+
+/* ACCOUNT */
+
+.account {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 9px;
+
+  border: 0;
+
+  background: transparent;
+
+  text-align: left;
+
+  cursor: pointer;
+}
+
+.account-avatar {
+  width: 36px;
+  height: 36px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #eeeeec;
+  color: #111;
+
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.account-details {
+  min-width: 0;
+}
+
+.account-details strong {
+  display: block;
+
+  overflow: hidden;
+
+  font-size: 10px;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-details span {
+  display: block;
+
+  margin-top: 3px;
+
+  color: #999;
+
+  font-size: 8px;
+}
+
+
+/* =================================
+   LOGOUT
+   ================================= */
+
+.logout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  gap: 5px;
+
+  margin-top: 10px;
+
+  border: 0;
+
+  background: transparent;
+
+  color: #555;
+
+  cursor: pointer;
+}
+
+.logout-circle {
+  width: 46px;
+  height: 46px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid #111;
+  border-radius: 50%;
+
+  background: #fff;
+  color: #111;
+
+  font-size: 20px;
+}
+
+.logout:hover .logout-circle {
+  background: #111;
+  color: #fff;
+}
+
+.logout-text {
+  font-size: 9px;
+}
+
+
+/* =================================
+   MAIN CONTENT
+   ================================= */
+
+.main-content {
+  width: 100%;
+  min-width: 0;
+
+  margin-left: 235px;
+}
+
+
+/* =================================
+   COLLAPSED STATE
+   ================================= */
+
+/*
+   IMPORTANT:
+
+   When the sidebar is closed, the sidebar
+   does NOT become a mini sidebar.
+
+   It is completely removed from the layout.
+*/
+
+.dashboard:not(.sidebar-open) .sidebar {
+  display: none;
+}
+
+.dashboard:not(.sidebar-open) .main-content {
+  margin-left: 0;
+}
+
+
+/* =================================
+   TOPBAR
+   ================================= */
+
+.topbar {
+  min-height: 72px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 14px 35px;
+
+  background: #fff;
+
+  border-bottom: 1px solid #e6e6e4;
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+}
+
+.open-menu-button {
+  position: fixed;
+
+  top: 18px;
+  left: 18px;
+
+  z-index: 2000;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+
+  gap: 18px;
+
+  margin-left: auto;
+}
+
+
+/* =================================
+   SETTINGS
+   ================================= */
+
+.settings-button {
+  padding: 8px 15px;
+
+  border: 1px solid #d9d9d7;
+  border-radius: 20px;
+
+  background: #fff;
+  color: #111;
+
+  font-size: 9px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.settings-button:hover {
+  background: #f1f1ef;
+}
+
+
+/* =================================
+   TOP USER
+   ================================= */
+
+.top-user {
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+
+  padding-left: 17px;
+
+  border-left: 1px solid #e4e4e2;
+}
+
+.top-avatar {
+  width: 37px;
+  height: 37px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #111;
+  color: #fff;
+
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.top-user-details strong {
+  display: block;
+
+  font-size: 10px;
+}
+
+.top-user-details span {
+  display: block;
+
+  margin-top: 3px;
+
+  color: #999;
+
+  font-size: 8px;
+}
+
+
+/* =================================
+   PAGE
+   ================================= */
+
+.page {
+  width: 100%;
+  max-width: 1550px;
+
+  margin: auto;
+
+  padding: 35px 40px 55px;
+}
+
+
+/* =================================
+   PAGE HEADER
+   ================================= */
+
+.page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+
+  gap: 25px;
+
+  margin-bottom: 27px;
+}
+
+.title-area {
+  min-width: 0;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+
+  color: #888;
+
+  font-size: 8px;
+  font-weight: 700;
+
+  letter-spacing: 1px;
+}
+
+.page-header h2 {
+  margin: 0;
+
+  font-size: 30px;
+  font-weight: 700;
+
+  letter-spacing: -1px;
+}
+
+.description {
+  margin: 6px 0 0;
+
+  color: #8d8d8d;
+
+  font-size: 11px;
+}
+
+
+/* =================================
+   QUICK ACTIONS
+   ================================= */
+
+.quick-actions {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  flex-shrink: 0;
+}
+
+.action-pill {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 7px;
+
+  padding: 9px 14px;
+
+  border: 1px solid #d7d7d5;
+  border-radius: 999px;
+
+  background: #fff;
+  color: #111;
+
+  font-size: 9px;
+  font-weight: 600;
+
+  white-space: nowrap;
+
+  cursor: pointer;
+}
+
+.action-pill:hover {
+  background: #111;
+  border-color: #111;
+  color: #fff;
+}
+
+.plus {
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+
+/* =================================
+   STAT CARDS
+   ================================= */
+
+.stats {
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+  gap: 12px;
+
+  margin-bottom: 38px;
+}
+
+.stat-card {
+  min-height: 140px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  padding: 19px;
+
+  background: #fff;
+
+  border: 1px solid #e5e5e3;
+  border-radius: 10px;
+}
+
+.stat-label {
+  color: #777;
+
+  font-size: 9px;
+  font-weight: 650;
+
+  text-transform: uppercase;
+}
+
+.stat-number {
+  font-size: 34px;
+  font-weight: 700;
+}
+
+.stat-description {
+  color: #999;
+
+  font-size: 9px;
+}
+
+
+/* =================================
+   SECTION
+   ================================= */
+
+.section {
+  margin-bottom: 35px;
+}
+
+.section-heading {
+  margin-bottom: 13px;
+}
+
+.section-heading h3,
+.card-header h3 {
+  margin: 0;
+
+  font-size: 15px;
+  font-weight: 650;
+}
+
+
+/* =================================
+   PROGRESS GRID
+   ================================= */
+
+.progress-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 12px;
+}
+
+.progress-card {
+  min-width: 0;
+
+  min-height: 315px;
+
+  padding: 20px;
+
+  background: #fff;
+
+  border: 1px solid #e5e5e3;
+  border-radius: 10px;
+}
+
+.progress-header,
+.card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 15px;
+}
+
+.progress-header h4 {
+  margin: 0;
+
+  font-size: 12px;
+}
+
+.progress-header p,
+.card-header p:last-child {
+  margin: 4px 0 0;
+
+  color: #999;
+
+  font-size: 9px;
+}
+
+
+/* =================================
+   VIEW BUTTON
+   ================================= */
+
+.view-button {
+  padding: 6px 10px;
+
+  flex-shrink: 0;
+
+  border: 1px solid #d8d8d6;
+  border-radius: 999px;
+
+  background: #fff;
+  color: #333;
+
+  font-size: 9px;
+
+  cursor: pointer;
+}
+
+.view-button:hover {
+  background: #111;
+  border-color: #111;
+  color: #fff;
+}
+
+
+/* =================================
+   CIRCLE
+   ================================= */
+
+.circle-container {
+  position: relative;
+
+  width: 150px;
+  height: 150px;
+
+  margin: 20px auto 13px;
+}
+
+.progress-circle {
+  width: 100%;
+  height: 100%;
+
+  transform: rotate(-90deg);
+}
+
+.circle-background,
+.circle-progress {
+  fill: none;
+
+  stroke-width: 8;
+}
+
+.circle-background {
+  stroke: #ededeb;
+}
+
+.circle-progress {
+  stroke: #111;
+
+  stroke-linecap: round;
+
+  stroke-dasharray: 301.59;
+
+  transition: stroke-dashoffset .4s ease;
+}
+
+.circle-value {
+  position: absolute;
+
+  inset: 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.circle-value strong {
+  font-size: 25px;
+}
+
+.circle-value span {
+  margin-top: 4px;
+
+  color: #888;
+
+  font-size: 9px;
+}
+
+
+/* =================================
+   LABELS
+   ================================= */
+
+.progress-labels {
+  display: flex;
+  flex-direction: column;
+
+  gap: 7px;
+
+  padding-top: 10px;
+
+  border-top: 1px solid #eee;
+}
+
+.progress-labels div {
+  display: flex;
+  justify-content: space-between;
+
+  font-size: 9px;
+}
+
+.progress-labels span {
+  color: #777;
+}
+
+
+/* =================================
+   LOWER GRID
+   ================================= */
+
+.lower-grid {
+  display: grid;
+
+  grid-template-columns:
+    1.2fr .8fr;
+
+  gap: 12px;
+}
+
+.farm-card,
+.reports-card {
+  min-width: 0;
+
+  padding: 21px;
+
+  background: #fff;
+
+  border: 1px solid #e5e5e3;
+  border-radius: 10px;
+}
+
+
+/* =================================
+   FARM
+   ================================= */
+
+.farm-progress {
+  display: grid;
+
+  grid-template-columns:
+    .9fr 1.1fr;
+
+  align-items: center;
+
+  gap: 25px;
+}
+
+.semi-circle-container {
+  position: relative;
+
+  width: 210px;
+  max-width: 100%;
+
+  margin: auto;
+}
+
+.semi-circle {
+  width: 100%;
+}
+
+.semi-background,
+.semi-progress {
+  fill: none;
+
+  stroke-width: 15;
+
+  stroke-linecap: round;
+}
+
+.semi-background {
+  stroke: #ededeb;
+}
+
+.semi-progress {
+  stroke: #111;
+}
+
+.semi-value {
+  position: absolute;
+
+  left: 0;
+  right: 0;
+  bottom: 5px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.semi-value strong {
+  font-size: 25px;
+}
+
+.semi-value span {
+  color: #888;
+
+  font-size: 8px;
+}
+
+
+/* =================================
+   PROGRESS LINES
+   ================================= */
+
+.farm-progress-list {
+  display: flex;
+  flex-direction: column;
+
+  gap: 18px;
+}
+
+.progress-line > div:first-child {
+  display: flex;
+  justify-content: space-between;
+
+  margin-bottom: 7px;
+
+  font-size: 9px;
+}
+
+.progress-line span {
+  color: #777;
+}
+
+.line {
+  width: 100%;
+  height: 5px;
+
+  overflow: hidden;
+
+  border-radius: 10px;
+
+  background: #ededeb;
+}
+
+.line span {
+  display: block;
+
+  height: 100%;
+
+  background: #111;
+}
+
+
+/* =================================
+   REPORTS
+   ================================= */
+
+.report-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.report-row {
+  min-height: 68px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 11px;
+
+  border-bottom: 1px solid #eee;
+}
+
+.report-row:last-child {
+  border-bottom: 0;
+}
+
+.report-marker {
+  width: 30px;
+  height: 30px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid #dededc;
+  border-radius: 6px;
+
+  font-size: 8px;
+}
+
+.report-info {
+  min-width: 0;
+  flex: 1;
+}
+
+.report-info strong {
+  display: block;
+
+  font-size: 10px;
+}
+
+.report-info span {
+  display: block;
+
+  margin-top: 4px;
+
+  overflow: hidden;
+
+  color: #999;
+
+  font-size: 8px;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.report-status {
+  padding: 5px 8px;
+
+  border: 1px solid #dededc;
+  border-radius: 999px;
+
+  color: #666;
+
+  font-size: 8px;
+}
+
+
+/* =================================
+   TABLET
+   ================================= */
+
+@media (max-width: 1150px) {
+
+  .page {
+    padding-left: 28px;
+    padding-right: 28px;
+  }
+
+  .stats {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .progress-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .progress-card:last-child {
+    grid-column: span 2;
+  }
+
+  .lower-grid {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+
+/* =================================
+   SMALL SCREEN
+   ================================= */
+
+@media (max-width: 800px) {
+
+  .sidebar {
+    width: 220px;
+  }
+
+  .main-content {
+    margin-left: 220px;
+  }
+
+  .dashboard:not(.sidebar-open) .main-content {
+    margin-left: 0;
+  }
+
+  .page-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .quick-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+}
+
+
+/* =================================
+   MOBILE
+   ================================= */
+
+@media (max-width: 600px) {
+
+  .sidebar {
+    width: 235px;
+  }
+
+  .main-content,
+  .dashboard:not(.sidebar-open) .main-content {
+    margin-left: 0;
+  }
+
+  .topbar {
+    min-height: 65px;
+
+    padding: 12px 15px;
+  }
+
+  .page {
+    padding: 25px 14px 35px;
+  }
+
+  .page-header h2 {
+    font-size: 25px;
+  }
+
+  .quick-actions {
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .action-pill {
+    justify-content: center;
+  }
+
+  .stats {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+    gap: 8px;
+  }
+
+  .stat-card {
+    min-height: 120px;
+
+    padding: 15px;
+  }
+
+  .stat-number {
+    font-size: 28px;
+  }
+
+  .progress-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .progress-card:last-child {
+    grid-column: auto;
+  }
+
+  .farm-progress {
+    grid-template-columns: 1fr;
+  }
+
+  .top-user-details {
+    display: none;
+  }
+
+}
+
+
+/* =================================
+   VERY SMALL PHONE
+   ================================= */
+
+@media (max-width: 390px) {
+
+  .stats {
+    grid-template-columns: 1fr;
+  }
+
+  .topbar {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .page {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+}
