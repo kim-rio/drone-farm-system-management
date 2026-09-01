@@ -1,0 +1,397 @@
+<div class="page">
+
+  <!-- HEADER -->
+
+  <div class="page-header">
+
+    <div>
+
+      <p class="eyebrow">
+        SERVICE MANAGEMENT
+      </p>
+
+      <h1>
+        Service Requests
+      </h1>
+
+      <p>
+        Manage customer requests for services in the catalogue.
+      </p>
+
+    </div>
+
+    <button
+      type="button"
+      class="primary"
+      (click)="createRequest()">
+
+      + Create Request
+
+    </button>
+
+  </div>
+
+
+  <!-- SUCCESS -->
+
+  @if (successMessage) {
+
+    <div class="success">
+      {{ successMessage }}
+    </div>
+
+  }
+
+
+  <!-- ERROR -->
+
+  @if (errorMessage) {
+
+    <div class="alert">
+      {{ errorMessage }}
+    </div>
+
+  }
+
+
+  <!-- FILTERS -->
+
+  <div class="filters">
+
+    <div class="search">
+
+      <label for="search">
+        Search
+      </label>
+
+      <input
+        id="search"
+        type="text"
+        [(ngModel)]="searchTerm"
+        placeholder="Search customer, farm, block or service..."
+      />
+
+    </div>
+
+
+    <div class="filter-group">
+
+      <label for="status">
+        Status
+      </label>
+
+      <select
+        id="status"
+        [(ngModel)]="selectedStatus">
+
+        <option value="ALL">
+          All Statuses
+        </option>
+
+        <option value="PENDING">
+          Pending
+        </option>
+
+        <option value="APPROVED">
+          Approved
+        </option>
+
+        <option value="IN_PROGRESS">
+          In Progress
+        </option>
+
+        <option value="COMPLETED">
+          Completed
+        </option>
+
+        <option value="CANCELLED">
+          Cancelled
+        </option>
+
+      </select>
+
+    </div>
+
+  </div>
+
+
+  <!-- LOADING -->
+
+  @if (loading) {
+
+    <div class="state">
+      Loading service requests...
+    </div>
+
+  }
+
+
+  <!-- EMPTY -->
+
+  @if (
+    !loading &&
+    !errorMessage &&
+    filteredRequests.length === 0
+  ) {
+
+    <div class="empty">
+
+      <h2>
+        No service requests found
+      </h2>
+
+      <p>
+        Create a service request to get started.
+      </p>
+
+      <button
+        type="button"
+        class="primary"
+        (click)="createRequest()">
+
+        Create Service Request
+
+      </button>
+
+    </div>
+
+  }
+
+
+  <!-- REQUEST CARDS -->
+
+  @if (
+    !loading &&
+    filteredRequests.length > 0
+  ) {
+
+    <div class="request-grid">
+
+      @for (
+        request of filteredRequests;
+        track request.id
+      ) {
+
+        <article class="request-card">
+
+
+          <!-- CARD HEADER -->
+
+          <div class="request-header">
+
+            <div>
+
+              <span class="request-number">
+                REQUEST #{{ request.id }}
+              </span>
+
+              <h2>
+                {{ request.serviceCatalogue?.name || 'Service' }}
+              </h2>
+
+            </div>
+
+
+            <span
+              class="status"
+              [class.pending]="request.status === 'PENDING'"
+              [class.approved]="request.status === 'APPROVED'"
+              [class.progress]="request.status === 'IN_PROGRESS'"
+              [class.completed]="request.status === 'COMPLETED'"
+              [class.cancelled]="request.status === 'CANCELLED'">
+
+              {{ request.status }}
+
+            </span>
+
+          </div>
+
+
+          <!-- CUSTOMER -->
+
+          <div class="info-section">
+
+            <div class="info-item">
+
+              <span>
+                Customer
+              </span>
+
+              <strong>
+                {{ getCustomerName(request) }}
+              </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+              <span>
+                Farm
+              </span>
+
+              <strong>
+                {{ request.farm?.name || '—' }}
+              </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+              <span>
+                Block
+              </span>
+
+              <strong>
+                {{ request.farmBlock?.name || '—' }}
+              </strong>
+
+            </div>
+
+
+            <div class="info-item">
+
+              <span>
+                Requested Date
+              </span>
+
+              <strong>
+                {{ request.requestedDate }}
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <!-- SERVICE -->
+
+          <div class="service-summary">
+
+            <div>
+
+              <span>
+                Category
+              </span>
+
+              <strong>
+                {{ request.serviceCatalogue?.category || '—' }}
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                Unit
+              </span>
+
+              <strong>
+                {{ request.serviceCatalogue?.unitOfMeasurement || '—' }}
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                Standard Price
+              </span>
+
+              <strong>
+                {{
+                  request.serviceCatalogue?.standardPrice
+                  | number:'1.0-2'
+                }}
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <!-- NOTES -->
+
+          @if (request.notes) {
+
+            <div class="notes">
+
+              <span>
+                Notes
+              </span>
+
+              <p>
+                {{ request.notes }}
+              </p>
+
+            </div>
+
+          }
+
+
+          <!-- ACTIONS -->
+
+          <div class="request-actions">
+
+            <button
+              type="button"
+              class="secondary"
+              (click)="viewRequest(request)">
+
+              View
+
+            </button>
+
+
+            <select
+              class="status-select"
+              [value]="request.status"
+              (change)="updateStatus(
+                request,
+                $any($event.target).value
+              )">
+
+              <option value="PENDING">
+                Pending
+              </option>
+
+              <option value="APPROVED">
+                Approved
+              </option>
+
+              <option value="IN_PROGRESS">
+                In Progress
+              </option>
+
+              <option value="COMPLETED">
+                Completed
+              </option>
+
+              <option value="CANCELLED">
+                Cancelled
+              </option>
+
+            </select>
+
+
+            <button
+              type="button"
+              class="danger"
+              (click)="deleteRequest(request)">
+
+              Delete
+
+            </button>
+
+          </div>
+
+        </article>
+
+      }
+
+    </div>
+
+  }
+
+</div>

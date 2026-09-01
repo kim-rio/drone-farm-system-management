@@ -37,6 +37,16 @@ export class Management {
       label: 'Clients',
       route: '/management/clients'
     },
+
+    {
+    label: 'Service Catalogue',
+    route: '/management/service-catalogue'
+    },
+
+    {
+  label: 'Service Requests',
+  route: '/management/service-requests'
+   },
     {
       label: 'Farms',
       route: '/management/farms'

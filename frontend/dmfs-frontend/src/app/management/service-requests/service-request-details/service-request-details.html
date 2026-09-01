@@ -1,0 +1,728 @@
+<div class="page">
+
+  @if (loading) {
+
+    <div class="state">
+      Loading service request...
+    </div>
+
+  } @else if (request) {
+
+    <!-- HEADER -->
+
+    <div class="page-header">
+
+      <div>
+
+        <button
+          type="button"
+          class="back"
+          (click)="backToRequests()">
+
+          ← Service Requests
+
+        </button>
+
+        <p class="eyebrow">
+          SERVICE REQUEST #{{ request.id }}
+        </p>
+
+        <h1>
+          {{ request.serviceCatalogue?.name || 'Service Request' }}
+        </h1>
+
+        <p>
+          Created {{ request.createdAt | date:'medium' }}
+        </p>
+
+      </div>
+
+
+      <div class="header-actions">
+
+        @if (!editing) {
+
+          <button
+            type="button"
+            class="secondary"
+            (click)="startEditing()">
+
+            Edit Request
+
+          </button>
+
+          <button
+            type="button"
+            class="danger"
+            [disabled]="deleting"
+            (click)="deleteRequest()">
+
+            @if (deleting) {
+              Deleting...
+            } @else {
+              Delete
+            }
+
+          </button>
+
+        }
+
+      </div>
+
+    </div>
+
+
+    <!-- MESSAGES -->
+
+    @if (successMessage) {
+
+      <div class="success">
+        {{ successMessage }}
+      </div>
+
+    }
+
+    @if (errorMessage) {
+
+      <div class="alert">
+        {{ errorMessage }}
+      </div>
+
+    }
+
+
+    @if (!editing) {
+
+      <!-- STATUS -->
+
+      <section class="status-card">
+
+        <div>
+
+          <span>
+            Current Status
+          </span>
+
+          <strong>
+            {{ request.status }}
+          </strong>
+
+        </div>
+
+
+        <div class="status-actions">
+
+          <button
+            type="button"
+            [class.active]="request.status === 'PENDING'"
+            (click)="changeStatus('PENDING')">
+
+            Pending
+
+          </button>
+
+          <button
+            type="button"
+            [class.active]="request.status === 'APPROVED'"
+            (click)="changeStatus('APPROVED')">
+
+            Approved
+
+          </button>
+
+          <button
+            type="button"
+            [class.active]="request.status === 'IN_PROGRESS'"
+            (click)="changeStatus('IN_PROGRESS')">
+
+            In Progress
+
+          </button>
+
+          <button
+            type="button"
+            [class.active]="request.status === 'COMPLETED'"
+            (click)="changeStatus('COMPLETED')">
+
+            Completed
+
+          </button>
+
+          <button
+            type="button"
+            [class.active]="request.status === 'CANCELLED'"
+            (click)="changeStatus('CANCELLED')">
+
+            Cancelled
+
+          </button>
+
+        </div>
+
+      </section>
+
+
+      <!-- MAIN GRID -->
+
+      <div class="details-grid">
+
+        <!-- CUSTOMER -->
+
+        <section class="card">
+
+          <div class="card-heading">
+
+            <span>
+              CUSTOMER
+            </span>
+
+            <h2>
+              Customer Information
+            </h2>
+
+          </div>
+
+          <div class="details">
+
+            <div>
+              <span>Name</span>
+              <strong>
+                {{ getCustomerName() }}
+              </strong>
+            </div>
+
+            <div>
+              <span>Customer Code</span>
+              <strong>
+                {{ request.customer?.customerCode || '—' }}
+              </strong>
+            </div>
+
+            <div>
+              <span>Type</span>
+              <strong>
+                {{ request.customer?.type || '—' }}
+              </strong>
+            </div>
+
+            <div>
+              <span>Email</span>
+              <strong>
+                {{ request.customer?.email || '—' }}
+              </strong>
+            </div>
+
+            <div>
+              <span>Phone</span>
+              <strong>
+                {{ request.customer?.phone || '—' }}
+              </strong>
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- FARM -->
+
+        <section class="card">
+
+          <div class="card-heading">
+
+            <span>
+              FARM
+            </span>
+
+            <h2>
+              Farm Information
+            </h2>
+
+          </div>
+
+          <div class="details">
+
+            <div>
+              <span>Farm</span>
+              <strong>
+                {{ request.farm?.name || '—' }}
+              </strong>
+            </div>
+
+            <div>
+              <span>Area</span>
+              <strong>
+                {{
+                  request.farm?.areaHectares != null
+                    ? request.farm.areaHectares + ' ha'
+                    : '—'
+                }}
+              </strong>
+            </div>
+
+            <div>
+              <span>Description</span>
+              <strong>
+                {{ request.farm?.description || '—' }}
+              </strong>
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- BLOCK -->
+
+        <section class="card">
+
+          <div class="card-heading">
+
+            <span>
+              FARM BLOCK
+            </span>
+
+            <h2>
+              Block Information
+            </h2>
+
+          </div>
+
+          <div class="details">
+
+            <div>
+              <span>Block</span>
+              <strong>
+                {{ request.farmBlock?.name || '—' }}
+              </strong>
+            </div>
+
+            <div>
+              <span>Area</span>
+              <strong>
+                {{
+                  request.farmBlock?.areaHectares != null
+                    ? request.farmBlock.areaHectares + ' ha'
+                    : '—'
+                }}
+              </strong>
+            </div>
+
+            <div>
+              <span>Centre Latitude</span>
+              <strong>
+                {{ request.farmBlock?.centerLatitude ?? '—' }}
+              </strong>
+            </div>
+
+            <div>
+              <span>Centre Longitude</span>
+              <strong>
+                {{ request.farmBlock?.centerLongitude ?? '—' }}
+              </strong>
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- SERVICE -->
+
+        <section class="card">
+
+          <div class="card-heading">
+
+            <span>
+              SERVICE
+            </span>
+
+            <h2>
+              Service Information
+            </h2>
+
+          </div>
+
+          <div class="details">
+
+            <div>
+              <span>Service</span>
+              <strong>
+                {{ request.serviceCatalogue?.name || '—' }}
+              </strong>
+            </div>
+
+            <div>
+              <span>Category</span>
+              <strong>
+                {{ request.serviceCatalogue?.category || '—' }}
+              </strong>
+            </div>
+
+            <div>
+              <span>Unit</span>
+              <strong>
+                {{ request.serviceCatalogue?.unitOfMeasurement || '—' }}
+              </strong>
+            </div>
+
+            <div>
+              <span>Standard Price</span>
+              <strong>
+                {{
+                  request.serviceCatalogue?.standardPrice
+                    | number:'1.0-2'
+                }}
+              </strong>
+            </div>
+
+            <div>
+              <span>Minimum Area</span>
+              <strong>
+                {{
+                  request.serviceCatalogue?.minimumArea != null
+                    ? request.serviceCatalogue.minimumArea + ' ha'
+                    : '—'
+                }}
+              </strong>
+            </div>
+
+            <div>
+              <span>Estimated Duration</span>
+              <strong>
+                {{
+                  request.serviceCatalogue?.estimatedDurationMinutes != null
+                    ? request.serviceCatalogue.estimatedDurationMinutes + ' minutes'
+                    : '—'
+                }}
+              </strong>
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- REQUEST DETAILS -->
+
+        <section class="card full">
+
+          <div class="card-heading">
+
+            <span>
+              REQUEST
+            </span>
+
+            <h2>
+              Request Details
+            </h2>
+
+          </div>
+
+          <div class="request-details">
+
+            <div>
+
+              <span>
+                Requested Date
+              </span>
+
+              <strong>
+                {{ request.requestedDate }}
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                Notes
+              </span>
+
+              <p>
+                {{ request.notes || 'No notes provided.' }}
+              </p>
+
+            </div>
+
+          </div>
+
+        </section>
+
+      </div>
+
+    } @else {
+
+      <!-- EDIT MODE -->
+
+      <section class="edit-card">
+
+        <div class="card-heading">
+
+          <span>
+            EDIT REQUEST
+          </span>
+
+          <h2>
+            Update Service Request
+          </h2>
+
+        </div>
+
+
+        <form
+          (ngSubmit)="saveChanges()">
+
+
+          <div class="form-row">
+
+            <div class="form-group">
+
+              <label for="customer">
+                Customer *
+              </label>
+
+              <select
+                id="customer"
+                name="customer"
+                [(ngModel)]="selectedCustomerId"
+                (ngModelChange)="onCustomerChange()"
+                required>
+
+                <option [ngValue]="null">
+                  Select customer
+                </option>
+
+                @for (
+                  customer of customers;
+                  track customer.id
+                ) {
+
+                  <option
+                    [ngValue]="customer.id">
+
+                    {{
+                      customer.companyName ||
+                      (
+                        (customer.firstName || '') +
+                        ' ' +
+                        (customer.lastName || '')
+                      ).trim() ||
+                      customer.customerCode
+                    }}
+
+                  </option>
+
+                }
+
+              </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+              <label for="farm">
+                Farm *
+              </label>
+
+              <select
+                id="farm"
+                name="farm"
+                [(ngModel)]="selectedFarmId"
+                (ngModelChange)="onFarmChange()"
+                [disabled]="!selectedCustomerId"
+                required>
+
+                <option [ngValue]="null">
+                  Select farm
+                </option>
+
+                @for (
+                  farm of farms;
+                  track farm.id
+                ) {
+
+                  <option
+                    [ngValue]="farm.id">
+
+                    {{ farm.name }}
+
+                  </option>
+
+                }
+
+              </select>
+
+            </div>
+
+          </div>
+
+
+          <div class="form-row">
+
+            <div class="form-group">
+
+              <label for="block">
+                Farm Block *
+              </label>
+
+              <select
+                id="block"
+                name="block"
+                [(ngModel)]="selectedBlockId"
+                [disabled]="!selectedFarmId"
+                required>
+
+                <option [ngValue]="null">
+                  Select block
+                </option>
+
+                @for (
+                  block of blocks;
+                  track block.id
+                ) {
+
+                  <option
+                    [ngValue]="block.id">
+
+                    {{ block.name }}
+
+                  </option>
+
+                }
+
+              </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+              <label for="service">
+                Service *
+              </label>
+
+              <select
+                id="service"
+                name="service"
+                [(ngModel)]="selectedServiceId"
+                required>
+
+                <option [ngValue]="null">
+                  Select service
+                </option>
+
+                @for (
+                  service of services;
+                  track service.id
+                ) {
+
+                  <option
+                    [ngValue]="service.id">
+
+                    {{ service.name }}
+
+                  </option>
+
+                }
+
+              </select>
+
+            </div>
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label for="requestedDate">
+              Requested Date *
+            </label>
+
+            <input
+              id="requestedDate"
+              type="date"
+              name="requestedDate"
+              [(ngModel)]="requestedDate"
+              required />
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label for="notes">
+              Notes
+            </label>
+
+            <textarea
+              id="notes"
+              name="notes"
+              rows="5"
+              [(ngModel)]="notes"
+              placeholder="Additional notes...">
+            </textarea>
+
+          </div>
+
+
+          <div class="edit-actions">
+
+            <button
+              type="button"
+              class="secondary"
+              (click)="cancelEditing()">
+
+              Cancel
+
+            </button>
+
+            <button
+              type="submit"
+              class="primary"
+              [disabled]="saving">
+
+              @if (saving) {
+                Saving...
+              } @else {
+                Save Changes
+              }
+
+            </button>
+
+          </div>
+
+        </form>
+
+      </section>
+
+    }
+
+  } @else {
+
+    <div class="empty">
+
+      <h2>
+        Service request not found
+      </h2>
+
+      <p>
+        {{ errorMessage }}
+      </p>
+
+      <button
+        type="button"
+        class="primary"
+        (click)="backToRequests()">
+
+        Back to Requests
+
+      </button>
+
+    </div>
+
+  }
+
+</div>

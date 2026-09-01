@@ -1,0 +1,606 @@
+<div class="page">
+
+  <!-- HEADER -->
+
+  <div class="page-header">
+
+    <div>
+      <p class="eyebrow">SERVICE MANAGEMENT</p>
+
+      <h1>Service Catalogue</h1>
+
+      <p>
+        Manage the services available for farm operations and service requests.
+      </p>
+    </div>
+
+    <button
+      class="primary"
+      type="button"
+      (click)="openCreateForm()">
+
+      + Add Service
+
+    </button>
+
+  </div>
+
+
+  <!-- MESSAGES -->
+
+  @if (successMessage) {
+
+    <div class="success">
+      {{ successMessage }}
+    </div>
+
+  }
+
+  @if (errorMessage && !showForm) {
+
+    <div class="alert">
+      {{ errorMessage }}
+    </div>
+
+  }
+
+
+  <!-- FILTERS -->
+
+  <div class="filters">
+
+    <div class="search">
+
+      <label for="search">
+        Search
+      </label>
+
+      <input
+        id="search"
+        type="text"
+        [(ngModel)]="searchTerm"
+        placeholder="Search services..."
+      />
+
+    </div>
+
+
+    <div class="filter-group">
+
+      <label for="category">
+        Category
+      </label>
+
+      <select
+        id="category"
+        [(ngModel)]="selectedCategory">
+
+        <option value="ALL">
+          All Categories
+        </option>
+
+        @for (category of categories; track category) {
+
+          <option [value]="category">
+            {{ category }}
+          </option>
+
+        }
+
+      </select>
+
+    </div>
+
+
+    <div class="filter-group">
+
+      <label for="status">
+        Status
+      </label>
+
+      <select
+        id="status"
+        [(ngModel)]="selectedStatus">
+
+        <option value="ALL">
+          All Statuses
+        </option>
+
+        <option value="ACTIVE">
+          Active
+        </option>
+
+        <option value="INACTIVE">
+          Inactive
+        </option>
+
+      </select>
+
+    </div>
+
+  </div>
+
+
+  <!-- LOADING -->
+
+  @if (loading) {
+
+    <div class="state">
+      Loading service catalogue...
+    </div>
+
+  }
+
+
+  <!-- EMPTY -->
+
+  @if (
+    !loading &&
+    !errorMessage &&
+    filteredServices.length === 0
+  ) {
+
+    <div class="empty">
+
+      <h2>No services found</h2>
+
+      <p>
+        There are no services matching your current filters.
+      </p>
+
+      <button
+        class="primary"
+        type="button"
+        (click)="openCreateForm()">
+
+        Add Service
+
+      </button>
+
+    </div>
+
+  }
+
+
+  <!-- SERVICE GRID -->
+
+  @if (
+    !loading &&
+    filteredServices.length > 0
+  ) {
+
+    <div class="service-grid">
+
+      @for (
+        service of filteredServices;
+        track service.id
+      ) {
+
+        <article class="service-card">
+
+          <div class="service-header">
+
+            <div>
+
+              <span class="category">
+                {{ service.category }}
+              </span>
+
+              <h2>
+                {{ service.name }}
+              </h2>
+
+            </div>
+
+            <span
+              class="status"
+              [class.inactive]="service.status !== 'ACTIVE'">
+
+              {{ service.status }}
+
+            </span>
+
+          </div>
+
+
+          <p class="description">
+            {{ service.description }}
+          </p>
+
+
+          <div class="service-details">
+
+            <div>
+              <span>Unit</span>
+              <strong>
+                {{ service.unitOfMeasurement }}
+              </strong>
+            </div>
+
+            <div>
+              <span>Standard Price</span>
+              <strong>
+                {{ service.standardPrice | number:'1.0-2' }}
+              </strong>
+            </div>
+
+            <div>
+              <span>Minimum Area</span>
+              <strong>
+                {{ service.minimumArea }}
+              </strong>
+            </div>
+
+            <div>
+              <span>Duration</span>
+              <strong>
+                {{ service.estimatedDurationMinutes }} min
+              </strong>
+            </div>
+
+          </div>
+
+
+          <div class="service-extra">
+
+            @if (service.requiredEquipment) {
+
+              <div>
+                <span>Equipment</span>
+                <p>
+                  {{ service.requiredEquipment }}
+                </p>
+              </div>
+
+            }
+
+            @if (service.requiredPersonnel) {
+
+              <div>
+                <span>Personnel</span>
+                <p>
+                  {{ service.requiredPersonnel }}
+                </p>
+              </div>
+
+            }
+
+          </div>
+
+
+          <div class="service-actions">
+
+            <button
+              type="button"
+              class="secondary"
+              (click)="openEditForm(service)">
+
+              Edit
+
+            </button>
+
+            @if (service.status === 'ACTIVE') {
+
+              <button
+                type="button"
+                class="danger"
+                (click)="deactivateService(service)">
+
+                Deactivate
+
+              </button>
+
+            }
+
+          </div>
+
+        </article>
+
+      }
+
+    </div>
+
+  }
+
+
+  <!-- CREATE / EDIT MODAL -->
+
+  @if (showForm) {
+
+    <div
+      class="modal-backdrop"
+      (click)="closeForm()">
+
+      <div
+        class="modal"
+        (click)="$event.stopPropagation()">
+
+        <div class="modal-header">
+
+          <div>
+
+            <p class="eyebrow">
+              SERVICE CATALOGUE
+            </p>
+
+            <h2>
+              {{
+                editingService
+                  ? 'Edit Service'
+                  : 'Add Service'
+              }}
+            </h2>
+
+            <p>
+              {{
+                editingService
+                  ? 'Update the service details.'
+                  : 'Create a new service for the catalogue.'
+              }}
+            </p>
+
+          </div>
+
+          <button
+            type="button"
+            class="close-button"
+            [disabled]="saving"
+            (click)="closeForm()">
+
+            ×
+
+          </button>
+
+        </div>
+
+
+        @if (errorMessage) {
+
+          <div class="form-error">
+            {{ errorMessage }}
+          </div>
+
+        }
+
+
+        <form
+          (ngSubmit)="saveService()"
+          #serviceForm="ngForm">
+
+          <div class="form-row">
+
+            <div class="form-group">
+
+              <label for="name">
+                Service Name *
+              </label>
+
+              <input
+                id="name"
+                name="name"
+                type="text"
+                [(ngModel)]="form.name"
+                required
+                placeholder="e.g. Drone Spraying"
+              />
+
+            </div>
+
+
+            <div class="form-group">
+
+              <label for="formCategory">
+                Category *
+              </label>
+
+              <input
+                id="formCategory"
+                name="category"
+                type="text"
+                [(ngModel)]="form.category"
+                required
+                placeholder="e.g. Crop Protection"
+              />
+
+            </div>
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label for="description">
+              Description *
+            </label>
+
+            <textarea
+              id="description"
+              name="description"
+              [(ngModel)]="form.description"
+              required
+              rows="4"
+              placeholder="Describe the service...">
+            </textarea>
+
+          </div>
+
+
+          <div class="form-row">
+
+            <div class="form-group">
+
+              <label for="unit">
+                Unit of Measurement *
+              </label>
+
+              <input
+                id="unit"
+                name="unitOfMeasurement"
+                type="text"
+                [(ngModel)]="form.unitOfMeasurement"
+                required
+                placeholder="e.g. hectare"
+              />
+
+            </div>
+
+
+            <div class="form-group">
+
+              <label for="price">
+                Standard Price *
+              </label>
+
+              <input
+                id="price"
+                name="standardPrice"
+                type="number"
+                min="0"
+                [(ngModel)]="form.standardPrice"
+                required
+              />
+
+            </div>
+
+          </div>
+
+
+          <div class="form-row">
+
+            <div class="form-group">
+
+              <label for="minimumArea">
+                Minimum Area *
+              </label>
+
+              <input
+                id="minimumArea"
+                name="minimumArea"
+                type="number"
+                min="0"
+                step="0.01"
+                [(ngModel)]="form.minimumArea"
+                required
+              />
+
+            </div>
+
+
+            <div class="form-group">
+
+              <label for="duration">
+                Estimated Duration (minutes) *
+              </label>
+
+              <input
+                id="duration"
+                name="estimatedDurationMinutes"
+                type="number"
+                min="0"
+                [(ngModel)]="form.estimatedDurationMinutes"
+                required
+              />
+
+            </div>
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label for="equipment">
+              Required Equipment
+            </label>
+
+            <input
+              id="equipment"
+              name="requiredEquipment"
+              type="text"
+              [(ngModel)]="form.requiredEquipment"
+              placeholder="e.g. Agricultural drone"
+            />
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label for="personnel">
+              Required Personnel
+            </label>
+
+            <input
+              id="personnel"
+              name="requiredPersonnel"
+              type="text"
+              [(ngModel)]="form.requiredPersonnel"
+              placeholder="e.g. Certified drone operator"
+            />
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label for="status">
+              Status
+            </label>
+
+            <select
+              id="status"
+              name="status"
+              [(ngModel)]="form.status">
+
+              <option value="ACTIVE">
+                Active
+              </option>
+
+              <option value="INACTIVE">
+                Inactive
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="modal-actions">
+
+            <button
+              type="button"
+              class="secondary"
+              [disabled]="saving"
+              (click)="closeForm()">
+
+              Cancel
+
+            </button>
+
+            <button
+              type="submit"
+              class="primary"
+              [disabled]="saving || serviceForm.invalid">
+
+              @if (saving) {
+                Saving...
+              } @else {
+                {{
+                  editingService
+                    ? 'Update Service'
+                    : 'Create Service'
+                }}
+              }
+
+            </button>
+
+          </div>
+
+        </form>
+
+      </div>
+
+    </div>
+
+  }
+
+</div>

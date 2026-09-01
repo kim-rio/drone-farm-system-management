@@ -1,0 +1,493 @@
+<div class="page">
+
+  <!-- HEADER -->
+
+  <div class="page-header">
+
+    <div>
+
+      <p class="eyebrow">
+        SERVICE MANAGEMENT
+      </p>
+
+      <h1>
+        Create Service Request
+      </h1>
+
+      <p>
+        Create a service request for a customer, farm and block.
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <!-- ERROR -->
+
+  @if (errorMessage) {
+
+    <div class="alert">
+      {{ errorMessage }}
+    </div>
+
+  }
+
+
+  <!-- SUCCESS -->
+
+  @if (successMessage) {
+
+    <div class="success">
+      {{ successMessage }}
+    </div>
+
+  }
+
+
+  <!-- FORM -->
+
+  <div class="form-card">
+
+    <form
+      (ngSubmit)="createRequest()"
+      #requestForm="ngForm">
+
+
+      <!-- CUSTOMER -->
+
+      <div class="form-section">
+
+        <div class="section-heading">
+
+          <p class="eyebrow">
+            CUSTOMER
+          </p>
+
+          <h2>
+            Select Customer
+          </h2>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="customer">
+            Customer *
+          </label>
+
+          <select
+            id="customer"
+            name="customer"
+            [(ngModel)]="selectedCustomerId"
+            (ngModelChange)="onCustomerChange()"
+            required>
+
+            <option [ngValue]="null">
+              Select a customer
+            </option>
+
+            @for (
+              customer of customers;
+              track customer.id
+            ) {
+
+              <option [ngValue]="customer.id">
+
+                {{
+                  customer.companyName
+                  || (
+                    (customer.firstName || '') +
+                    ' ' +
+                    (customer.lastName || '')
+                  ).trim()
+                  || customer.customerCode
+                }}
+
+              </option>
+
+            }
+
+          </select>
+
+          @if (loadingCustomers) {
+
+            <small>
+              Loading customers...
+            </small>
+
+          }
+
+        </div>
+
+      </div>
+
+
+      <!-- FARM -->
+
+      <div class="form-section">
+
+        <div class="section-heading">
+
+          <p class="eyebrow">
+            FARM
+          </p>
+
+          <h2>
+            Select Farm
+          </h2>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="farm">
+            Farm *
+          </label>
+
+          <select
+            id="farm"
+            name="farm"
+            [(ngModel)]="selectedFarmId"
+            (ngModelChange)="onFarmChange()"
+            [disabled]="!selectedCustomerId || loadingFarms"
+            required>
+
+            <option [ngValue]="null">
+
+              @if (!selectedCustomerId) {
+                Select a customer first
+              } @else if (loadingFarms) {
+                Loading farms...
+              } @else {
+                Select a farm
+              }
+
+            </option>
+
+            @for (
+              farm of farms;
+              track farm.id
+            ) {
+
+              <option [ngValue]="farm.id">
+                {{ farm.name }}
+              </option>
+
+            }
+
+          </select>
+
+          @if (
+            selectedCustomerId &&
+            !loadingFarms &&
+            farms.length === 0
+          ) {
+
+            <small class="warning">
+              This customer has no registered farms.
+            </small>
+
+          }
+
+        </div>
+
+      </div>
+
+
+      <!-- BLOCK -->
+
+      <div class="form-section">
+
+        <div class="section-heading">
+
+          <p class="eyebrow">
+            FARM BLOCK
+          </p>
+
+          <h2>
+            Select Block
+          </h2>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="block">
+            Farm Block *
+          </label>
+
+          <select
+            id="block"
+            name="block"
+            [(ngModel)]="selectedBlockId"
+            [disabled]="!selectedFarmId || loadingBlocks"
+            required>
+
+            <option [ngValue]="null">
+
+              @if (!selectedFarmId) {
+                Select a farm first
+              } @else if (loadingBlocks) {
+                Loading blocks...
+              } @else {
+                Select a block
+              }
+
+            </option>
+
+            @for (
+              block of blocks;
+              track block.id
+            ) {
+
+              <option [ngValue]="block.id">
+
+                {{ block.name }}
+
+                @if (block.areaHectares !== null) {
+                  — {{ block.areaHectares }} ha
+                }
+
+              </option>
+
+            }
+
+          </select>
+
+          @if (
+            selectedFarmId &&
+            !loadingBlocks &&
+            blocks.length === 0
+          ) {
+
+            <small class="warning">
+              This farm has no registered blocks.
+            </small>
+
+          }
+
+        </div>
+
+      </div>
+
+
+      <!-- SERVICE -->
+
+      <div class="form-section">
+
+        <div class="section-heading">
+
+          <p class="eyebrow">
+            SERVICE
+          </p>
+
+          <h2>
+            Select Service
+          </h2>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="service">
+            Service *
+          </label>
+
+          <select
+            id="service"
+            name="service"
+            [(ngModel)]="selectedServiceId"
+            [disabled]="loadingServices"
+            required>
+
+            <option [ngValue]="null">
+
+              @if (loadingServices) {
+                Loading services...
+              } @else {
+                Select a service
+              }
+
+            </option>
+
+            @for (
+              service of services;
+              track service.id
+            ) {
+
+              <option [ngValue]="service.id">
+
+                {{ service.name }}
+
+                —
+                {{ service.category }}
+
+              </option>
+
+            }
+
+          </select>
+
+        </div>
+
+
+        @if (selectedService) {
+
+          <div class="service-preview">
+
+            <div>
+
+              <span>
+                Service
+              </span>
+
+              <strong>
+                {{ selectedService.name }}
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                Unit
+              </span>
+
+              <strong>
+                {{ selectedService.unitOfMeasurement }}
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                Standard Price
+              </span>
+
+              <strong>
+                {{ selectedService.standardPrice | number:'1.0-2' }}
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                Estimated Duration
+              </span>
+
+              <strong>
+                {{ selectedService.estimatedDurationMinutes }}
+                minutes
+              </strong>
+
+            </div>
+
+          </div>
+
+        }
+
+      </div>
+
+
+      <!-- REQUEST DETAILS -->
+
+      <div class="form-section">
+
+        <div class="section-heading">
+
+          <p class="eyebrow">
+            REQUEST DETAILS
+          </p>
+
+          <h2>
+            Schedule & Notes
+          </h2>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="requestedDate">
+            Requested Date *
+          </label>
+
+          <input
+            id="requestedDate"
+            name="requestedDate"
+            type="date"
+            [(ngModel)]="requestedDate"
+            required
+          />
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="notes">
+            Notes
+          </label>
+
+          <textarea
+            id="notes"
+            name="notes"
+            rows="5"
+            [(ngModel)]="notes"
+            placeholder="Add any additional information about this request...">
+          </textarea>
+
+        </div>
+
+      </div>
+
+
+      <!-- ACTIONS -->
+
+      <div class="form-actions">
+
+        <button
+          type="button"
+          class="secondary"
+          [disabled]="saving"
+          (click)="cancel()">
+
+          Cancel
+
+        </button>
+
+
+        <button
+          type="submit"
+          class="primary"
+          [disabled]="
+            saving ||
+            requestForm.invalid ||
+            !selectedCustomerId ||
+            !selectedFarmId ||
+            !selectedBlockId ||
+            !selectedServiceId
+          ">
+
+          @if (saving) {
+            Creating...
+          } @else {
+            Create Service Request
+          }
+
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
