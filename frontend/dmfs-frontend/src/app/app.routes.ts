@@ -19,6 +19,17 @@ export const routes: Routes = [
   },
 
   // ==============================
+  // SUPER ADMIN DASHBOARD
+  // ==============================
+
+  {
+    path: 'super-admin',
+    loadComponent: () =>
+      import('./super-admin/super-admin')
+        .then(m => m.SuperAdmin)
+  },
+
+  // ==============================
   // MANAGEMENT DASHBOARD
   // ==============================
 
@@ -28,32 +39,33 @@ export const routes: Routes = [
       import('./management/management')
         .then(m => m.Management)
   },
-   
-   {
-  path: 'management/service-catalogue',
-  loadComponent: () =>
-    import('./management/service-catalogue/service-catalogue')
-      .then(m => m.ServiceCatalogueComponent)
-  },
 
-   {
-  path: 'management/service-requests/new',
-  loadComponent: () =>
-    import('./management/service-requests/create-service-request/create-service-request')
-      .then(m => m.CreateServiceRequest)
+  {
+    path: 'management/service-catalogue',
+    loadComponent: () =>
+      import('./management/service-catalogue/service-catalogue')
+        .then(m => m.ServiceCatalogueComponent)
   },
 
   {
-  path: 'management/service-requests/:id',
-  loadComponent: () =>
-    import('./management/service-requests/service-request-details/service-request-details')
-      .then(m => m.ServiceRequestDetails)
+    path: 'management/service-requests/new',
+    loadComponent: () =>
+      import('./management/service-requests/create-service-request/create-service-request')
+        .then(m => m.CreateServiceRequest)
   },
+
   {
-  path: 'management/service-requests',
-  loadComponent: () =>
-    import('./management/service-requests/service-request-list/service-request-list')
-      .then(m => m.ServiceRequestList)
+    path: 'management/service-requests/:id',
+    loadComponent: () =>
+      import('./management/service-requests/service-request-details/service-request-details')
+        .then(m => m.ServiceRequestDetails)
+  },
+
+  {
+    path: 'management/service-requests',
+    loadComponent: () =>
+      import('./management/service-requests/service-request-list/service-request-list')
+        .then(m => m.ServiceRequestList)
   },
 
   // ==============================
@@ -80,7 +92,6 @@ export const routes: Routes = [
 
   // ==============================
   // FARM DETAILS
-  // Put this BEFORE client :id
   // ==============================
 
   {

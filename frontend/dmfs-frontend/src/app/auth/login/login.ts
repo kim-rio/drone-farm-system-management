@@ -1,4 +1,3 @@
-
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -39,6 +38,10 @@ export class Login {
 
         switch (user.role) {
 
+          case 'SUPER_ADMIN':
+            this.router.navigate(['/super-admin']);
+            break;
+
           case 'MANAGEMENT':
             this.router.navigate(['/management']);
             break;
@@ -51,10 +54,12 @@ export class Login {
             this.router.navigate(['/customer']);
             break;
 
+          case 'DRONE_OPERATOR':
           case 'OPERATOR':
             this.router.navigate(['/operator']);
             break;
 
+          case 'GEOLOGIST':
           case 'SURVEYOR':
             this.router.navigate(['/surveyor']);
             break;
@@ -64,7 +69,8 @@ export class Login {
             break;
 
           default:
-            this.router.navigate(['/']);
+            this.errorMessage = `Unsupported user role: ${user.role}`;
+            break;
         }
       },
 
