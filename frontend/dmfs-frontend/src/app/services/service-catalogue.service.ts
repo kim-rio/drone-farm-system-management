@@ -2,12 +2,14 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+export type ServiceCatalogueStatus = 'ACTIVE' | 'INACTIVE';
+
 export interface ServiceCatalogue {
   id: number;
   name: string;
   category: string;
   description: string;
-  status: 'ACTIVE' | 'INACTIVE';
+  status: ServiceCatalogueStatus;
   unitOfMeasurement: string;
   standardPrice: number;
   minimumArea: number;
@@ -16,6 +18,19 @@ export interface ServiceCatalogue {
   estimatedDurationMinutes: number;
   createdAt: string;
   updatedAt: string | null;
+}
+
+export interface CreateServiceCatalogueRequest {
+  name: string;
+  category: string;
+  description: string;
+  status: ServiceCatalogueStatus;
+  unitOfMeasurement: string;
+  standardPrice: number;
+  minimumArea: number;
+  requiredEquipment?: string;
+  requiredPersonnel?: string;
+  estimatedDurationMinutes: number;
 }
 
 @Injectable({
@@ -28,7 +43,9 @@ export class ServiceCatalogueService {
   private readonly apiUrl = '/api/service-catalogue';
 
   getServices(): Observable<ServiceCatalogue[]> {
-    return this.http.get<ServiceCatalogue[]>(this.apiUrl);
+    return this.http.get<ServiceCatalogue[]>(
+      this.apiUrl
+    );
   }
 
   getService(id: number): Observable<ServiceCatalogue> {
@@ -38,7 +55,7 @@ export class ServiceCatalogueService {
   }
 
   createService(
-    service: Omit<ServiceCatalogue, 'id' | 'createdAt' | 'updatedAt'>
+    service: CreateServiceCatalogueRequest
   ): Observable<ServiceCatalogue> {
     return this.http.post<ServiceCatalogue>(
       this.apiUrl,
@@ -48,7 +65,7 @@ export class ServiceCatalogueService {
 
   updateService(
     id: number,
-    service: Omit<ServiceCatalogue, 'id' | 'createdAt' | 'updatedAt'>
+    service: CreateServiceCatalogueRequest
   ): Observable<ServiceCatalogue> {
     return this.http.put<ServiceCatalogue>(
       `${this.apiUrl}/${id}`,
@@ -56,7 +73,9 @@ export class ServiceCatalogueService {
     );
   }
 
-  deactivateService(id: number): Observable<void> {
+  deactivateService(
+    id: number
+  ): Observable<void> {
     return this.http.delete<void>(
       `${this.apiUrl}/${id}`
     );

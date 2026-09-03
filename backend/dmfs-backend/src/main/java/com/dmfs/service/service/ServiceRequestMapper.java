@@ -1,6 +1,6 @@
 package com.dmfs.service.service;
 
-import com.dmfs.customer.entity.Customer;
+import com.dmfs.client.entity.Client;
 import com.dmfs.farm.entity.Block;
 import com.dmfs.farm.entity.Farm;
 import com.dmfs.service.dto.ServiceRequestResponse;
@@ -11,7 +11,6 @@ public class ServiceRequestMapper {
 
     private ServiceRequestMapper() {
     }
-
 
     public static ServiceRequestResponse toResponse(
             ServiceRequest request
@@ -44,55 +43,55 @@ public class ServiceRequestMapper {
 
 
         /* ==============================
-           CUSTOMER
+           CLIENT
            ============================== */
 
-        Customer customer =
+        Client client =
                 request.getCustomer();
 
-        if (customer != null) {
+        if (client != null) {
 
             ServiceRequestResponse.CustomerInfo
                     customerInfo =
                     new ServiceRequestResponse.CustomerInfo();
 
             customerInfo.setId(
-                    customer.getId()
+                    client.getId()
             );
 
             customerInfo.setCustomerCode(
-                    customer.getCustomerCode()
+                    client.getClientCode()
             );
 
             customerInfo.setType(
-                    customer.getType() != null
-                            ? customer.getType().name()
+                    client.getType() != null
+                            ? client.getType().name()
                             : null
             );
 
             customerInfo.setCompanyName(
-                    customer.getCompanyName()
+                    client.getCompanyName()
             );
 
             customerInfo.setFirstName(
-                    customer.getFirstName()
+                    client.getFirstName()
             );
 
             customerInfo.setLastName(
-                    customer.getLastName()
+                    client.getLastName()
             );
 
             customerInfo.setEmail(
-                    customer.getEmail()
+                    client.getEmail()
             );
 
             customerInfo.setPhone(
-                    customer.getPhone()
+                    client.getPhone()
             );
 
             customerInfo.setStatus(
-                    customer.getStatus() != null
-                            ? customer.getStatus().name()
+                    client.getStatus() != null
+                            ? client.getStatus().name()
                             : null
             );
 
