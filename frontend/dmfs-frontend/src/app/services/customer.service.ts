@@ -28,7 +28,7 @@ export interface CreateCustomerRequest {
   address?: string;
   identificationNumber?: string;
   tin?: string;
-  password: string;
+  password?: string;
 }
 
 @Injectable({
@@ -39,7 +39,7 @@ export class CustomerService {
   private readonly http = inject(HttpClient);
 
   private readonly apiUrl =
-    'http://localhost:8080/api/customers';
+    'http://localhost:8080/api/clients';
 
   getCustomers(): Observable<Customer[]> {
     return this.http.get<Customer[]>(
