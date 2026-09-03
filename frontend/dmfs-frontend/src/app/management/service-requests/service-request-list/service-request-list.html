@@ -186,7 +186,7 @@
               </span>
 
               <h2>
-                {{ request.serviceCatalogue?.name || 'Service' }}
+                {{ request.serviceCatalogue.name || 'Service' }}
               </h2>
 
             </div>
@@ -231,7 +231,7 @@
               </span>
 
               <strong>
-                {{ request.farm?.name || '—' }}
+                {{ request.farm.name || '—' }}
               </strong>
 
             </div>
@@ -244,7 +244,7 @@
               </span>
 
               <strong>
-                {{ request.farmBlock?.name || '—' }}
+                {{ request.farmBlock.name || '—' }}
               </strong>
 
             </div>
@@ -276,7 +276,7 @@
               </span>
 
               <strong>
-                {{ request.serviceCatalogue?.category || '—' }}
+                {{ request.serviceCatalogue.category || '—' }}
               </strong>
 
             </div>
@@ -288,7 +288,7 @@
               </span>
 
               <strong>
-                {{ request.serviceCatalogue?.unitOfMeasurement || '—' }}
+                {{ request.serviceCatalogue.unitOfMeasurement || '—' }}
               </strong>
 
             </div>
@@ -301,7 +301,7 @@
 
               <strong>
                 {{
-                  request.serviceCatalogue?.standardPrice
+                  request.serviceCatalogue.standardPrice
                   | number:'1.0-2'
                 }}
               </strong>

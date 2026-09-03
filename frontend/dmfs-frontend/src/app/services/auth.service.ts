@@ -21,7 +21,11 @@ export class AuthService {
   private readonly apiUrl =
     'http://localhost:8080/api/auth';
 
-  private currentUser: LoginResponse | null = null;
+  private readonly storageKey =
+    'dmfs_current_user';
+
+  private currentUser: LoginResponse | null =
+    this.loadStoredUser();
 
   login(
     email: string,
@@ -40,6 +44,11 @@ export class AuthService {
     ).pipe(
       tap((user) => {
         this.currentUser = user;
+
+        localStorage.setItem(
+          this.storageKey,
+          JSON.stringify(user)
+        );
       })
     );
   }
@@ -58,12 +67,53 @@ export class AuthService {
       }
     ).pipe(
       tap(() => {
-        this.currentUser = null;
+        this.clearSession();
       })
     );
   }
 
   isLoggedIn(): boolean {
     return this.currentUser !== null;
+  }
+
+  hasRole(role: string): boolean {
+    return this.currentUser?.role === role;
+  }
+
+  clearSession(): void {
+
+    this.currentUser = null;
+
+    localStorage.removeItem(
+      this.storageKey
+    );
+  }
+
+  private loadStoredUser(): LoginResponse | null {
+
+    try {
+
+      const stored =
+        localStorage.getItem(this.storageKey);
+
+      if (!stored) {
+        return null;
+      }
+
+      return JSON.parse(stored) as LoginResponse;
+
+    } catch (error) {
+
+      console.error(
+        'Failed to restore stored user session:',
+        error
+      );
+
+      localStorage.removeItem(
+        this.storageKey
+      );
+
+      return null;
+    }
   }
 }

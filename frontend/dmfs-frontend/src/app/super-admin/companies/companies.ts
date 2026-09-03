@@ -1,5 +1,17 @@
-﻿import { Component, ChangeDetectorRef, OnInit, inject } from '@angular/core';
+import {
+  Component,
+  ChangeDetectorRef,
+  OnInit,
+  inject
+} from '@angular/core';
+
 import { Router } from '@angular/router';
+
+import {
+  AuthService,
+  LoginResponse
+} from '../../services/auth.service';
+
 import {
   CompanyResponse,
   SuperAdminService
@@ -15,21 +27,33 @@ import {
 export class Companies implements OnInit {
 
   private readonly router = inject(Router);
-  private readonly service = inject(SuperAdminService);
-  private readonly cdr = inject(ChangeDetectorRef);
+
+  private readonly service =
+    inject(SuperAdminService);
+
+  private readonly authService =
+    inject(AuthService);
+
+  private readonly cdr =
+    inject(ChangeDetectorRef);
 
   companies: CompanyResponse[] = [];
 
   loading = true;
+
   error = '';
 
   sidebarOpen = true;
 
-  user = this.service['http'] ? null : null;
+  user: LoginResponse | null =
+    this.authService.getCurrentUser();
 
   totalCompanies = 0;
+
   activeCompanies = 0;
+
   suspendedCompanies = 0;
+
   expiredCompanies = 0;
 
   ngOnInit(): void {
@@ -37,35 +61,65 @@ export class Companies implements OnInit {
   }
 
   loadCompanies(): void {
+
     this.loading = true;
+
     this.error = '';
 
     this.service.getCompanies().subscribe({
+
       next: (data) => {
+
         this.companies = data;
 
-        this.totalCompanies = data.length;
+        this.totalCompanies =
+          data.length;
+
         this.activeCompanies =
-          data.filter(c => c.status === 'ACTIVE').length;
+          data.filter(
+            company =>
+              company.status === 'ACTIVE'
+          ).length;
+
         this.suspendedCompanies =
-          data.filter(c => c.status === 'SUSPENDED').length;
+          data.filter(
+            company =>
+              company.status === 'SUSPENDED'
+          ).length;
+
         this.expiredCompanies =
-          data.filter(c => c.status === 'EXPIRED').length;
+          data.filter(
+            company =>
+              company.status === 'EXPIRED'
+          ).length;
 
         this.loading = false;
+
         this.cdr.detectChanges();
       },
+
       error: (err) => {
-        console.error('Failed to load companies:', err);
-        this.error = 'Failed to load companies.';
+
+        console.error(
+          'Failed to load companies:',
+          err
+        );
+
+        this.error =
+          err?.error?.message ||
+          'Failed to load companies.';
+
         this.loading = false;
+
         this.cdr.detectChanges();
       }
+
     });
   }
 
   toggleSidebar(): void {
-    this.sidebarOpen = !this.sidebarOpen;
+    this.sidebarOpen =
+      !this.sidebarOpen;
   }
 
   navigate(route: string): void {
@@ -73,15 +127,27 @@ export class Companies implements OnInit {
   }
 
   registerCompany(): void {
-    this.router.navigate(['/super-admin/companies/register']);
+
+    this.router.navigate([
+      '/super-admin/companies/register'
+    ]);
   }
 
   viewCompany(id: number): void {
-    this.router.navigate(['/super-admin/companies', id]);
+
+    this.router.navigate([
+      '/super-admin/companies',
+      id
+    ]);
   }
 
   editCompany(id: number): void {
-    this.router.navigate(['/super-admin/companies', id, 'edit']);
+
+    this.router.navigate([
+      '/super-admin/companies',
+      id,
+      'edit'
+    ]);
   }
 
   statusClass(status: string): string {
@@ -89,6 +155,42 @@ export class Companies implements OnInit {
   }
 
   formatDate(date: string): string {
-    return new Date(date).toLocaleDateString();
+    return new Date(date)
+      .toLocaleDateString();
+  }
+
+  getInitials(): string {
+
+    if (!this.user) {
+      return 'SA';
+    }
+
+    const first =
+      this.user.firstName?.charAt(0) ?? '';
+
+    const last =
+      this.user.lastName?.charAt(0) ?? '';
+
+    return (
+      first + last
+    ).toUpperCase();
+  }
+
+  logout(): void {
+
+    this.authService.logout().subscribe({
+
+      next: () => {
+        this.router.navigate(['/login']);
+      },
+
+      error: () => {
+
+        this.authService.clearSession();
+
+        this.router.navigate(['/login']);
+      }
+
+    });
   }
 }

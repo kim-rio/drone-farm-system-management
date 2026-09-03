@@ -1,6 +1,10 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
+
+import {
+  Company,
+  CompanyService
+} from './company.service';
 
 @Component({
   selector: 'app-admin-company',
@@ -8,25 +12,60 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './company.html',
   styleUrl: './company.scss'
 })
-export class AdminCompany {
+export class AdminCompany implements OnInit {
 
   private readonly router = inject(Router);
-  private readonly authService = inject(AuthService);
+  private readonly companyService = inject(CompanyService);
 
-  user = this.authService.getCurrentUser();
-
-  company = {
-    name: 'Subscriber Company',
-    registrationNumber: 'Not available',
-    tin: 'Not available',
-    email: 'Not available',
-    phone: 'Not available',
-    country: 'Not available',
-    region: 'Not available',
-    city: 'Not available',
-    physicalAddress: 'Not available',
-    status: 'ACTIVE'
+  company: Company = {
+    id: 0,
+    name: 'Loading...',
+    registrationNumber: 'Loading...',
+    tin: null,
+    email: null,
+    phone: null,
+    country: 'Loading...',
+    region: 'Loading...',
+    city: 'Loading...',
+    physicalAddress: 'Loading...',
+    status: 'LOADING',
+    createdAt: '',
+    updatedAt: null
   };
+
+  loading = true;
+  errorMessage = '';
+
+  ngOnInit(): void {
+    this.loadCompany();
+  }
+
+  loadCompany(): void {
+
+    this.loading = true;
+    this.errorMessage = '';
+
+    this.companyService.getCompany().subscribe({
+
+      next: (company) => {
+        this.company = company;
+        this.loading = false;
+      },
+
+      error: (error) => {
+        console.error(
+          'Unable to load company information:',
+          error
+        );
+
+        this.errorMessage =
+          'Unable to load company information.';
+
+        this.loading = false;
+      }
+
+    });
+  }
 
   goBack(): void {
     this.router.navigate(['/admin']);

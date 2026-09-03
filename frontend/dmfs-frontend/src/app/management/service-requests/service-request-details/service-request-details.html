@@ -28,7 +28,7 @@
         </p>
 
         <h1>
-          {{ request.serviceCatalogue?.name || 'Service Request' }}
+          {{ request.serviceCatalogue.name || 'Service Request' }}
         </h1>
 
         <p>
@@ -194,28 +194,28 @@
             <div>
               <span>Customer Code</span>
               <strong>
-                {{ request.customer?.customerCode || '—' }}
+                {{ request.customer.customerCode || '—' }}
               </strong>
             </div>
 
             <div>
               <span>Type</span>
               <strong>
-                {{ request.customer?.type || '—' }}
+                {{ request.customer.type || '—' }}
               </strong>
             </div>
 
             <div>
               <span>Email</span>
               <strong>
-                {{ request.customer?.email || '—' }}
+                {{ request.customer.email || '—' }}
               </strong>
             </div>
 
             <div>
               <span>Phone</span>
               <strong>
-                {{ request.customer?.phone || '—' }}
+                {{ request.customer.phone || '—' }}
               </strong>
             </div>
 
@@ -245,7 +245,7 @@
             <div>
               <span>Farm</span>
               <strong>
-                {{ request.farm?.name || '—' }}
+                {{ request.farm.name || '—' }}
               </strong>
             </div>
 
@@ -253,7 +253,7 @@
               <span>Area</span>
               <strong>
                 {{
-                  request.farm?.areaHectares != null
+                  request.farm.areaHectares != null
                     ? request.farm.areaHectares + ' ha'
                     : '—'
                 }}
@@ -263,7 +263,7 @@
             <div>
               <span>Description</span>
               <strong>
-                {{ request.farm?.description || '—' }}
+                {{ request.farm.description || '—' }}
               </strong>
             </div>
 
@@ -293,7 +293,7 @@
             <div>
               <span>Block</span>
               <strong>
-                {{ request.farmBlock?.name || '—' }}
+                {{ request.farmBlock.name || '—' }}
               </strong>
             </div>
 
@@ -301,7 +301,7 @@
               <span>Area</span>
               <strong>
                 {{
-                  request.farmBlock?.areaHectares != null
+                  request.farmBlock.areaHectares != null
                     ? request.farmBlock.areaHectares + ' ha'
                     : '—'
                 }}
@@ -311,14 +311,14 @@
             <div>
               <span>Centre Latitude</span>
               <strong>
-                {{ request.farmBlock?.centerLatitude ?? '—' }}
+                {{ request.farmBlock.centerLatitude ?? '—' }}
               </strong>
             </div>
 
             <div>
               <span>Centre Longitude</span>
               <strong>
-                {{ request.farmBlock?.centerLongitude ?? '—' }}
+                {{ request.farmBlock.centerLongitude ?? '—' }}
               </strong>
             </div>
 
@@ -348,21 +348,21 @@
             <div>
               <span>Service</span>
               <strong>
-                {{ request.serviceCatalogue?.name || '—' }}
+                {{ request.serviceCatalogue.name || '—' }}
               </strong>
             </div>
 
             <div>
               <span>Category</span>
               <strong>
-                {{ request.serviceCatalogue?.category || '—' }}
+                {{ request.serviceCatalogue.category || '—' }}
               </strong>
             </div>
 
             <div>
               <span>Unit</span>
               <strong>
-                {{ request.serviceCatalogue?.unitOfMeasurement || '—' }}
+                {{ request.serviceCatalogue.unitOfMeasurement || '—' }}
               </strong>
             </div>
 
@@ -370,7 +370,7 @@
               <span>Standard Price</span>
               <strong>
                 {{
-                  request.serviceCatalogue?.standardPrice
+                  request.serviceCatalogue.standardPrice
                     | number:'1.0-2'
                 }}
               </strong>
@@ -380,7 +380,7 @@
               <span>Minimum Area</span>
               <strong>
                 {{
-                  request.serviceCatalogue?.minimumArea != null
+                  request.serviceCatalogue.minimumArea != null
                     ? request.serviceCatalogue.minimumArea + ' ha'
                     : '—'
                 }}
@@ -391,7 +391,7 @@
               <span>Estimated Duration</span>
               <strong>
                 {{
-                  request.serviceCatalogue?.estimatedDurationMinutes != null
+                  request.serviceCatalogue.estimatedDurationMinutes != null
                     ? request.serviceCatalogue.estimatedDurationMinutes + ' minutes'
                     : '—'
                 }}
