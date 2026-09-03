@@ -1,0 +1,128 @@
+<div class="page-shell">
+
+  <header class="page-header">
+
+    <div>
+      <p class="eyebrow">COMPANY ADMINISTRATION</p>
+      <h1>Company Profile</h1>
+      <p class="description">
+        View the subscriber company information associated with your account.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="secondary-button"
+      (click)="goBack()"
+    >
+      Back to Dashboard
+    </button>
+
+  </header>
+
+  <section class="status-card">
+
+    <div>
+      <p class="eyebrow">ACCOUNT STATUS</p>
+      <h2>{{ company.name }}</h2>
+    </div>
+
+    <span class="status">
+      {{ company.status }}
+    </span>
+
+  </section>
+
+  <section class="information-grid">
+
+    <article class="card">
+
+      <p class="eyebrow">COMPANY INFORMATION</p>
+
+      <div class="field">
+        <span>Company Name</span>
+        <strong>{{ company.name }}</strong>
+      </div>
+
+      <div class="field">
+        <span>Registration Number</span>
+        <strong>{{ company.registrationNumber }}</strong>
+      </div>
+
+      <div class="field">
+        <span>TIN</span>
+        <strong>{{ company.tin }}</strong>
+      </div>
+
+    </article>
+
+    <article class="card">
+
+      <p class="eyebrow">CONTACT INFORMATION</p>
+
+      <div class="field">
+        <span>Email</span>
+        <strong>{{ company.email }}</strong>
+      </div>
+
+      <div class="field">
+        <span>Phone</span>
+        <strong>{{ company.phone }}</strong>
+      </div>
+
+    </article>
+
+    <article class="card full">
+
+      <p class="eyebrow">LOCATION</p>
+
+      <div class="location-grid">
+
+        <div class="field">
+          <span>Country</span>
+          <strong>{{ company.country }}</strong>
+        </div>
+
+        <div class="field">
+          <span>Region</span>
+          <strong>{{ company.region }}</strong>
+        </div>
+
+        <div class="field">
+          <span>City</span>
+          <strong>{{ company.city }}</strong>
+        </div>
+
+        <div class="field">
+          <span>Physical Address</span>
+          <strong>{{ company.physicalAddress }}</strong>
+        </div>
+
+      </div>
+
+    </article>
+
+  </section>
+
+  <section class="notice">
+
+    <div>
+      <strong>Company information is managed by the platform administrator.</strong>
+
+      <p>
+        Contact the platform administrator when registered company information
+        needs to be changed.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="primary-button"
+      (click)="openStaff()"
+    >
+      Manage Staff
+    </button>
+
+  </section>
+
+</div>

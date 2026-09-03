@@ -7,28 +7,15 @@ export interface ServiceCatalogue {
   name: string;
   category: string;
   description: string;
-  status: string;
+  status: 'ACTIVE' | 'INACTIVE';
   unitOfMeasurement: string;
   standardPrice: number;
   minimumArea: number;
   requiredEquipment?: string;
   requiredPersonnel?: string;
   estimatedDurationMinutes: number;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-export interface CreateServiceCatalogueRequest {
-  name: string;
-  category: string;
-  description: string;
-  status?: string;
-  unitOfMeasurement: string;
-  standardPrice: number;
-  minimumArea: number;
-  requiredEquipment?: string;
-  requiredPersonnel?: string;
-  estimatedDurationMinutes: number;
+  createdAt: string;
+  updatedAt: string | null;
 }
 
 @Injectable({
@@ -38,60 +25,40 @@ export class ServiceCatalogueService {
 
   private readonly http = inject(HttpClient);
 
-  private readonly apiUrl =
-    'http://localhost:8080/api/service-catalogue';
+  private readonly apiUrl = '/api/service-catalogue';
 
   getServices(): Observable<ServiceCatalogue[]> {
-    return this.http.get<ServiceCatalogue[]>(
-      this.apiUrl,
-      {
-        withCredentials: true
-      }
-    );
+    return this.http.get<ServiceCatalogue[]>(this.apiUrl);
   }
 
   getService(id: number): Observable<ServiceCatalogue> {
     return this.http.get<ServiceCatalogue>(
-      `${this.apiUrl}/${id}`,
-      {
-        withCredentials: true
-      }
+      `${this.apiUrl}/${id}`
     );
   }
 
   createService(
-    service: CreateServiceCatalogueRequest
+    service: Omit<ServiceCatalogue, 'id' | 'createdAt' | 'updatedAt'>
   ): Observable<ServiceCatalogue> {
     return this.http.post<ServiceCatalogue>(
       this.apiUrl,
-      service,
-      {
-        withCredentials: true
-      }
+      service
     );
   }
 
   updateService(
     id: number,
-    service: CreateServiceCatalogueRequest
+    service: Omit<ServiceCatalogue, 'id' | 'createdAt' | 'updatedAt'>
   ): Observable<ServiceCatalogue> {
     return this.http.put<ServiceCatalogue>(
       `${this.apiUrl}/${id}`,
-      service,
-      {
-        withCredentials: true
-      }
+      service
     );
   }
 
-  deactivateService(
-    id: number
-  ): Observable<void> {
+  deactivateService(id: number): Observable<void> {
     return this.http.delete<void>(
-      `${this.apiUrl}/${id}`,
-      {
-        withCredentials: true
-      }
+      `${this.apiUrl}/${id}`
     );
   }
 }

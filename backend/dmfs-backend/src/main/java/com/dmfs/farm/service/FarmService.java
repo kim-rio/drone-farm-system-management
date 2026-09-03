@@ -1,7 +1,7 @@
 package com.dmfs.farm.service;
 
-import com.dmfs.customer.entity.Customer;
-import com.dmfs.customer.repository.CustomerRepository;
+import com.dmfs.client.entity.Client;
+import com.dmfs.client.repository.ClientRepository;
 import com.dmfs.farm.entity.Farm;
 import com.dmfs.farm.repository.FarmRepository;
 import org.locationtech.jts.geom.Coordinate;
@@ -16,7 +16,7 @@ import java.util.List;
 public class FarmService {
 
     private final FarmRepository farmRepository;
-    private final CustomerRepository customerRepository;
+    private final ClientRepository clientRepository;
 
     private final GeometryFactory geometryFactory =
             new GeometryFactory(
@@ -26,10 +26,10 @@ public class FarmService {
 
     public FarmService(
             FarmRepository farmRepository,
-            CustomerRepository customerRepository
+            ClientRepository clientRepository
     ) {
         this.farmRepository = farmRepository;
-        this.customerRepository = customerRepository;
+        this.clientRepository = clientRepository;
     }
 
     public Farm createFarm(
@@ -41,11 +41,11 @@ public class FarmService {
             Double areaHectares
     ) {
 
-        Customer customer =
-                customerRepository.findById(customerId)
+        Client customer =
+                clientRepository.findById(customerId)
                         .orElseThrow(() ->
                                 new RuntimeException(
-                                        "Customer not found"
+                                        "Client not found"
                                 )
                         );
 

@@ -1,0 +1,358 @@
+<div class="page">
+
+  <!-- =================================
+       PAGE HEADER
+       ================================= -->
+
+  <div class="page-header">
+
+    <div class="title-area">
+
+      <p class="eyebrow">
+        DRONE MANAGEMENT
+      </p>
+
+      <h1>
+        Register Drone
+      </h1>
+
+      <p class="description">
+        Add a new drone to the fleet and configure its basic information.
+      </p>
+
+    </div>
+
+    <button
+      type="button"
+      class="back-button"
+      (click)="cancel()"
+    >
+      ← Back to Drones
+    </button>
+
+  </div>
+
+
+  <!-- =================================
+       ERROR
+       ================================= -->
+
+  @if (errorMessage) {
+
+    <div class="alert">
+      {{ errorMessage }}
+    </div>
+
+  }
+
+
+  <!-- =================================
+       FORM
+       ================================= -->
+
+  <form
+    class="drone-form"
+    [formGroup]="droneForm"
+    (ngSubmit)="submit()"
+  >
+
+
+    <!-- =================================
+         BASIC INFORMATION
+         ================================= -->
+
+    <section class="form-section">
+
+      <div class="section-heading">
+
+        <div>
+
+          <p class="section-eyebrow">
+            BASIC INFORMATION
+          </p>
+
+          <h2>
+            Drone details
+          </h2>
+
+          <p>
+            Enter the identification and classification information.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="form-grid">
+
+
+        <!-- NAME -->
+
+        <div class="field">
+
+          <label for="name">
+            Drone Name
+            <span>*</span>
+          </label>
+
+          <input
+            id="name"
+            type="text"
+            formControlName="name"
+            placeholder="e.g. Survey Drone 01"
+            autocomplete="off"
+          />
+
+          @if (
+            name.invalid &&
+            name.touched
+          ) {
+
+            <small>
+              Drone name is required.
+            </small>
+
+          }
+
+        </div>
+
+
+        <!-- SERIAL NUMBER -->
+
+        <div class="field">
+
+          <label for="serialNumber">
+            Serial Number
+            <span>*</span>
+          </label>
+
+          <input
+            id="serialNumber"
+            type="text"
+            formControlName="serialNumber"
+            placeholder="e.g. DJI-2026-001"
+            autocomplete="off"
+          />
+
+          @if (
+            serialNumber.invalid &&
+            serialNumber.touched
+          ) {
+
+            <small>
+              Serial number is required.
+            </small>
+
+          }
+
+        </div>
+
+
+        <!-- MANUFACTURER -->
+
+        <div class="field">
+
+          <label for="manufacturer">
+            Manufacturer
+          </label>
+
+          <input
+            id="manufacturer"
+            type="text"
+            formControlName="manufacturer"
+            placeholder="e.g. DJI"
+            autocomplete="off"
+          />
+
+        </div>
+
+
+        <!-- MODEL -->
+
+        <div class="field">
+
+          <label for="model">
+            Model
+          </label>
+
+          <input
+            id="model"
+            type="text"
+            formControlName="model"
+            placeholder="e.g. Matrice 350 RTK"
+            autocomplete="off"
+          />
+
+        </div>
+
+
+        <!-- DRONE TYPE -->
+
+        <div class="field">
+
+          <label for="droneType">
+            Drone Type
+            <span>*</span>
+          </label>
+
+          <select
+            id="droneType"
+            formControlName="droneType"
+          >
+
+            <option value="">
+              Select drone type
+            </option>
+
+            <option value="SURVEY">
+              Survey
+            </option>
+
+            <option value="MAPPING">
+              Mapping
+            </option>
+
+            <option value="SPRAYING">
+              Spraying
+            </option>
+
+            <option value="MONITORING">
+              Monitoring
+            </option>
+
+            <option value="MULTIPURPOSE">
+              Multipurpose
+            </option>
+
+          </select>
+
+          @if (
+            droneType.invalid &&
+            droneType.touched
+          ) {
+
+            <small>
+              Drone type is required.
+            </small>
+
+          }
+
+        </div>
+
+
+        <!-- PURCHASE DATE -->
+
+        <div class="field">
+
+          <label for="purchaseDate">
+            Purchase Date
+          </label>
+
+          <input
+            id="purchaseDate"
+            type="date"
+            formControlName="purchaseDate"
+          />
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================
+         INITIAL STATUS
+         ================================= -->
+
+    <section class="form-section">
+
+      <div class="section-heading">
+
+        <div>
+
+          <p class="section-eyebrow">
+            OPERATIONAL STATUS
+          </p>
+
+          <h2>
+            Initial status
+          </h2>
+
+          <p>
+            Newly registered drones are automatically marked as available.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="status-preview">
+
+        <div class="status-icon">
+          DR
+        </div>
+
+        <div>
+
+          <strong>
+            Available
+          </strong>
+
+          <span>
+            This drone can be assigned to an operation.
+          </span>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================
+         ACTIONS
+         ================================= -->
+
+    <div class="form-actions">
+
+      <button
+        type="button"
+        class="secondary"
+        (click)="cancel()"
+        [disabled]="submitting"
+      >
+        Cancel
+      </button>
+
+
+      <button
+        type="submit"
+        class="primary"
+        [disabled]="submitting"
+      >
+
+        @if (submitting) {
+
+          <span>
+            Registering...
+          </span>
+
+        } @else {
+
+          <span>
+            Register Drone
+          </span>
+
+        }
+
+      </button>
+
+    </div>
+
+
+  </form>
+
+</div>

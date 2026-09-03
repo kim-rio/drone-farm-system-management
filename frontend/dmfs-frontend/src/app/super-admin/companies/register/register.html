@@ -1,0 +1,494 @@
+<div class="register-page">
+
+  <aside class="sidebar">
+
+    <div class="brand">
+      <div class="brand-mark">DM</div>
+
+      <div class="brand-text">
+        <strong>DMFS</strong>
+        <span>PLATFORM ADMIN</span>
+      </div>
+    </div>
+
+    <nav class="navigation">
+
+      <button
+        type="button"
+        class="nav-item"
+        (click)="goToDashboard()"
+      >
+        <span class="nav-indicator"></span>
+        <span>Dashboard</span>
+      </button>
+
+      <button
+        type="button"
+        class="nav-item active"
+        (click)="cancel()"
+      >
+        <span class="nav-indicator"></span>
+        <span>Companies</span>
+      </button>
+
+    </nav>
+
+    <div class="sidebar-bottom">
+
+      <div class="account">
+        <div class="account-avatar">SA</div>
+
+        <div class="account-details">
+          <strong>Super Admin</strong>
+          <span>Super Admin Account</span>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="logout"
+        (click)="logout()"
+      >
+        <span class="logout-circle">?</span>
+        <span class="logout-text">Logout</span>
+      </button>
+
+    </div>
+
+  </aside>
+
+  <main class="main-content">
+
+    <header class="topbar">
+
+      <button
+        type="button"
+        class="back-button"
+        (click)="cancel()"
+      >
+        ?
+      </button>
+
+      <div class="top-user">
+        <div class="top-avatar">SA</div>
+
+        <div class="top-user-details">
+          <strong>Super Admin</strong>
+          <span>SUPER ADMIN</span>
+        </div>
+      </div>
+
+    </header>
+
+    <section class="page">
+
+      <div class="page-header">
+
+        <div>
+          <p class="eyebrow">SUPER ADMIN PORTAL</p>
+
+          <h2>Register Company</h2>
+
+          <p class="description">
+            Create a subscriber company and its initial company administrator.
+          </p>
+        </div>
+
+      </div>
+
+      @if (error) {
+        <div class="error-banner">
+          <span>{{ error }}</span>
+        </div>
+      }
+
+      <form
+        class="registration-form"
+        [formGroup]="companyForm"
+        (ngSubmit)="submit()"
+      >
+
+        <!-- COMPANY INFORMATION -->
+
+        <section class="form-card">
+
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">STEP 01</p>
+              <h3>Company Information</h3>
+              <p>
+                Basic legal and contact information for the subscriber company.
+              </p>
+            </div>
+          </div>
+
+          <div
+            class="form-grid"
+            formGroupName="company"
+          >
+
+            <div class="field field-wide">
+
+              <label for="companyName">
+                Company Name
+                <span>*</span>
+              </label>
+
+              <input
+                id="companyName"
+                type="text"
+                formControlName="name"
+                placeholder="Enter company name"
+              />
+
+              @if (fieldInvalid(company.controls.name)) {
+                <small>Company name is required.</small>
+              }
+
+            </div>
+
+            <div class="field">
+
+              <label for="registrationNumber">
+                Registration Number
+                <span>*</span>
+              </label>
+
+              <input
+                id="registrationNumber"
+                type="text"
+                formControlName="registrationNumber"
+                placeholder="Enter registration number"
+              />
+
+              @if (fieldInvalid(company.controls.registrationNumber)) {
+                <small>Registration number is required.</small>
+              }
+
+            </div>
+
+            <div class="field">
+
+              <label for="tin">
+                TIN
+              </label>
+
+              <input
+                id="tin"
+                type="text"
+                formControlName="tin"
+                placeholder="Enter TIN"
+              />
+
+            </div>
+
+            <div class="field">
+
+              <label for="companyEmail">
+                Company Email
+                <span>*</span>
+              </label>
+
+              <input
+                id="companyEmail"
+                type="email"
+                formControlName="email"
+                placeholder="company@example.com"
+              />
+
+              @if (fieldInvalid(company.controls.email)) {
+                <small>
+                  Enter a valid company email.
+                </small>
+              }
+
+            </div>
+
+            <div class="field">
+
+              <label for="phone">
+                Phone Number
+                <span>*</span>
+              </label>
+
+              <input
+                id="phone"
+                type="tel"
+                formControlName="phone"
+                placeholder="+255..."
+              />
+
+              @if (fieldInvalid(company.controls.phone)) {
+                <small>Phone number is required.</small>
+              }
+
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- LOCATION -->
+
+        <section class="form-card">
+
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">STEP 02</p>
+              <h3>Location</h3>
+              <p>
+                Registered physical location of the subscriber company.
+              </p>
+            </div>
+          </div>
+
+          <div
+            class="form-grid"
+            formGroupName="location"
+          >
+
+            <div class="field">
+
+              <label for="country">
+                Country
+                <span>*</span>
+              </label>
+
+              <input
+                id="country"
+                type="text"
+                formControlName="country"
+                placeholder="Enter country"
+              />
+
+              @if (fieldInvalid(location.controls.country)) {
+                <small>Country is required.</small>
+              }
+
+            </div>
+
+            <div class="field">
+
+              <label for="region">
+                Region
+                <span>*</span>
+              </label>
+
+              <input
+                id="region"
+                type="text"
+                formControlName="region"
+                placeholder="Enter region"
+              />
+
+              @if (fieldInvalid(location.controls.region)) {
+                <small>Region is required.</small>
+              }
+
+            </div>
+
+            <div class="field">
+
+              <label for="city">
+                City
+                <span>*</span>
+              </label>
+
+              <input
+                id="city"
+                type="text"
+                formControlName="city"
+                placeholder="Enter city"
+              />
+
+              @if (fieldInvalid(location.controls.city)) {
+                <small>City is required.</small>
+              }
+
+            </div>
+
+            <div class="field field-wide">
+
+              <label for="physicalAddress">
+                Physical Address
+                <span>*</span>
+              </label>
+
+              <textarea
+                id="physicalAddress"
+                rows="3"
+                formControlName="physicalAddress"
+                placeholder="Enter physical address"
+              ></textarea>
+
+              @if (fieldInvalid(location.controls.physicalAddress)) {
+                <small>Physical address is required.</small>
+              }
+
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- INITIAL ADMIN -->
+
+        <section class="form-card">
+
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">STEP 03</p>
+              <h3>Initial Company Admin</h3>
+              <p>
+                Create the first administrator who will manage this company.
+              </p>
+            </div>
+          </div>
+
+          <div
+            class="form-grid"
+            formGroupName="admin"
+          >
+
+            <div class="field">
+
+              <label for="firstName">
+                First Name
+                <span>*</span>
+              </label>
+
+              <input
+                id="firstName"
+                type="text"
+                formControlName="firstName"
+                placeholder="Enter first name"
+              />
+
+              @if (fieldInvalid(admin.controls.firstName)) {
+                <small>First name is required.</small>
+              }
+
+            </div>
+
+            <div class="field">
+
+              <label for="lastName">
+                Last Name
+                <span>*</span>
+              </label>
+
+              <input
+                id="lastName"
+                type="text"
+                formControlName="lastName"
+                placeholder="Enter last name"
+              />
+
+              @if (fieldInvalid(admin.controls.lastName)) {
+                <small>Last name is required.</small>
+              }
+
+            </div>
+
+            <div class="field field-wide">
+
+              <label for="adminEmail">
+                Admin Email
+                <span>*</span>
+              </label>
+
+              <input
+                id="adminEmail"
+                type="email"
+                formControlName="email"
+                placeholder="admin@company.com"
+              />
+
+              @if (fieldInvalid(admin.controls.email)) {
+                <small>Enter a valid admin email.</small>
+              }
+
+            </div>
+
+            <div class="field">
+
+              <label for="password">
+                Password
+                <span>*</span>
+              </label>
+
+              <input
+                id="password"
+                type="password"
+                formControlName="password"
+                placeholder="Minimum 8 characters"
+              />
+
+              @if (fieldInvalid(admin.controls.password)) {
+                <small>
+                  Password must be at least 8 characters.
+                </small>
+              }
+
+            </div>
+
+            <div class="field">
+
+              <label for="confirmPassword">
+                Confirm Password
+                <span>*</span>
+              </label>
+
+              <input
+                id="confirmPassword"
+                type="password"
+                formControlName="confirmPassword"
+                placeholder="Repeat password"
+              />
+
+              @if (passwordsDoNotMatch()) {
+                <small>
+                  Passwords do not match.
+                </small>
+              }
+
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- ACTIONS -->
+
+        <div class="form-actions">
+
+          <button
+            type="button"
+            class="cancel-button"
+            (click)="cancel()"
+            [disabled]="submitting"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            class="submit-button"
+            [disabled]="submitting"
+          >
+            @if (submitting) {
+              <span>Creating Company...</span>
+            } @else {
+              <span>Create Company</span>
+            }
+          </button>
+
+        </div>
+
+      </form>
+
+    </section>
+
+  </main>
+
+</div>

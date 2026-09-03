@@ -1,0 +1,633 @@
+﻿/* =================================
+   PAGE
+   ================================= */
+
+.page {
+  width: 100%;
+  max-width: 1550px;
+
+  margin: auto;
+
+  padding: 35px 40px 55px;
+}
+
+
+/* =================================
+   PAGE HEADER
+   ================================= */
+
+.page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+
+  gap: 25px;
+
+  margin-bottom: 30px;
+}
+
+.title-area {
+  min-width: 0;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+
+  color: #888;
+
+  font-size: 8px;
+  font-weight: 700;
+
+  letter-spacing: 1px;
+}
+
+.page-header h1 {
+  margin: 0;
+
+  font-size: 30px;
+  font-weight: 700;
+
+  letter-spacing: -1px;
+}
+
+.description {
+  margin: 6px 0 0;
+
+  color: #8d8d8d;
+
+  font-size: 11px;
+}
+
+
+/* =================================
+   PRIMARY BUTTON
+   ================================= */
+
+.primary {
+  padding: 10px 16px;
+
+  flex-shrink: 0;
+
+  border: 1px solid #111;
+  border-radius: 999px;
+
+  background: #111;
+  color: #fff;
+
+  font-size: 9px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background .2s ease,
+    color .2s ease,
+    transform .2s ease;
+}
+
+.primary:hover {
+  background: #fff;
+  color: #111;
+
+  transform: translateY(-1px);
+}
+
+.primary:active {
+  transform: translateY(0);
+}
+
+
+/* =================================
+   STATES
+   ================================= */
+
+.state,
+.empty,
+.alert {
+  width: 100%;
+
+  padding: 45px 25px;
+
+  border: 1px solid #e5e5e3;
+  border-radius: 10px;
+
+  background: #fff;
+
+  text-align: center;
+}
+
+
+/* =================================
+   LOADING
+   ================================= */
+
+.state-title {
+  color: #333;
+
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.state-description {
+  margin-top: 6px;
+
+  color: #999;
+
+  font-size: 9px;
+}
+
+
+/* =================================
+   ERROR
+   ================================= */
+
+.alert {
+  border-color: #dededc;
+
+  color: #555;
+}
+
+.alert strong {
+  display: block;
+
+  font-size: 11px;
+}
+
+.alert p {
+  margin: 6px 0 15px;
+
+  color: #999;
+
+  font-size: 9px;
+}
+
+.retry-button {
+  padding: 8px 14px;
+
+  border: 1px solid #111;
+  border-radius: 999px;
+
+  background: #fff;
+  color: #111;
+
+  font-size: 9px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background .2s ease,
+    color .2s ease;
+}
+
+.retry-button:hover {
+  background: #111;
+  color: #fff;
+}
+
+
+/* =================================
+   EMPTY STATE
+   ================================= */
+
+.empty-icon {
+  width: 48px;
+  height: 48px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin: 0 auto 15px;
+
+  border-radius: 10px;
+
+  background: #111;
+  color: #fff;
+
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.empty h2 {
+  margin: 0;
+
+  font-size: 17px;
+  font-weight: 650;
+}
+
+.empty p {
+  margin: 7px 0 20px;
+
+  color: #999;
+
+  font-size: 10px;
+}
+
+
+/* =================================
+   DRONE SECTION
+   ================================= */
+
+.drone-section {
+  width: 100%;
+}
+
+.section-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  margin-bottom: 13px;
+}
+
+.section-header h2 {
+  margin: 0;
+
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.drone-count {
+  padding: 5px 9px;
+
+  border: 1px solid #dededc;
+  border-radius: 999px;
+
+  background: #fff;
+  color: #666;
+
+  font-size: 8px;
+  font-weight: 600;
+}
+
+
+/* =================================
+   DRONE GRID
+   ================================= */
+
+.drone-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 12px;
+}
+
+
+/* =================================
+   DRONE CARD
+   ================================= */
+
+.drone-card {
+  min-width: 0;
+
+  padding: 20px;
+
+  background: #fff;
+
+  border: 1px solid #e5e5e3;
+  border-radius: 10px;
+
+  cursor: pointer;
+
+  outline: none;
+
+  transition:
+    border-color .2s ease,
+    transform .2s ease,
+    box-shadow .2s ease;
+}
+
+.drone-card:hover {
+  border-color: #cfcfcd;
+
+  transform: translateY(-2px);
+
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .05);
+}
+
+.drone-card:focus-visible {
+  border-color: #111;
+
+  box-shadow: 0 0 0 2px #111;
+}
+
+
+/* =================================
+   DRONE TOP
+   ================================= */
+
+.drone-top {
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  margin-bottom: 20px;
+}
+
+.drone-icon {
+  width: 43px;
+  height: 43px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 9px;
+
+  background: #111;
+  color: #fff;
+
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.drone-heading {
+  min-width: 0;
+}
+
+.drone-heading h2 {
+  margin: 0;
+
+  overflow: hidden;
+
+  font-size: 13px;
+  font-weight: 650;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.serial {
+  display: block;
+
+  margin-top: 4px;
+
+  overflow: hidden;
+
+  color: #999;
+
+  font-size: 8px;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+/* =================================
+   DRONE INFORMATION
+   ================================= */
+
+.drone-info {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 13px;
+
+  padding: 15px 0;
+
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+}
+
+.info-item {
+  min-width: 0;
+}
+
+.info-item > span {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: #999;
+
+  font-size: 8px;
+}
+
+.info-item > strong {
+  display: block;
+
+  overflow: hidden;
+
+  font-size: 9px;
+
+  font-weight: 600;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+/* =================================
+   STATUS
+   ================================= */
+
+.status {
+  display: inline-block;
+
+  max-width: 100%;
+
+  padding: 4px 7px;
+
+  border: 1px solid #dededc;
+  border-radius: 999px;
+
+  font-size: 7px !important;
+
+  text-transform: uppercase;
+}
+
+.status.available {
+  background: #f5f5f3;
+  color: #222;
+}
+
+.status.assigned {
+  background: #eeeeec;
+  color: #444;
+}
+
+.status.in-flight {
+  background: #e8e8e6;
+  color: #111;
+}
+
+.status.damaged {
+  background: #f1f1ef;
+  color: #555;
+}
+
+.status.retired {
+  background: #fafafa;
+  color: #999;
+}
+
+
+/* =================================
+   DRONE FOOTER
+   ================================= */
+
+.drone-footer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+
+  gap: 15px;
+
+  margin-top: 15px;
+}
+
+.drone-footer > div {
+  min-width: 0;
+}
+
+.drone-footer > div > span {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: #999;
+
+  font-size: 8px;
+}
+
+.drone-footer strong {
+  display: block;
+
+  overflow: hidden;
+
+  font-size: 8px;
+
+  font-weight: 600;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+/* =================================
+   VIEW
+   ================================= */
+
+.view {
+  flex-shrink: 0;
+
+  color: #555;
+
+  font-size: 9px;
+  font-weight: 600;
+
+  white-space: nowrap;
+}
+
+.drone-card:hover .view {
+  color: #111;
+}
+
+
+/* =================================
+   TABLET
+   ================================= */
+
+@media (max-width: 1150px) {
+
+  .page {
+    padding-left: 28px;
+    padding-right: 28px;
+  }
+
+  .drone-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+}
+
+
+/* =================================
+   SMALL SCREEN
+   ================================= */
+
+@media (max-width: 800px) {
+
+  .page-header {
+    align-items: flex-start;
+
+    flex-direction: column;
+  }
+
+  .page-header .primary {
+    width: auto;
+  }
+
+}
+
+
+/* =================================
+   MOBILE
+   ================================= */
+
+@media (max-width: 700px) {
+
+  .page {
+    padding: 25px 18px 35px;
+  }
+
+  .page-header h1 {
+    font-size: 27px;
+  }
+
+  .page-header .primary {
+    width: 100%;
+  }
+
+  .section-header {
+    align-items: flex-start;
+
+    flex-direction: column;
+
+    gap: 8px;
+  }
+
+  .drone-grid {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+
+/* =================================
+   SMALL PHONE
+   ================================= */
+
+@media (max-width: 390px) {
+
+  .page {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .drone-info {
+    gap: 10px;
+  }
+
+  .drone-card {
+    padding: 16px;
+  }
+
+  .drone-footer {
+    align-items: flex-start;
+
+    flex-direction: column;
+  }
+
+}

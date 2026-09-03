@@ -56,10 +56,6 @@ export class Management {
       route: '/management/surveys'
     },
     {
-      label: 'Field Operations',
-      route: '/management/operations'
-    },
-    {
       label: 'Data Analysis',
       route: '/management/analysis'
     },
@@ -101,28 +97,13 @@ export class Management {
   dataAnalysisProgress = 0;
   farmProgress = 0;
 
-
-  /* ==============================
-     SIDEBAR
-     ============================== */
-
   toggleSidebar(): void {
     this.sidebarOpen = !this.sidebarOpen;
   }
 
-
-  /* ==============================
-     NAVIGATION
-     ============================== */
-
   navigate(route: string): void {
     this.router.navigate([route]);
   }
-
-
-  /* ==============================
-     QUICK ACTIONS
-     ============================== */
 
   registerClient(): void {
     this.router.navigate(['/management/clients/register']);
@@ -132,22 +113,11 @@ export class Management {
     this.router.navigate(['/management/surveys/new']);
   }
 
-
-  /* ==============================
-     SETTINGS
-     ============================== */
-
   openSettings(): void {
     this.router.navigate(['/management/settings']);
   }
 
-
-  /* ==============================
-     LOGOUT
-     ============================== */
-
   logout(): void {
-
     this.authService.logout().subscribe({
       next: () => {
         this.router.navigate(['/login']);
@@ -156,16 +126,9 @@ export class Management {
         this.router.navigate(['/login']);
       }
     });
-
   }
 
-
-  /* ==============================
-     USER INITIALS
-     ============================== */
-
   getInitials(): string {
-
     if (!this.user) {
       return 'M';
     }
@@ -179,13 +142,7 @@ export class Management {
     return (first + last).toUpperCase();
   }
 
-
-  /* ==============================
-     CIRCLE PROGRESS
-     ============================== */
-
   getProgressOffset(progress: number): number {
-
     const circumference = 301.59;
 
     return circumference -

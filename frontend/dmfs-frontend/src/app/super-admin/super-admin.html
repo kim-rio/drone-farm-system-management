@@ -1,0 +1,580 @@
+﻿<div
+  class="dashboard"
+  [class.sidebar-open]="sidebarOpen"
+>
+
+  <aside class="sidebar">
+
+    <div class="brand">
+      <div class="brand-mark">DM</div>
+
+      <div class="brand-text">
+        <strong>DMFS</strong>
+        <span>PLATFORM ADMIN</span>
+      </div>
+    </div>
+
+    <nav class="navigation">
+      @for (
+        item of menuItems;
+        track item.route
+      ) {
+        <button
+          type="button"
+          class="nav-item"
+          [class.active]="item.route === '/super-admin'"
+          (click)="navigate(item.route)"
+        >
+          <span class="nav-indicator"></span>
+          <span>{{ item.label }}</span>
+        </button>
+      }
+    </nav>
+
+    <div class="sidebar-bottom">
+
+      <button
+        type="button"
+        class="account"
+      >
+        <div class="account-avatar">
+          {{ getInitials() }}
+        </div>
+
+        <div class="account-details">
+          <strong>
+            {{ user?.firstName }} {{ user?.lastName }}
+          </strong>
+
+          <span>Super Admin Account</span>
+        </div>
+      </button>
+
+      <button
+        type="button"
+        class="logout"
+        (click)="logout()"
+      >
+        <span class="logout-circle">↪</span>
+        <span class="logout-text">Logout</span>
+      </button>
+
+    </div>
+
+  </aside>
+
+  <main class="main-content">
+
+    <header class="topbar">
+
+      <div class="topbar-left">
+
+        @if (!sidebarOpen) {
+          <button
+            type="button"
+            class="open-menu-button"
+            (click)="toggleSidebar()"
+            aria-label="Open navigation"
+          >
+            ☰
+          </button>
+        }
+
+      </div>
+
+      <div class="topbar-right">
+
+        <div class="top-user">
+
+          <div class="top-avatar">
+            {{ getInitials() }}
+          </div>
+
+          <div class="top-user-details">
+            <strong>
+              {{ user?.firstName }} {{ user?.lastName }}
+            </strong>
+
+            <span>SUPER ADMIN</span>
+          </div>
+
+        </div>
+
+      </div>
+
+    </header>
+
+    <section class="page">
+
+      <div class="page-header">
+
+        <div class="title-area">
+
+          <p class="eyebrow">
+            SUPER ADMIN PORTAL
+          </p>
+
+          <h2>Dashboard</h2>
+
+          <p class="description">
+            Overview of subscriber companies and platform users.
+          </p>
+
+        </div>
+
+        <div class="quick-actions">
+
+          <button
+            type="button"
+            class="action-pill"
+            (click)="registerCompany()"
+          >
+            <span class="plus">+</span>
+            <span>Register Company</span>
+          </button>
+
+          <button
+            type="button"
+            class="action-pill"
+            (click)="viewCompanies()"
+          >
+            <span>View Companies</span>
+          </button>
+
+        </div>
+
+      </div>
+
+      @if (loading) {
+
+        <div class="state-message">
+          Loading dashboard...
+        </div>
+
+      } @else if (error) {
+
+        <div class="state-message error">
+
+          <span>{{ error }}</span>
+
+          <button
+            type="button"
+            (click)="loadDashboard()"
+          >
+            Retry
+          </button>
+
+        </div>
+
+      } @else {
+
+        <section class="stats">
+
+          @for (
+            stat of dashboardStats;
+            track stat.title
+          ) {
+
+            <article class="stat-card">
+
+              <span class="stat-label">
+                {{ stat.title }}
+              </span>
+
+              <strong class="stat-number">
+                {{ stat.value }}
+              </strong>
+
+              <span class="stat-description">
+                {{ stat.description }}
+              </span>
+
+            </article>
+
+          }
+
+        </section>
+
+        <section class="section">
+
+          <div class="section-heading">
+
+            <div>
+              <p class="eyebrow">
+                PLATFORM
+              </p>
+
+              <h3>Platform Activity</h3>
+            </div>
+
+          </div>
+
+          <div class="progress-grid">
+
+            <article class="progress-card">
+
+              <div class="progress-header">
+
+                <div>
+                  <h4>Company Status</h4>
+
+                  <p>
+                    Active companies across the platform
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  class="view-button"
+                  (click)="viewCompanies()"
+                >
+                  View
+                </button>
+
+              </div>
+
+              <div class="circle-container">
+
+                <svg
+                  class="progress-circle"
+                  viewBox="0 0 120 120"
+                >
+                  <circle
+                    class="circle-background"
+                    cx="60"
+                    cy="60"
+                    r="48"
+                  ></circle>
+
+                  <circle
+                    class="circle-progress"
+                    cx="60"
+                    cy="60"
+                    r="48"
+                    [style.stroke-dashoffset]="
+                      getProgressOffset(activeCompanyProgress)
+                    "
+                  ></circle>
+                </svg>
+
+                <div class="circle-value">
+
+                  <strong>
+                    {{ activeCompanyProgress }}%
+                  </strong>
+
+                  <span>Active</span>
+
+                </div>
+
+              </div>
+
+              <div class="progress-labels">
+
+                <div>
+                  <span>Active</span>
+                  <strong>
+                    {{ dashboardStats[1].value }}
+                  </strong>
+                </div>
+
+                <div>
+                  <span>Suspended</span>
+                  <strong>
+                    {{ dashboardStats[2].value }}
+                  </strong>
+                </div>
+
+                <div>
+                  <span>Expired</span>
+                  <strong>
+                    {{ dashboardStats[3].value }}
+                  </strong>
+                </div>
+
+              </div>
+
+            </article>
+
+            <article class="progress-card">
+
+              <div class="progress-header">
+
+                <div>
+                  <h4>Platform Users</h4>
+
+                  <p>
+                    Active users across all companies
+                  </p>
+                </div>
+
+              </div>
+
+              <div class="circle-container">
+
+                <svg
+                  class="progress-circle"
+                  viewBox="0 0 120 120"
+                >
+                  <circle
+                    class="circle-background"
+                    cx="60"
+                    cy="60"
+                    r="48"
+                  ></circle>
+
+                  <circle
+                    class="circle-progress"
+                    cx="60"
+                    cy="60"
+                    r="48"
+                    [style.stroke-dashoffset]="
+                      getProgressOffset(userActivityProgress)
+                    "
+                  ></circle>
+                </svg>
+
+                <div class="circle-value">
+
+                  <strong>
+                    {{ userActivityProgress }}%
+                  </strong>
+
+                  <span>Active</span>
+
+                </div>
+
+              </div>
+
+              <div class="progress-labels">
+
+                <div>
+                  <span>Total Users</span>
+                  <strong>
+                    {{ platformUsers.total }}
+                  </strong>
+                </div>
+
+                <div>
+                  <span>Active</span>
+                  <strong>
+                    {{ platformUsers.active }}
+                  </strong>
+                </div>
+
+                <div>
+                  <span>Inactive</span>
+                  <strong>
+                    {{ platformUsers.inactive }}
+                  </strong>
+                </div>
+
+              </div>
+
+            </article>
+
+            <article class="progress-card">
+
+              <div class="progress-header">
+
+                <div>
+                  <h4>Platform Health</h4>
+
+                  <p>
+                    Companies currently within the platform lifecycle
+                  </p>
+                </div>
+
+              </div>
+
+              <div class="circle-container">
+
+                <svg
+                  class="progress-circle"
+                  viewBox="0 0 120 120"
+                >
+                  <circle
+                    class="circle-background"
+                    cx="60"
+                    cy="60"
+                    r="48"
+                  ></circle>
+
+                  <circle
+                    class="circle-progress"
+                    cx="60"
+                    cy="60"
+                    r="48"
+                    [style.stroke-dashoffset]="
+                      getProgressOffset(companyHealthProgress)
+                    "
+                  ></circle>
+                </svg>
+
+                <div class="circle-value">
+
+                  <strong>
+                    {{ companyHealthProgress }}%
+                  </strong>
+
+                  <span>In lifecycle</span>
+
+                </div>
+
+              </div>
+
+              <div class="progress-labels">
+
+                <div>
+                  <span>All Companies</span>
+                  <strong>
+                    {{ dashboardStats[0].value }}
+                  </strong>
+                </div>
+
+                <div>
+                  <span>Active</span>
+                  <strong>
+                    {{ dashboardStats[1].value }}
+                  </strong>
+                </div>
+
+                <div>
+                  <span>Other Status</span>
+                  <strong>
+                    {{
+                      dashboardStats[2].value +
+                      dashboardStats[3].value
+                    }}
+                  </strong>
+                </div>
+
+              </div>
+
+            </article>
+
+          </div>
+
+        </section>
+
+        <section class="lower-grid">
+
+          <article class="overview-card">
+
+            <div class="card-header">
+
+              <div>
+
+                <p class="eyebrow">
+                  COMPANIES
+                </p>
+
+                <h3>Company Overview</h3>
+
+                <p>
+                  Current subscriber company distribution.
+                </p>
+
+              </div>
+
+              <button
+                type="button"
+                class="view-button"
+                (click)="viewCompanies()"
+              >
+                View Companies
+              </button>
+
+            </div>
+
+            <div class="company-overview">
+
+              <div class="overview-row">
+                <span>Total Subscriber Companies</span>
+                <strong>
+                  {{ dashboardStats[0].value }}
+                </strong>
+              </div>
+
+              <div class="overview-row">
+                <span>Active Companies</span>
+                <strong>
+                  {{ dashboardStats[1].value }}
+                </strong>
+              </div>
+
+              <div class="overview-row">
+                <span>Suspended Companies</span>
+                <strong>
+                  {{ dashboardStats[2].value }}
+                </strong>
+              </div>
+
+              <div class="overview-row">
+                <span>Expired Companies</span>
+                <strong>
+                  {{ dashboardStats[3].value }}
+                </strong>
+              </div>
+
+            </div>
+
+          </article>
+
+          <article class="overview-card">
+
+            <div class="card-header">
+
+              <div>
+
+                <p class="eyebrow">
+                  USERS
+                </p>
+
+                <h3>Platform Users</h3>
+
+                <p>
+                  User account overview across the platform.
+                </p>
+
+              </div>
+
+            </div>
+
+            <div class="user-overview">
+
+              <div class="user-total">
+                <strong>
+                  {{ platformUsers.total }}
+                </strong>
+
+                <span>Total Users</span>
+              </div>
+
+              <div class="user-row">
+                <span>Active Users</span>
+                <strong>
+                  {{ platformUsers.active }}
+                </strong>
+              </div>
+
+              <div class="user-row">
+                <span>Inactive Users</span>
+                <strong>
+                  {{ platformUsers.inactive }}
+                </strong>
+              </div>
+
+            </div>
+
+          </article>
+
+        </section>
+
+      }
+
+    </section>
+
+  </main>
+
+</div>

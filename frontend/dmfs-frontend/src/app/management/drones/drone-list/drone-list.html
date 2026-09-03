@@ -1,0 +1,291 @@
+@'
+<div class="page">
+
+  <!-- PAGE HEADER -->
+
+  <div class="page-header">
+
+    <div class="title-area">
+
+      <p class="eyebrow">
+        DRONE MANAGEMENT
+      </p>
+
+      <h1>
+        Drones
+      </h1>
+
+      <p class="description">
+        Manage registered drones and their operational status.
+      </p>
+
+    </div>
+
+    <button
+      class="primary"
+      type="button"
+      (click)="registerDrone()">
+
+      + Register Drone
+
+    </button>
+
+  </div>
+
+
+  <!-- LOADING -->
+
+  @if (loading) {
+
+    <div class="state">
+
+      <div class="state-title">
+        Loading drones...
+      </div>
+
+      <div class="state-description">
+        Please wait while the drone records are loaded.
+      </div>
+
+    </div>
+
+  }
+
+
+  <!-- ERROR -->
+
+  @if (!loading && errorMessage) {
+
+    <div class="alert">
+
+      <strong>
+        Unable to load drones
+      </strong>
+
+      <p>
+        {{ errorMessage }}
+      </p>
+
+      <button
+        type="button"
+        class="retry-button"
+        (click)="loadDrones()">
+
+        Try Again
+
+      </button>
+
+    </div>
+
+  }
+
+
+  <!-- EMPTY -->
+
+  @if (!loading && !errorMessage && drones.length === 0) {
+
+    <div class="empty">
+
+      <div class="empty-icon">
+        DR
+      </div>
+
+      <h2>
+        No drones yet
+      </h2>
+
+      <p>
+        There are currently no drones registered in the system.
+      </p>
+
+      <button
+        class="primary"
+        type="button"
+        (click)="registerDrone()">
+
+        + Register Drone
+
+      </button>
+
+    </div>
+
+  }
+
+
+  <!-- DRONE LIST -->
+
+  @if (!loading && !errorMessage && drones.length > 0) {
+
+    <section class="drone-section">
+
+      <div class="section-header">
+
+        <div>
+
+          <p class="eyebrow">
+            FLEET
+          </p>
+
+          <h2>
+            Registered Drones
+          </h2>
+
+        </div>
+
+        <span class="drone-count">
+          {{ drones.length }}
+          {{ drones.length === 1 ? 'Drone' : 'Drones' }}
+        </span>
+
+      </div>
+
+
+      <div class="drone-grid">
+
+        @for (
+          drone of drones;
+          track drone.id
+        ) {
+
+          <article
+            class="drone-card"
+            tabindex="0"
+            role="button"
+            (click)="openDrone(drone)"
+            (keydown.enter)="openDrone(drone)"
+            (keydown.space)="openDrone(drone); $event.preventDefault()">
+
+
+            <!-- CARD TOP -->
+
+            <div class="drone-top">
+
+              <div class="drone-icon">
+                DR
+              </div>
+
+              <div class="drone-heading">
+
+                <h2>
+                  {{ drone.name }}
+                </h2>
+
+                <span class="serial">
+                  {{ drone.serialNumber }}
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <!-- DRONE INFORMATION -->
+
+            <div class="drone-info">
+
+
+              <!-- TYPE -->
+
+              <div class="info-item">
+
+                <span>
+                  Type
+                </span>
+
+                <strong>
+                  {{ drone.droneType }}
+                </strong>
+
+              </div>
+
+
+              <!-- MANUFACTURER -->
+
+              <div class="info-item">
+
+                <span>
+                  Manufacturer
+                </span>
+
+                <strong>
+                  {{ drone.manufacturer || '—' }}
+                </strong>
+
+              </div>
+
+
+              <!-- MODEL -->
+
+              <div class="info-item">
+
+                <span>
+                  Model
+                </span>
+
+                <strong>
+                  {{ drone.model || '—' }}
+                </strong>
+
+              </div>
+
+
+              <!-- STATUS -->
+
+              <div class="info-item">
+
+                <span>
+                  Status
+                </span>
+
+                <strong
+                  class="status"
+                  [class.available]="drone.status === 'AVAILABLE'"
+                  [class.assigned]="drone.status === 'ASSIGNED'"
+                  [class.in-flight]="drone.status === 'IN_FLIGHT'"
+                  [class.damaged]="drone.status === 'DAMAGED'"
+                  [class.retired]="drone.status === 'RETIRED'">
+
+                  {{ getStatusLabel(drone.status) }}
+
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <!-- CARD FOOTER -->
+
+            <div class="drone-footer">
+
+              <div>
+
+                <span>
+                  Serial Number
+                </span>
+
+                <strong>
+                  {{ drone.serialNumber }}
+                </strong>
+
+              </div>
+
+              <span class="view">
+                View Drone →
+              </span>
+
+            </div>
+
+
+          </article>
+
+        }
+
+      </div>
+
+    </section>
+
+  }
+
+</div>
+'@ | Set-Content .\src\app\management\drones\drone-list\drone-list.html -Encoding UTF8

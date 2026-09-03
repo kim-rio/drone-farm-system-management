@@ -1,6 +1,8 @@
 package com.dmfs.auth.entity;
 
+import com.dmfs.company.entity.SubscriberCompany;
 import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -30,6 +32,10 @@ public class User {
     @Column(nullable = false)
     private boolean active = true;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id")
+    private SubscriberCompany company;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -45,8 +51,6 @@ public class User {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
-
-    // Getters and setters
 
     public Long getId() {
         return id;
@@ -98,6 +102,14 @@ public class User {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public SubscriberCompany getCompany() {
+        return company;
+    }
+
+    public void setCompany(SubscriberCompany company) {
+        this.company = company;
     }
 
     public LocalDateTime getCreatedAt() {

@@ -1,0 +1,17 @@
+CREATE TABLE drones (
+    id BIGSERIAL PRIMARY KEY,
+
+    name VARCHAR(100) NOT NULL,
+    serial_number VARCHAR(100) NOT NULL UNIQUE,
+    model VARCHAR(100),
+    manufacturer VARCHAR(100),
+
+    drone_type VARCHAR(50) NOT NULL,
+
+    status VARCHAR(30) NOT NULL DEFAULT 'AVAILABLE',
+
+    purchase_date DATE,
+
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

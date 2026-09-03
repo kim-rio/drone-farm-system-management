@@ -1,0 +1,517 @@
+<div class="page">
+
+  <div class="page-header">
+
+    <div class="title-area">
+
+      <p class="eyebrow">
+        COMPANY ADMIN PORTAL
+      </p>
+
+      <h2>
+        Dashboard
+      </h2>
+
+      <p class="description">
+        Overview of your company, staff and operational activity.
+      </p>
+
+    </div>
+
+    <div class="quick-actions">
+
+      <button
+        type="button"
+        class="action-pill"
+        (click)="manageStaff()"
+      >
+        <span class="plus">+</span>
+        <span>Manage Staff</span>
+      </button>
+
+      <button
+        type="button"
+        class="action-pill"
+        (click)="openCompany()"
+      >
+        <span>View Company</span>
+      </button>
+
+    </div>
+
+  </div>
+
+  <section class="stats">
+
+    @for (
+      stat of dashboardStats;
+      track stat.title
+    ) {
+
+      <article class="stat-card">
+
+        <span class="stat-label">
+          {{ stat.title }}
+        </span>
+
+        <strong class="stat-number">
+          {{ stat.value }}
+        </strong>
+
+        <span class="stat-description">
+          {{ stat.description }}
+        </span>
+
+      </article>
+
+    }
+
+  </section>
+
+  <section class="section">
+
+    <div class="section-heading">
+
+      <div>
+
+        <p class="eyebrow">
+          COMPANY
+        </p>
+
+        <h3>
+          Administration
+        </h3>
+
+      </div>
+
+    </div>
+
+    <div class="progress-grid">
+
+      <article class="progress-card">
+
+        <div class="progress-header">
+
+          <div>
+
+            <h4>
+              Company Staff
+            </h4>
+
+            <p>
+              Staff members working for your company
+            </p>
+
+          </div>
+
+          <button
+            type="button"
+            class="view-button"
+            (click)="manageStaff()"
+          >
+            Manage
+          </button>
+
+        </div>
+
+        <div class="circle-container">
+
+          <svg
+            class="progress-circle"
+            viewBox="0 0 120 120"
+          >
+
+            <circle
+              class="circle-background"
+              cx="60"
+              cy="60"
+              r="48"
+            ></circle>
+
+            <circle
+              class="circle-progress"
+              cx="60"
+              cy="60"
+              r="48"
+              [style.stroke-dashoffset]="
+                getProgressOffset(activeStaffProgress)
+              "
+            ></circle>
+
+          </svg>
+
+          <div class="circle-value">
+
+            <strong>
+              {{ activeStaffProgress }}%
+            </strong>
+
+            <span>
+              Active
+            </span>
+
+          </div>
+
+        </div>
+
+        <div class="progress-labels">
+
+          <div>
+            <span>
+              Total Staff
+            </span>
+
+            <strong>
+              {{ dashboardStats[0].value }}
+            </strong>
+          </div>
+
+          <div>
+            <span>
+              Active
+            </span>
+
+            <strong>
+              {{ dashboardStats[1].value }}
+            </strong>
+          </div>
+
+          <div>
+            <span>
+              Inactive
+            </span>
+
+            <strong>
+              {{ inactiveStaff }}
+            </strong>
+          </div>
+
+        </div>
+
+      </article>
+
+      <article class="progress-card">
+
+        <div class="progress-header">
+
+          <div>
+
+            <h4>
+              Operations
+            </h4>
+
+            <p>
+              Current company operational activity
+            </p>
+
+          </div>
+
+          <button
+            type="button"
+            class="view-button"
+            (click)="openOperations()"
+          >
+            View
+          </button>
+
+        </div>
+
+        <div class="circle-container">
+
+          <svg
+            class="progress-circle"
+            viewBox="0 0 120 120"
+          >
+
+            <circle
+              class="circle-background"
+              cx="60"
+              cy="60"
+              r="48"
+            ></circle>
+
+            <circle
+              class="circle-progress"
+              cx="60"
+              cy="60"
+              r="48"
+              [style.stroke-dashoffset]="
+                getProgressOffset(operationProgress)
+              "
+            ></circle>
+
+          </svg>
+
+          <div class="circle-value">
+
+            <strong>
+              {{ operationProgress }}%
+            </strong>
+
+            <span>
+              Active
+            </span>
+
+          </div>
+
+        </div>
+
+        <div class="progress-labels">
+
+          <div>
+            <span>
+              Pending
+            </span>
+
+            <strong>
+              {{ dashboardStats[2].value }}
+            </strong>
+          </div>
+
+          <div>
+            <span>
+              Active
+            </span>
+
+            <strong>
+              {{ dashboardStats[3].value }}
+            </strong>
+          </div>
+
+          <div>
+            <span>
+              Total Activity
+            </span>
+
+            <strong>
+              {{ totalOperations }}
+            </strong>
+          </div>
+
+        </div>
+
+      </article>
+
+      <article class="progress-card">
+
+        <div class="progress-header">
+
+          <div>
+
+            <h4>
+              Company Profile
+            </h4>
+
+            <p>
+              Subscriber company information and administration
+            </p>
+
+          </div>
+
+          <button
+            type="button"
+            class="view-button"
+            (click)="openCompany()"
+          >
+            View
+          </button>
+
+        </div>
+
+        <div class="company-status">
+
+          <div class="status-mark">
+            ?
+          </div>
+
+          <strong>
+            Company Account
+          </strong>
+
+          <span>
+            Your company is registered on the DMFS platform.
+          </span>
+
+        </div>
+
+        <div class="progress-labels">
+
+          <div>
+            <span>
+              Staff
+            </span>
+
+            <strong>
+              {{ dashboardStats[0].value }}
+            </strong>
+          </div>
+
+          <div>
+            <span>
+              Pending Work
+            </span>
+
+            <strong>
+              {{ dashboardStats[2].value }}
+            </strong>
+          </div>
+
+          <div>
+            <span>
+              Active Operations
+            </span>
+
+            <strong>
+              {{ dashboardStats[3].value }}
+            </strong>
+          </div>
+
+        </div>
+
+      </article>
+
+    </div>
+
+  </section>
+
+  <section class="lower-grid">
+
+    <article class="overview-card">
+
+      <div class="card-header">
+
+        <div>
+
+          <p class="eyebrow">
+            STAFF
+          </p>
+
+          <h3>
+            Staff Overview
+          </h3>
+
+          <p>
+            Staff accounts registered under your company.
+          </p>
+
+        </div>
+
+        <button
+          type="button"
+          class="view-button"
+          (click)="manageStaff()"
+        >
+          View Staff
+        </button>
+
+      </div>
+
+      <div class="company-overview">
+
+        <div class="overview-row">
+
+          <span>
+            Total Staff
+          </span>
+
+          <strong>
+            {{ dashboardStats[0].value }}
+          </strong>
+
+        </div>
+
+        <div class="overview-row">
+
+          <span>
+            Active Staff
+          </span>
+
+          <strong>
+            {{ dashboardStats[1].value }}
+          </strong>
+
+        </div>
+
+        <div class="overview-row">
+
+          <span>
+            Inactive Staff
+          </span>
+
+          <strong>
+            {{ inactiveStaff }}
+          </strong>
+
+        </div>
+
+      </div>
+
+    </article>
+
+    <article class="overview-card">
+
+      <div class="card-header">
+
+        <div>
+
+          <p class="eyebrow">
+            OPERATIONS
+          </p>
+
+          <h3>
+            Operations Overview
+          </h3>
+
+          <p>
+            Current operational workload for your company.
+          </p>
+
+        </div>
+
+      </div>
+
+      <div class="user-overview">
+
+        <div class="user-total">
+
+          <strong>
+            {{ totalOperations }}
+          </strong>
+
+          <span>
+            Total Operations
+          </span>
+
+        </div>
+
+        <div class="user-row">
+
+          <span>
+            Pending Work
+          </span>
+
+          <strong>
+            {{ dashboardStats[2].value }}
+          </strong>
+
+        </div>
+
+        <div class="user-row">
+
+          <span>
+            Active Operations
+          </span>
+
+          <strong>
+            {{ dashboardStats[3].value }}
+          </strong>
+
+        </div>
+
+      </div>
+
+    </article>
+
+  </section>
+
+</div>

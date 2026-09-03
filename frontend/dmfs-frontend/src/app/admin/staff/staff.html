@@ -1,0 +1,281 @@
+<div class="staff-page">
+
+  <header class="page-header">
+
+    <div>
+      <p class="eyebrow">STAFF MANAGEMENT</p>
+
+      <h1>Company Staff</h1>
+
+      <p class="description">
+        Manage the staff members working for your company.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="primary-button"
+      (click)="openCreateForm()"
+    >
+      Add Staff
+    </button>
+
+  </header>
+
+  @if (successMessage) {
+    <div class="message success">
+      {{ successMessage }}
+    </div>
+  }
+
+  @if (errorMessage && !showForm) {
+    <div class="message error">
+      {{ errorMessage }}
+    </div>
+  }
+
+  @if (loading) {
+
+    <div class="state">
+      Loading staff...
+    </div>
+
+  } @else if (staff.length === 0) {
+
+    <div class="empty-state">
+
+      <h2>No staff members yet</h2>
+
+      <p>
+        Add your first Management, Geologist or Drone Operator.
+      </p>
+
+      <button
+        type="button"
+        class="primary-button"
+        (click)="openCreateForm()"
+      >
+        Add Staff
+      </button>
+
+    </div>
+
+  } @else {
+
+    <section class="staff-table">
+
+      <div class="table-header">
+
+        <span>Staff Member</span>
+        <span>Role</span>
+        <span>Status</span>
+        <span>Actions</span>
+
+      </div>
+
+      @for (member of staff; track member.id) {
+
+        <div class="table-row">
+
+          <div class="member">
+
+            <div class="avatar">
+              {{ getInitials(member) }}
+            </div>
+
+            <div>
+              <strong>
+                {{ member.firstName }} {{ member.lastName }}
+              </strong>
+
+              <span>
+                {{ member.email }}
+              </span>
+            </div>
+
+          </div>
+
+          <div class="role">
+            {{ getRoleLabel(member.role) }}
+          </div>
+
+          <div>
+
+            <span
+              class="status"
+              [class.active]="member.active"
+              [class.inactive]="!member.active"
+            >
+              {{ member.active ? 'Active' : 'Inactive' }}
+            </span>
+
+          </div>
+
+          <div class="actions">
+
+            <button
+              type="button"
+              class="secondary-button"
+              (click)="openEditForm(member)"
+            >
+              Edit
+            </button>
+
+            <button
+              type="button"
+              class="status-button"
+              [class.activate]="!member.active"
+              [class.deactivate]="member.active"
+              (click)="toggleStatus(member)"
+            >
+              {{ member.active ? 'Deactivate' : 'Activate' }}
+            </button>
+
+          </div>
+
+        </div>
+
+      }
+
+    </section>
+
+  }
+
+  @if (showForm) {
+
+    <div class="modal-backdrop">
+
+      <section class="modal">
+
+        <div class="modal-header">
+
+          <div>
+
+            <p class="eyebrow">
+              {{ editingStaff ? 'EDIT STAFF' : 'NEW STAFF' }}
+            </p>
+
+            <h2>
+              {{ editingStaff
+                ? 'Edit Staff Member'
+                : 'Add Staff Member'
+              }}
+            </h2>
+
+          </div>
+
+          <button
+            type="button"
+            class="close-button"
+            (click)="closeForm()"
+          >
+            ×
+          </button>
+
+        </div>
+
+        <div class="form-grid">
+
+          <label>
+            <span>First Name</span>
+
+            <input
+              type="text"
+              [(ngModel)]="form.firstName"
+              placeholder="First name"
+            >
+          </label>
+
+          <label>
+            <span>Last Name</span>
+
+            <input
+              type="text"
+              [(ngModel)]="form.lastName"
+              placeholder="Last name"
+            >
+          </label>
+
+          <label>
+            <span>Email</span>
+
+            <input
+              type="email"
+              [(ngModel)]="form.email"
+              placeholder="staff@company.com"
+            >
+          </label>
+
+          @if (!editingStaff) {
+
+            <label>
+              <span>Password</span>
+
+              <input
+                type="password"
+                [(ngModel)]="form.password"
+                placeholder="Minimum 8 characters"
+              >
+            </label>
+
+          }
+
+          <label class="full">
+            <span>Staff Role</span>
+
+            <select [(ngModel)]="form.role">
+
+              @for (role of roles; track role) {
+
+                <option [value]="role">
+                  {{ getRoleLabel(role) }}
+                </option>
+
+              }
+
+            </select>
+          </label>
+
+        </div>
+
+        @if (errorMessage) {
+
+          <div class="message error">
+            {{ errorMessage }}
+          </div>
+
+        }
+
+        <div class="modal-actions">
+
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="closeForm()"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="button"
+            class="primary-button"
+            [disabled]="saving"
+            (click)="saveStaff()"
+          >
+            {{ saving
+              ? 'Saving...'
+              : editingStaff
+                ? 'Save Changes'
+                : 'Create Staff'
+            }}
+          </button>
+
+        </div>
+
+      </section>
+
+    </div>
+
+  }
+
+</div>

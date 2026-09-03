@@ -3,6 +3,7 @@ package com.dmfs.service.controller;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,11 +30,13 @@ public class ServiceCatalogueController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGEMENT', 'GEOLOGIST', 'DRONE_OPERATOR')")
     public List<ServiceCatalogue> getAllServices() {
         return serviceCatalogueService.getAllServices();
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGEMENT', 'GEOLOGIST', 'DRONE_OPERATOR')")
     public ServiceCatalogue getServiceById(
             @PathVariable Long id
     ) {
@@ -42,6 +45,7 @@ public class ServiceCatalogueController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('ADMIN')")
     public ServiceCatalogue createService(
             @RequestBody ServiceCatalogue service
     ) {
@@ -49,6 +53,7 @@ public class ServiceCatalogueController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ServiceCatalogue updateService(
             @PathVariable Long id,
             @RequestBody ServiceCatalogue service
@@ -58,6 +63,7 @@ public class ServiceCatalogueController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ADMIN')")
     public void deactivateService(
             @PathVariable Long id
     ) {
