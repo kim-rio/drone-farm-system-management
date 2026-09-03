@@ -1,0 +1,304 @@
+<div class="companies-page">
+
+  <aside class="sidebar">
+
+    <div class="brand">
+      <div class="brand-mark">DM</div>
+
+      <div class="brand-text">
+        <strong>DMFS</strong>
+        <span>PLATFORM ADMIN</span>
+      </div>
+    </div>
+
+    <nav class="navigation">
+
+      <button
+        type="button"
+        class="nav-item"
+        (click)="navigate('/super-admin')"
+      >
+        <span class="nav-indicator"></span>
+        <span>Dashboard</span>
+      </button>
+
+      <button
+        type="button"
+        class="nav-item active"
+      >
+        <span class="nav-indicator"></span>
+        <span>Companies</span>
+      </button>
+
+    </nav>
+
+    <div class="sidebar-bottom">
+
+      <div class="account">
+        <div class="account-avatar">SA</div>
+
+        <div class="account-details">
+          <strong>Super Admin</strong>
+          <span>Super Admin Account</span>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="logout"
+        (click)="navigate('/login')"
+      >
+        <span class="logout-circle">?</span>
+        <span class="logout-text">Logout</span>
+      </button>
+
+    </div>
+
+  </aside>
+
+  <main class="main-content">
+
+    <header class="topbar">
+
+      <button
+        type="button"
+        class="open-menu-button"
+        (click)="toggleSidebar()"
+      >
+        ?
+      </button>
+
+      <div class="top-user">
+        <div class="top-avatar">SA</div>
+
+        <div class="top-user-details">
+          <strong>Super Admin</strong>
+          <span>SUPER ADMIN</span>
+        </div>
+      </div>
+
+    </header>
+
+    <section class="page">
+
+      <div class="page-header">
+
+        <div>
+          <p class="eyebrow">SUPER ADMIN PORTAL</p>
+
+          <h2>Companies</h2>
+
+          <p class="description">
+            Manage subscriber companies registered on the platform.
+          </p>
+        </div>
+
+        <div class="quick-actions">
+
+          <button
+            type="button"
+            class="action-pill"
+            (click)="registerCompany()"
+          >
+            <span class="plus">+</span>
+            <span>Register Company</span>
+          </button>
+
+        </div>
+
+      </div>
+
+      <section class="stats">
+
+        <article class="stat-card">
+          <span class="stat-label">Total Companies</span>
+          <strong class="stat-number">{{ totalCompanies }}</strong>
+          <span class="stat-description">
+            All subscriber companies
+          </span>
+        </article>
+
+        <article class="stat-card">
+          <span class="stat-label">Active</span>
+          <strong class="stat-number">{{ activeCompanies }}</strong>
+          <span class="stat-description">
+            Currently active
+          </span>
+        </article>
+
+        <article class="stat-card">
+          <span class="stat-label">Suspended</span>
+          <strong class="stat-number">{{ suspendedCompanies }}</strong>
+          <span class="stat-description">
+            Currently suspended
+          </span>
+        </article>
+
+        <article class="stat-card">
+          <span class="stat-label">Expired</span>
+          <strong class="stat-number">{{ expiredCompanies }}</strong>
+          <span class="stat-description">
+            Expired companies
+          </span>
+        </article>
+
+      </section>
+
+      <section class="company-section">
+
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">SUBSCRIBERS</p>
+            <h3>Company List</h3>
+          </div>
+        </div>
+
+        @if (loading) {
+
+          <div class="state">
+            Loading companies...
+          </div>
+
+        } @else if (error) {
+
+          <div class="state error">
+            <span>{{ error }}</span>
+
+            <button
+              type="button"
+              (click)="loadCompanies()"
+            >
+              Retry
+            </button>
+          </div>
+
+        } @else if (companies.length === 0) {
+
+          <div class="empty-state">
+
+            <strong>No companies registered</strong>
+
+            <span>
+              Register the first subscriber company to get started.
+            </span>
+
+            <button
+              type="button"
+              class="action-pill dark"
+              (click)="registerCompany()"
+            >
+              <span class="plus">+</span>
+              <span>Register Company</span>
+            </button>
+
+          </div>
+
+        } @else {
+
+          <div class="table-card">
+
+            <div class="table-wrapper">
+
+              <table>
+
+                <thead>
+                  <tr>
+                    <th>Company</th>
+                    <th>Registration No.</th>
+                    <th>Email</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+
+                  @for (
+                    company of companies;
+                    track company.id
+                  ) {
+
+                    <tr>
+
+                      <td>
+                        <div class="company-name">
+                          <div class="company-avatar">
+                            {{ company.name.charAt(0).toUpperCase() }}
+                          </div>
+
+                          <div>
+                            <strong>{{ company.name }}</strong>
+                            <span>{{ company.phone || 'No phone' }}</span>
+                          </div>
+                        </div>
+                      </td>
+
+                      <td>
+                        <span class="company-code">
+                          {{ company.registrationNumber }}
+                        </span>
+                      </td>
+
+                      <td>
+                        {{ company.email || '—' }}
+                      </td>
+
+                      <td>
+                        <span
+                          class="status"
+                          [class.active]="company.status === 'ACTIVE'"
+                          [class.suspended]="company.status === 'SUSPENDED'"
+                          [class.expired]="company.status === 'EXPIRED'"
+                        >
+                          {{ company.status }}
+                        </span>
+                      </td>
+
+                      <td>
+                        {{ formatDate(company.createdAt) }}
+                      </td>
+
+                      <td>
+
+                        <div class="actions">
+
+                          <button
+                            type="button"
+                            (click)="viewCompany(company.id)"
+                          >
+                            View
+                          </button>
+
+                          <button
+                            type="button"
+                            (click)="editCompany(company.id)"
+                          >
+                            Edit
+                          </button>
+
+                        </div>
+
+                      </td>
+
+                    </tr>
+
+                  }
+
+                </tbody>
+
+              </table>
+
+            </div>
+
+          </div>
+
+        }
+
+      </section>
+
+    </section>
+
+  </main>
+
+</div>

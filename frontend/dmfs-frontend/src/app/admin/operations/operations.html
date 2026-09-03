@@ -1,0 +1,130 @@
+<div class="page-shell">
+
+  <header class="page-header">
+
+    <div>
+      <p class="eyebrow">COMPANY OPERATIONS</p>
+      <h1>Operations</h1>
+      <p class="description">
+        Monitor field operations performed by your company.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="secondary-button"
+      (click)="goBack()"
+    >
+      Back to Dashboard
+    </button>
+
+  </header>
+
+  <section class="summary-grid">
+
+    <article class="summary-card">
+      <span>Total Operations</span>
+      <strong>{{ operations.length }}</strong>
+    </article>
+
+    <article class="summary-card">
+      <span>Pending</span>
+      <strong>
+        {{ operations.filter(o => o.status === 'PENDING').length }}
+      </strong>
+    </article>
+
+    <article class="summary-card">
+      <span>Active</span>
+      <strong>
+        {{ operations.filter(o => o.status === 'ACTIVE').length }}
+      </strong>
+    </article>
+
+    <article class="summary-card">
+      <span>Completed</span>
+      <strong>
+        {{ operations.filter(o => o.status === 'COMPLETED').length }}
+      </strong>
+    </article>
+
+  </section>
+
+  <section class="panel">
+
+    <div class="filters">
+
+      @for (filter of filters; track filter) {
+
+        <button
+          type="button"
+          class="filter-button"
+          [class.active]="selectedFilter === filter"
+          (click)="setFilter(filter)"
+        >
+          {{ filter }}
+        </button>
+
+      }
+
+    </div>
+
+    @if (filteredOperations.length === 0) {
+
+      <div class="empty-state">
+
+        <div class="empty-icon">OP</div>
+
+        <h2>No operations available</h2>
+
+        <p>
+          Company operations will appear here when survey and field
+          activities are created.
+        </p>
+
+      </div>
+
+    } @else {
+
+      <div class="table">
+
+        <div class="table-header">
+          <span>Operation</span>
+          <span>Client</span>
+          <span>Service</span>
+          <span>Team</span>
+          <span>Status</span>
+        </div>
+
+        @for (operation of filteredOperations; track operation.id) {
+
+          <div class="table-row">
+
+            <strong>{{ operation.id }}</strong>
+
+            <span>{{ operation.client }}</span>
+
+            <span>{{ operation.service }}</span>
+
+            <span>{{ operation.assignedTeam }}</span>
+
+            <span
+              class="status"
+              [class.pending]="operation.status === 'PENDING'"
+              [class.active]="operation.status === 'ACTIVE'"
+              [class.completed]="operation.status === 'COMPLETED'"
+            >
+              {{ operation.status }}
+            </span>
+
+          </div>
+
+        }
+
+      </div>
+
+    }
+
+  </section>
+
+</div>

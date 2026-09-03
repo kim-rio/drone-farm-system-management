@@ -1,0 +1,181 @@
+<div class="page-shell">
+
+  <header class="page-header">
+
+    <div>
+      <p class="eyebrow">ADMINISTRATION</p>
+      <h1>Settings</h1>
+      <p class="description">
+        Manage your administrator account and dashboard preferences.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="secondary-button"
+      (click)="goBack()"
+    >
+      Back to Dashboard
+    </button>
+
+  </header>
+
+  @if (saved) {
+
+    <div class="success-message">
+      Settings saved successfully.
+    </div>
+
+  }
+
+  <section class="settings-grid">
+
+    <article class="card">
+
+      <p class="eyebrow">ADMIN ACCOUNT</p>
+
+      <h2>
+        Account Information
+      </h2>
+
+      <div class="field">
+
+        <span>Name</span>
+
+        <strong>
+          {{ user?.firstName }} {{ user?.lastName }}
+        </strong>
+
+      </div>
+
+      <div class="field">
+
+        <span>Email</span>
+
+        <strong>
+          {{ user?.email }}
+        </strong>
+
+      </div>
+
+      <div class="field">
+
+        <span>Role</span>
+
+        <strong>
+          Company Administrator
+        </strong>
+
+      </div>
+
+    </article>
+
+    <article class="card">
+
+      <p class="eyebrow">PREFERENCES</p>
+
+      <h2>
+        Dashboard Preferences
+      </h2>
+
+      <label class="setting">
+
+        <div>
+          <strong>Notifications</strong>
+
+          <span>
+            Receive important system notifications.
+          </span>
+        </div>
+
+        <input
+          type="checkbox"
+          [(ngModel)]="notifications"
+        >
+
+      </label>
+
+      <label class="setting">
+
+        <div>
+          <strong>Compact View</strong>
+
+          <span>
+            Use a more compact dashboard layout.
+          </span>
+        </div>
+
+        <input
+          type="checkbox"
+          [(ngModel)]="compactView"
+        >
+
+      </label>
+
+      <button
+        type="button"
+        class="primary-button"
+        (click)="savePreferences()"
+      >
+        Save Preferences
+      </button>
+
+    </article>
+
+    <article class="card">
+
+      <p class="eyebrow">SECURITY</p>
+
+      <h2>
+        Account Security
+      </h2>
+
+      <p class="security-text">
+        Your administrator account is protected by the
+        platform authentication system.
+      </p>
+
+      <div class="security-row">
+
+        <span>Password</span>
+
+        <strong>
+          ••••••••••••
+        </strong>
+
+      </div>
+
+      <button
+        type="button"
+        class="secondary-button"
+      >
+        Change Password
+      </button>
+
+    </article>
+
+    <article class="card danger-card">
+
+      <p class="eyebrow">SESSION</p>
+
+      <h2>
+        Sign Out
+      </h2>
+
+      <p class="security-text">
+        Sign out of your company administrator account.
+      </p>
+
+      <button
+        type="button"
+        class="danger-button"
+        (click)="logout()"
+      >
+        Logout
+      </button>
+
+    </article>
+
+  </section>
+
+</div>

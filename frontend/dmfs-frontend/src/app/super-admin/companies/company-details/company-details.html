@@ -1,0 +1,506 @@
+<div class="details-page">
+
+  <aside class="sidebar">
+
+    <div class="brand">
+
+      <div class="brand-mark">
+        DM
+      </div>
+
+      <div class="brand-text">
+        <strong>DMFS</strong>
+        <span>PLATFORM ADMIN</span>
+      </div>
+
+    </div>
+
+    <nav class="navigation">
+
+      <button
+        type="button"
+        class="nav-item"
+        (click)="goToDashboard()"
+      >
+        <span class="nav-indicator"></span>
+        <span>Dashboard</span>
+      </button>
+
+      <button
+        type="button"
+        class="nav-item active"
+        (click)="backToCompanies()"
+      >
+        <span class="nav-indicator"></span>
+        <span>Companies</span>
+      </button>
+
+    </nav>
+
+    <div class="sidebar-bottom">
+
+      <div class="account">
+
+        <div class="account-avatar">
+          SA
+        </div>
+
+        <div class="account-details">
+          <strong>Super Admin</strong>
+          <span>Super Admin Account</span>
+        </div>
+
+      </div>
+
+      <button
+        type="button"
+        class="logout"
+        (click)="logout()"
+      >
+        <span class="logout-circle">
+          ?
+        </span>
+
+        <span class="logout-text">
+          Logout
+        </span>
+      </button>
+
+    </div>
+
+  </aside>
+
+  <main class="main-content">
+
+    <header class="topbar">
+
+      <button
+        type="button"
+        class="back-button"
+        (click)="backToCompanies()"
+      >
+        ?
+      </button>
+
+      <div class="top-user">
+
+        <div class="top-avatar">
+          SA
+        </div>
+
+        <div class="top-user-details">
+          <strong>Super Admin</strong>
+          <span>SUPER ADMIN</span>
+        </div>
+
+      </div>
+
+    </header>
+
+    <section class="page">
+
+      @if (loading) {
+
+        <div class="state">
+          Loading company...
+        </div>
+
+      } @else if (error) {
+
+        <div class="state error">
+          <strong>{{ error }}</strong>
+
+          <button
+            type="button"
+            (click)="backToCompanies()"
+          >
+            Back to Companies
+          </button>
+        </div>
+
+      } @else if (company) {
+
+        <div class="page-header">
+
+          <div class="header-main">
+
+            <div class="company-avatar">
+              {{ company.name.charAt(0).toUpperCase() }}
+            </div>
+
+            <div>
+
+              <p class="eyebrow">
+                SUBSCRIBER COMPANY
+              </p>
+
+              <h2>
+                {{ company.name }}
+              </h2>
+
+              <p class="description">
+                Registration No.
+                {{ company.registrationNumber }}
+              </p>
+
+            </div>
+
+          </div>
+
+          <div class="header-actions">
+
+            <button
+              type="button"
+              class="secondary-button"
+              (click)="editCompany()"
+            >
+              Edit Company
+            </button>
+
+          </div>
+
+        </div>
+
+        @if (actionError) {
+
+          <div class="error-banner">
+            {{ actionError }}
+          </div>
+
+        }
+
+        <section class="overview">
+
+          <article class="overview-card">
+
+            <span class="overview-label">
+              STATUS
+            </span>
+
+            <div class="status-row">
+
+              <span
+                class="status"
+                [class.active]="company.status === 'ACTIVE'"
+                [class.suspended]="company.status === 'SUSPENDED'"
+                [class.expired]="company.status === 'EXPIRED'"
+              >
+                {{ company.status }}
+              </span>
+
+            </div>
+
+          </article>
+
+          <article class="overview-card">
+
+            <span class="overview-label">
+              REGISTRATION NUMBER
+            </span>
+
+            <strong>
+              {{ company.registrationNumber }}
+            </strong>
+
+          </article>
+
+          <article class="overview-card">
+
+            <span class="overview-label">
+              TIN
+            </span>
+
+            <strong>
+              {{ company.tin || 'Not provided' }}
+            </strong>
+
+          </article>
+
+          <article class="overview-card">
+
+            <span class="overview-label">
+              CREATED
+            </span>
+
+            <strong>
+              {{ formatDate(company.createdAt) }}
+            </strong>
+
+          </article>
+
+        </section>
+
+        <div class="content-grid">
+
+          <section class="detail-card">
+
+            <div class="card-heading">
+
+              <div>
+                <p class="eyebrow">
+                  COMPANY PROFILE
+                </p>
+
+                <h3>
+                  Company Information
+                </h3>
+              </div>
+
+            </div>
+
+            <div class="detail-grid">
+
+              <div class="detail-item">
+
+                <span>
+                  Company Name
+                </span>
+
+                <strong>
+                  {{ company.name }}
+                </strong>
+
+              </div>
+
+              <div class="detail-item">
+
+                <span>
+                  Registration Number
+                </span>
+
+                <strong>
+                  {{ company.registrationNumber }}
+                </strong>
+
+              </div>
+
+              <div class="detail-item">
+
+                <span>
+                  TIN
+                </span>
+
+                <strong>
+                  {{ company.tin || '—' }}
+                </strong>
+
+              </div>
+
+              <div class="detail-item">
+
+                <span>
+                  Company Email
+                </span>
+
+                <strong>
+                  {{ company.email || '—' }}
+                </strong>
+
+              </div>
+
+              <div class="detail-item">
+
+                <span>
+                  Phone Number
+                </span>
+
+                <strong>
+                  {{ company.phone || '—' }}
+                </strong>
+
+              </div>
+
+            </div>
+
+          </section>
+
+          <section class="detail-card">
+
+            <div class="card-heading">
+
+              <div>
+                <p class="eyebrow">
+                  REGISTERED LOCATION
+                </p>
+
+                <h3>
+                  Location
+                </h3>
+              </div>
+
+            </div>
+
+            <div class="location-block">
+
+              <div class="location-line">
+
+                <span>Country</span>
+
+                <strong>
+                  {{ company.country }}
+                </strong>
+
+              </div>
+
+              <div class="location-line">
+
+                <span>Region</span>
+
+                <strong>
+                  {{ company.region }}
+                </strong>
+
+              </div>
+
+              <div class="location-line">
+
+                <span>City</span>
+
+                <strong>
+                  {{ company.city }}
+                </strong>
+
+              </div>
+
+              <div class="location-line address">
+
+                <span>Physical Address</span>
+
+                <strong>
+                  {{ company.physicalAddress }}
+                </strong>
+
+              </div>
+
+            </div>
+
+          </section>
+
+        </div>
+
+        <section class="management-card">
+
+          <div class="card-heading">
+
+            <div>
+              <p class="eyebrow">
+                COMPANY MANAGEMENT
+              </p>
+
+              <h3>
+                Company Status
+              </h3>
+
+              <p class="card-description">
+                Control whether this subscriber company can actively use the platform.
+              </p>
+            </div>
+
+          </div>
+
+          <div class="status-actions">
+
+            @if (company.status !== 'ACTIVE') {
+
+              <button
+                type="button"
+                class="status-button activate"
+                (click)="activate()"
+                [disabled]="actionLoading"
+              >
+                Activate Company
+              </button>
+
+            }
+
+            @if (company.status !== 'SUSPENDED') {
+
+              <button
+                type="button"
+                class="status-button suspend"
+                (click)="suspend()"
+                [disabled]="actionLoading"
+              >
+                Suspend Company
+              </button>
+
+            }
+
+            @if (company.status !== 'EXPIRED') {
+
+              <button
+                type="button"
+                class="status-button expire"
+                (click)="expire()"
+                [disabled]="actionLoading"
+              >
+                Expire Company
+              </button>
+
+            }
+
+          </div>
+
+        </section>
+
+        <section class="timeline-card">
+
+          <div class="card-heading">
+
+            <div>
+              <p class="eyebrow">
+                RECORD
+              </p>
+
+              <h3>
+                Company Timeline
+              </h3>
+            </div>
+
+          </div>
+
+          <div class="timeline">
+
+            <div class="timeline-item">
+
+              <div class="timeline-dot"></div>
+
+              <div>
+                <strong>
+                  Company registered
+                </strong>
+
+                <span>
+                  {{ formatDate(company.createdAt) }}
+                </span>
+              </div>
+
+            </div>
+
+            <div class="timeline-item">
+
+              <div class="timeline-dot"></div>
+
+              <div>
+                <strong>
+                  Last updated
+                </strong>
+
+                <span>
+                  {{ formatDate(company.updatedAt) }}
+                </span>
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+      }
+
+    </section>
+
+  </main>
+
+</div>

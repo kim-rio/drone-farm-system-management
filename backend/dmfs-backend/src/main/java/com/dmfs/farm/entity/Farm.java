@@ -1,6 +1,6 @@
 package com.dmfs.farm.entity;
 
-import com.dmfs.customer.entity.Customer;
+import com.dmfs.client.entity.Client;
 import jakarta.persistence.*;
 import org.locationtech.jts.geom.Point;
 
@@ -39,7 +39,7 @@ public class Farm {
             name = "customer_id",
             nullable = false
     )
-    private Customer customer;
+    private Client customer;
 
     @Column(
             name = "created_at",
@@ -98,11 +98,11 @@ public class Farm {
         this.areaHectares = areaHectares;
     }
 
-    public Customer getCustomer() {
+    public Client getCustomer() {
         return customer;
     }
 
-    public void setCustomer(Customer customer) {
+    public void setCustomer(Client customer) {
         this.customer = customer;
     }
 

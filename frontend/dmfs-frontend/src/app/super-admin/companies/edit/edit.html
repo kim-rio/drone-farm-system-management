@@ -1,0 +1,300 @@
+<div class="edit-page">
+
+  <aside class="sidebar">
+
+    <div class="brand">
+      <div class="brand-mark">DM</div>
+
+      <div class="brand-text">
+        <strong>DMFS</strong>
+        <span>PLATFORM ADMIN</span>
+      </div>
+    </div>
+
+    <nav class="navigation">
+
+      <button
+        type="button"
+        class="nav-item"
+        (click)="goToDashboard()"
+      >
+        <span class="nav-indicator"></span>
+        Dashboard
+      </button>
+
+      <button
+        type="button"
+        class="nav-item active"
+        (click)="goToCompanies()"
+      >
+        <span class="nav-indicator"></span>
+        Companies
+      </button>
+
+    </nav>
+
+    <div class="sidebar-bottom">
+
+      <div class="account">
+        <div class="account-avatar">SA</div>
+
+        <div class="account-details">
+          <strong>Super Admin</strong>
+          <span>Super Admin Account</span>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="logout"
+        (click)="logout()"
+      >
+        <span class="logout-circle">?</span>
+        Logout
+      </button>
+
+    </div>
+
+  </aside>
+
+  <main class="main-content">
+
+    <header class="topbar">
+
+      <button
+        type="button"
+        class="back-button"
+        (click)="back()"
+      >
+        ?
+      </button>
+
+      <div class="top-user">
+
+        <div class="top-avatar">SA</div>
+
+        <div class="top-user-details">
+          <strong>Super Admin</strong>
+          <span>SUPER ADMIN</span>
+        </div>
+
+      </div>
+
+    </header>
+
+    <section class="page">
+
+      @if (loading) {
+
+        <div class="state">
+          Loading company...
+        </div>
+
+      } @else if (error && !company) {
+
+        <div class="state error">
+          <strong>{{ error }}</strong>
+
+          <button
+            type="button"
+            (click)="goToCompanies()"
+          >
+            Back to Companies
+          </button>
+        </div>
+
+      } @else {
+
+        <div class="page-header">
+
+          <div>
+            <p class="eyebrow">SUBSCRIBER COMPANY</p>
+
+            <h2>Edit Company</h2>
+
+            <p class="description">
+              Update the registered information for
+              {{ company?.name }}.
+            </p>
+          </div>
+
+        </div>
+
+        @if (error) {
+          <div class="error-banner">
+            {{ error }}
+          </div>
+        }
+
+        <form
+          class="company-form"
+          [formGroup]="companyForm"
+          (ngSubmit)="submit()"
+        >
+
+          <section class="form-card">
+
+            <div class="section-heading">
+              <p class="eyebrow">COMPANY INFORMATION</p>
+              <h3>Company Details</h3>
+            </div>
+
+            <div class="form-grid">
+
+              <div class="field full">
+                <label>Company Name *</label>
+
+                <input
+                  type="text"
+                  formControlName="name"
+                  placeholder="Enter company name"
+                  [class.invalid]="fieldInvalid(companyForm.controls.name)"
+                />
+
+                @if (fieldInvalid(companyForm.controls.name)) {
+                  <small>Company name is required.</small>
+                }
+              </div>
+
+              <div class="field">
+                <label>Registration Number *</label>
+
+                <input
+                  type="text"
+                  formControlName="registrationNumber"
+                  placeholder="Enter registration number"
+                  [class.invalid]="fieldInvalid(companyForm.controls.registrationNumber)"
+                />
+
+                @if (fieldInvalid(companyForm.controls.registrationNumber)) {
+                  <small>Registration number is required.</small>
+                }
+              </div>
+
+              <div class="field">
+                <label>TIN</label>
+
+                <input
+                  type="text"
+                  formControlName="tin"
+                  placeholder="Enter TIN"
+                />
+              </div>
+
+              <div class="field">
+                <label>Company Email *</label>
+
+                <input
+                  type="email"
+                  formControlName="email"
+                  placeholder="company@example.com"
+                  [class.invalid]="fieldInvalid(companyForm.controls.email)"
+                />
+
+                @if (fieldInvalid(companyForm.controls.email)) {
+                  <small>Enter a valid email address.</small>
+                }
+              </div>
+
+              <div class="field">
+                <label>Phone Number *</label>
+
+                <input
+                  type="text"
+                  formControlName="phone"
+                  placeholder="Enter phone number"
+                  [class.invalid]="fieldInvalid(companyForm.controls.phone)"
+                />
+
+                @if (fieldInvalid(companyForm.controls.phone)) {
+                  <small>Phone number is required.</small>
+                }
+              </div>
+
+            </div>
+
+          </section>
+
+          <section class="form-card">
+
+            <div class="section-heading">
+              <p class="eyebrow">LOCATION</p>
+              <h3>Registered Location</h3>
+            </div>
+
+            <div class="form-grid">
+
+              <div class="field">
+                <label>Country *</label>
+
+                <input
+                  type="text"
+                  formControlName="country"
+                  placeholder="Enter country"
+                />
+              </div>
+
+              <div class="field">
+                <label>Region *</label>
+
+                <input
+                  type="text"
+                  formControlName="region"
+                  placeholder="Enter region"
+                />
+              </div>
+
+              <div class="field">
+                <label>City *</label>
+
+                <input
+                  type="text"
+                  formControlName="city"
+                  placeholder="Enter city"
+                />
+              </div>
+
+              <div class="field full">
+                <label>Physical Address *</label>
+
+                <textarea
+                  rows="3"
+                  formControlName="physicalAddress"
+                  placeholder="Enter physical address"
+                ></textarea>
+              </div>
+
+            </div>
+
+          </section>
+
+          <div class="form-actions">
+
+            <button
+              type="button"
+              class="cancel-button"
+              (click)="back()"
+              [disabled]="submitting"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              class="save-button"
+              [disabled]="submitting"
+            >
+              {{ submitting ? 'Saving Changes...' : 'Save Changes' }}
+            </button>
+
+          </div>
+
+        </form>
+
+      }
+
+    </section>
+
+  </main>
+
+</div>

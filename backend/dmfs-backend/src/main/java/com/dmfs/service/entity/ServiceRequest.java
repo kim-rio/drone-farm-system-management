@@ -3,7 +3,7 @@ package com.dmfs.service.entity;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import com.dmfs.customer.entity.Customer;
+import com.dmfs.client.entity.Client;
 import com.dmfs.farm.entity.Block;
 import com.dmfs.farm.entity.Farm;
 
@@ -28,7 +28,7 @@ public class ServiceRequest {
 
     @ManyToOne
     @JoinColumn(name = "customer_id", nullable = false)
-    private Customer customer;
+    private Client customer;
 
     @ManyToOne
     @JoinColumn(name = "farm_id", nullable = false)
@@ -72,11 +72,11 @@ public class ServiceRequest {
         return id;
     }
 
-    public Customer getCustomer() {
+    public Client getCustomer() {
         return customer;
     }
 
-    public void setCustomer(Customer customer) {
+    public void setCustomer(Client customer) {
         this.customer = customer;
     }
 

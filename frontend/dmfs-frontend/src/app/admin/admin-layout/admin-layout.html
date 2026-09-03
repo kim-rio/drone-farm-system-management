@@ -1,0 +1,132 @@
+<div
+  class="dashboard"
+  [class.sidebar-open]="sidebarOpen"
+>
+
+  <aside class="sidebar">
+
+    <div class="brand">
+      <div class="brand-mark">DM</div>
+
+      <div class="brand-text">
+        <strong>DMFS</strong>
+        <span>COMPANY ADMIN</span>
+      </div>
+    </div>
+
+    <nav class="navigation">
+
+      @for (
+        item of menuItems;
+        track item.route
+      ) {
+
+        <button
+          type="button"
+          class="nav-item"
+          [class.active]="isActive(item.route)"
+          (click)="navigate(item.route)"
+        >
+          <span class="nav-indicator"></span>
+          <span>{{ item.label }}</span>
+        </button>
+
+      }
+
+    </nav>
+
+    <div class="sidebar-bottom">
+
+      <button
+        type="button"
+        class="account"
+      >
+
+        <div class="account-avatar">
+          {{ getInitials() }}
+        </div>
+
+        <div class="account-details">
+
+          <strong>
+            {{ user?.firstName }} {{ user?.lastName }}
+          </strong>
+
+          <span>Company Admin Account</span>
+
+        </div>
+
+      </button>
+
+      <button
+        type="button"
+        class="logout"
+        (click)="logout()"
+      >
+
+        <span class="logout-circle">?</span>
+
+        <span class="logout-text">
+          Logout
+        </span>
+
+      </button>
+
+    </div>
+
+  </aside>
+
+  <main class="main-content">
+
+    <header class="topbar">
+
+      <div class="topbar-left">
+
+        @if (!sidebarOpen) {
+
+          <button
+            type="button"
+            class="open-menu-button"
+            (click)="toggleSidebar()"
+            aria-label="Open navigation"
+          >
+            ?
+          </button>
+
+        }
+
+      </div>
+
+      <div class="topbar-right">
+
+        <div class="top-user">
+
+          <div class="top-avatar">
+            {{ getInitials() }}
+          </div>
+
+          <div class="top-user-details">
+
+            <strong>
+              {{ user?.firstName }} {{ user?.lastName }}
+            </strong>
+
+            <span>ADMIN</span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </header>
+
+    <section class="page">
+
+      <router-outlet></router-outlet>
+
+    </section>
+
+  </main>
+
+</div>

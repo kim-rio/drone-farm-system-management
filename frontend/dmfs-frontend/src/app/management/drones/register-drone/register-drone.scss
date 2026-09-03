@@ -1,0 +1,481 @@
+ /* =================================
+    PAGE
+    ================================= */
+
+.page {
+  width: 100%;
+  max-width: 1100px;
+
+  margin: auto;
+
+  padding: 35px 40px 55px;
+}
+
+
+/* =================================
+   PAGE HEADER
+   ================================= */
+
+.page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+
+  gap: 25px;
+
+  margin-bottom: 27px;
+}
+
+.title-area {
+  min-width: 0;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+
+  color: #888;
+
+  font-size: 8px;
+  font-weight: 700;
+
+  letter-spacing: 1px;
+}
+
+.page-header h1 {
+  margin: 0;
+
+  font-size: 30px;
+  font-weight: 700;
+
+  letter-spacing: -1px;
+}
+
+.description {
+  margin: 6px 0 0;
+
+  color: #8d8d8d;
+
+  font-size: 11px;
+}
+
+
+/* =================================
+   BACK BUTTON
+   ================================= */
+
+.back-button {
+  flex-shrink: 0;
+
+  padding: 9px 14px;
+
+  border: 1px solid #d7d7d5;
+  border-radius: 999px;
+
+  background: #fff;
+  color: #333;
+
+  font-size: 9px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background .2s ease,
+    color .2s ease,
+    border-color .2s ease;
+}
+
+.back-button:hover {
+  background: #111;
+  border-color: #111;
+  color: #fff;
+}
+
+
+/* =================================
+   ALERT
+   ================================= */
+
+.alert {
+  margin-bottom: 15px;
+
+  padding: 13px 15px;
+
+  border: 1px solid #d8d8d6;
+  border-radius: 8px;
+
+  background: #f7f7f5;
+  color: #555;
+
+  font-size: 9px;
+}
+
+
+/* =================================
+   FORM
+   ================================= */
+
+.drone-form {
+  display: flex;
+  flex-direction: column;
+
+  gap: 14px;
+}
+
+
+/* =================================
+   FORM SECTION
+   ================================= */
+
+.form-section {
+  padding: 23px;
+
+  background: #fff;
+
+  border: 1px solid #e5e5e3;
+  border-radius: 10px;
+}
+
+.section-heading {
+  margin-bottom: 22px;
+}
+
+.section-eyebrow {
+  margin: 0 0 5px;
+
+  color: #888;
+
+  font-size: 8px;
+  font-weight: 700;
+
+  letter-spacing: 1px;
+}
+
+.section-heading h2 {
+  margin: 0;
+
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.section-heading p:last-child {
+  margin: 5px 0 0;
+
+  color: #999;
+
+  font-size: 9px;
+}
+
+
+/* =================================
+   FORM GRID
+   ================================= */
+
+.form-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 19px 17px;
+}
+
+
+/* =================================
+   FIELD
+   ================================= */
+
+.field {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.field label {
+  margin-bottom: 7px;
+
+  color: #333;
+
+  font-size: 9px;
+  font-weight: 650;
+}
+
+.field label span {
+  color: #777;
+}
+
+.field input,
+.field select {
+  width: 100%;
+  min-height: 39px;
+
+  box-sizing: border-box;
+
+  padding: 9px 11px;
+
+  border: 1px solid #dcdcd9;
+  border-radius: 7px;
+
+  outline: none;
+
+  background: #fff;
+  color: #111;
+
+  font-family: inherit;
+  font-size: 10px;
+
+  transition:
+    border-color .2s ease,
+    box-shadow .2s ease;
+}
+
+.field input::placeholder {
+  color: #b0b0ae;
+}
+
+.field input:focus,
+.field select:focus {
+  border-color: #111;
+
+  box-shadow:
+    0 0 0 2px rgba(0, 0, 0, .05);
+}
+
+.field select {
+  cursor: pointer;
+}
+
+.field small {
+  margin-top: 5px;
+
+  color: #777;
+
+  font-size: 8px;
+}
+
+
+/* =================================
+   STATUS PREVIEW
+   ================================= */
+
+.status-preview {
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 13px;
+
+  border: 1px solid #e5e5e3;
+  border-radius: 8px;
+
+  background: #fafaf8;
+}
+
+.status-icon {
+  width: 38px;
+  height: 38px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 8px;
+
+  background: #111;
+  color: #fff;
+
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.status-preview strong {
+  display: block;
+
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.status-preview span {
+  display: block;
+
+  margin-top: 4px;
+
+  color: #999;
+
+  font-size: 8px;
+}
+
+
+/* =================================
+   FORM ACTIONS
+   ================================= */
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+
+  gap: 8px;
+
+  padding-top: 4px;
+}
+
+
+/* =================================
+   SECONDARY
+   ================================= */
+
+.secondary {
+  padding: 10px 17px;
+
+  border: 1px solid #d7d7d5;
+  border-radius: 999px;
+
+  background: #fff;
+  color: #333;
+
+  font-size: 9px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background .2s ease,
+    color .2s ease,
+    border-color .2s ease;
+}
+
+.secondary:hover:not(:disabled) {
+  background: #f1f1ef;
+  border-color: #cfcfcd;
+}
+
+
+/* =================================
+   PRIMARY
+   ================================= */
+
+.primary {
+  padding: 10px 17px;
+
+  border: 1px solid #111;
+  border-radius: 999px;
+
+  background: #111;
+  color: #fff;
+
+  font-size: 9px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background .2s ease,
+    color .2s ease,
+    border-color .2s ease;
+}
+
+.primary:hover:not(:disabled) {
+  background: #fff;
+  color: #111;
+}
+
+
+/* =================================
+   DISABLED
+   ================================= */
+
+.primary:disabled,
+.secondary:disabled {
+  opacity: .55;
+
+  cursor: not-allowed;
+}
+
+
+/* =================================
+   TABLET
+   ================================= */
+
+@media (max-width: 800px) {
+
+  .page {
+    padding-left: 28px;
+    padding-right: 28px;
+  }
+
+  .page-header {
+    align-items: flex-start;
+
+    flex-direction: column;
+  }
+
+  .back-button {
+    width: auto;
+  }
+
+}
+
+
+/* =================================
+   MOBILE
+   ================================= */
+
+@media (max-width: 600px) {
+
+  .page {
+    padding: 25px 18px 35px;
+  }
+
+  .page-header h1 {
+    font-size: 25px;
+  }
+
+  .form-section {
+    padding: 18px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+
+    gap: 16px;
+  }
+
+  .back-button {
+    width: 100%;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+
+    align-items: stretch;
+  }
+
+  .primary,
+  .secondary {
+    width: 100%;
+  }
+
+}
+
+
+/* =================================
+   SMALL PHONE
+   ================================= */
+
+@media (max-width: 390px) {
+
+  .page {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .form-section {
+    padding: 15px;
+  }
+
+}

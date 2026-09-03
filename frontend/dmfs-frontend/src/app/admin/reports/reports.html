@@ -1,0 +1,79 @@
+<div class="page-shell">
+
+  <header class="page-header">
+
+    <div>
+      <p class="eyebrow">COMPANY REPORTING</p>
+      <h1>Reports</h1>
+      <p class="description">
+        Review reports and summaries generated from company activity.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="secondary-button"
+      (click)="goBack()"
+    >
+      Back to Dashboard
+    </button>
+
+  </header>
+
+  <section class="report-grid">
+
+    @for (report of reports; track report.title) {
+
+      <article class="report-card">
+
+        <div class="report-top">
+
+          <div class="report-icon">
+            RP
+          </div>
+
+          <span class="report-count">
+            {{ report.count }}
+          </span>
+
+        </div>
+
+        <h2>
+          {{ report.title }}
+        </h2>
+
+        <p>
+          {{ report.description }}
+        </p>
+
+        <button
+          type="button"
+          class="outline-button"
+        >
+          View Report
+        </button>
+
+      </article>
+
+    }
+
+  </section>
+
+  <section class="notice">
+
+    <p class="eyebrow">
+      REPORTING STATUS
+    </p>
+
+    <h2>
+      Reports are ready for operational data.
+    </h2>
+
+    <p>
+      Detailed reports will populate automatically as clients,
+      survey requests and field operations are recorded.
+    </p>
+
+  </section>
+
+</div>

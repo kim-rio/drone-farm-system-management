@@ -1,0 +1,504 @@
+<div class="page-shell">
+
+  <header class="page-header">
+
+    <div>
+
+      <p class="eyebrow">
+        OPERATIONS
+      </p>
+
+      <h1>
+        Service Catalogue
+      </h1>
+
+      <p class="description">
+        Manage the services your company provides to clients.
+      </p>
+
+    </div>
+
+    <div class="header-actions">
+
+      <button
+        type="button"
+        class="secondary-button"
+        (click)="goBack()"
+      >
+        Back to Operations
+      </button>
+
+      <button
+        type="button"
+        class="primary-button"
+        (click)="openCreate()"
+      >
+        Add Service
+      </button>
+
+    </div>
+
+  </header>
+
+
+  <section class="summary-grid">
+
+    <article class="summary-card">
+
+      <span>
+        Total Services
+      </span>
+
+      <strong>
+        {{ services.length }}
+      </strong>
+
+    </article>
+
+
+    <article class="summary-card">
+
+      <span>
+        Active
+      </span>
+
+      <strong>
+        {{ activeCount }}
+      </strong>
+
+    </article>
+
+
+    <article class="summary-card">
+
+      <span>
+        Inactive
+      </span>
+
+      <strong>
+        {{ inactiveCount }}
+      </strong>
+
+    </article>
+
+  </section>
+
+
+  @if (errorMessage) {
+
+    <div class="error-message">
+      {{ errorMessage }}
+    </div>
+
+  }
+
+
+  <section class="panel">
+
+    <div class="panel-header">
+
+      <div>
+
+        <h2>
+          Available Services
+        </h2>
+
+        <p>
+          Services available for company service requests.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    @if (loading) {
+
+      <div class="empty-state">
+
+        <h2>
+          Loading services...
+        </h2>
+
+      </div>
+
+    }
+
+    @else if (services.length === 0) {
+
+      <div class="empty-state">
+
+        <div class="empty-icon">
+          SC
+        </div>
+
+        <h2>
+          No services available
+        </h2>
+
+        <p>
+          Add services to define what your company can provide
+          to clients.
+        </p>
+
+      </div>
+
+    }
+
+    @else {
+
+      <div class="table">
+
+        <div class="table-header">
+
+          <span>Service</span>
+          <span>Category</span>
+          <span>Unit</span>
+          <span>Price</span>
+          <span>Min. Area</span>
+          <span>Duration</span>
+          <span>Status</span>
+          <span>Actions</span>
+
+        </div>
+
+
+        @for (service of services; track service.id) {
+
+          <div class="table-row">
+
+            <div class="service-name">
+
+              <strong>
+                {{ service.name }}
+              </strong>
+
+              <span>
+                {{ service.description }}
+              </span>
+
+            </div>
+
+
+            <span>
+              {{ service.category }}
+            </span>
+
+
+            <span>
+              {{ service.unitOfMeasurement }}
+            </span>
+
+
+            <strong>
+              {{ service.standardPrice | number:'1.2-2' }}
+            </strong>
+
+
+            <span>
+              {{ service.minimumArea | number:'1.0-2' }}
+            </span>
+
+
+            <span>
+              {{ service.estimatedDurationMinutes }} min
+            </span>
+
+
+            <span
+              class="status"
+              [class.active]="service.status === 'ACTIVE'"
+              [class.inactive]="service.status === 'INACTIVE'"
+            >
+              {{ service.status }}
+            </span>
+
+
+            <div class="actions">
+
+              <button
+                type="button"
+                class="action-button"
+                (click)="openEdit(service)"
+              >
+                Edit
+              </button>
+
+
+              @if (service.status === 'ACTIVE') {
+
+                <button
+                  type="button"
+                  class="action-button danger"
+                  (click)="deactivate(service)"
+                >
+                  Deactivate
+                </button>
+
+              }
+
+            </div>
+
+          </div>
+
+        }
+
+      </div>
+
+    }
+
+  </section>
+
+
+  @if (showForm) {
+
+    <div class="modal-backdrop">
+
+      <section class="modal">
+
+        <header class="modal-header">
+
+          <div>
+
+            <p class="eyebrow">
+              SERVICE CATALOGUE
+            </p>
+
+            <h2>
+              {{
+                editingId === null
+                  ? 'Add Service'
+                  : 'Edit Service'
+              }}
+            </h2>
+
+          </div>
+
+
+          <button
+            type="button"
+            class="close-button"
+            (click)="closeForm()"
+          >
+            ×
+          </button>
+
+        </header>
+
+
+        <form
+          class="form"
+          (ngSubmit)="save()"
+        >
+
+          <div class="form-grid">
+
+            <label>
+
+              <span>
+                Service Name
+              </span>
+
+              <input
+                type="text"
+                name="name"
+                [(ngModel)]="form.name"
+                required
+              >
+
+            </label>
+
+
+            <label>
+
+              <span>
+                Category
+              </span>
+
+              <input
+                type="text"
+                name="category"
+                [(ngModel)]="form.category"
+                placeholder="e.g. Survey"
+                required
+              >
+
+            </label>
+
+
+            <label>
+
+              <span>
+                Unit of Measurement
+              </span>
+
+              <input
+                type="text"
+                name="unitOfMeasurement"
+                [(ngModel)]="form.unitOfMeasurement"
+                placeholder="e.g. Acre"
+                required
+              >
+
+            </label>
+
+
+            <label>
+
+              <span>
+                Standard Price
+              </span>
+
+              <input
+                type="number"
+                name="standardPrice"
+                [(ngModel)]="form.standardPrice"
+                min="0"
+                step="0.01"
+                required
+              >
+
+            </label>
+
+
+            <label>
+
+              <span>
+                Minimum Area
+              </span>
+
+              <input
+                type="number"
+                name="minimumArea"
+                [(ngModel)]="form.minimumArea"
+                min="0"
+                step="0.01"
+                required
+              >
+
+            </label>
+
+
+            <label>
+
+              <span>
+                Estimated Duration (minutes)
+              </span>
+
+              <input
+                type="number"
+                name="estimatedDurationMinutes"
+                [(ngModel)]="form.estimatedDurationMinutes"
+                min="1"
+                required
+              >
+
+            </label>
+
+
+            <label>
+
+              <span>
+                Status
+              </span>
+
+              <select
+                name="status"
+                [(ngModel)]="form.status"
+              >
+
+                <option value="ACTIVE">
+                  ACTIVE
+                </option>
+
+                <option value="INACTIVE">
+                  INACTIVE
+                </option>
+
+              </select>
+
+            </label>
+
+          </div>
+
+
+          <label>
+
+            <span>
+              Description
+            </span>
+
+            <textarea
+              name="description"
+              [(ngModel)]="form.description"
+              rows="3"
+              required
+            ></textarea>
+
+          </label>
+
+
+          <label>
+
+            <span>
+              Required Equipment
+            </span>
+
+            <textarea
+              name="requiredEquipment"
+              [(ngModel)]="form.requiredEquipment"
+              rows="2"
+              placeholder="e.g. Drone, multispectral camera"
+            ></textarea>
+
+          </label>
+
+
+          <label>
+
+            <span>
+              Required Personnel
+            </span>
+
+            <textarea
+              name="requiredPersonnel"
+              [(ngModel)]="form.requiredPersonnel"
+              rows="2"
+              placeholder="e.g. Geologist, drone operator"
+            ></textarea>
+
+          </label>
+
+
+          <div class="form-actions">
+
+            <button
+              type="button"
+              class="secondary-button"
+              (click)="closeForm()"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              class="primary-button"
+            >
+              {{
+                editingId === null
+                  ? 'Create Service'
+                  : 'Save Changes'
+              }}
+            </button>
+
+          </div>
+
+        </form>
+
+      </section>
+
+    </div>
+
+  }
+
+</div>
