@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   CreateStaffRequest,
@@ -21,7 +21,7 @@ export class Staff {
 
   staff: StaffMember[] = [];
 
-  loading = false;
+  loading = signal(true);
   saving = false;
 
   errorMessage = '';
@@ -49,15 +49,22 @@ export class Staff {
   }
 
   loadStaff(): void {
-    this.loading = true;
+    this.loading.set(true);
+    this.errorMessage = '';
 
     this.staffService.getStaff().subscribe({
       next: (staff) => {
+        console.log('STAFF LOADED:', staff);
+
         this.staff = staff;
-        this.loading = false;
+        this.loading.set(false);
       },
+
       error: (error) => {
-        this.loading = false;
+        console.error('STAFF LOAD ERROR:', error);
+
+        this.loading.set(false);
+
         this.errorMessage =
           error?.error?.message ??
           'Unable to load staff.';
@@ -107,10 +114,7 @@ export class Staff {
 
   saveStaff(): void {
 
-    console.log('========== SAVE STAFF START ==========');
-
     if (this.saving) {
-      console.log('BLOCKED: saving is already true');
       return;
     }
 
@@ -124,7 +128,6 @@ export class Staff {
     ) {
       this.errorMessage =
         'Please complete all required fields.';
-      console.log('VALIDATION FAILED');
       return;
     }
 
@@ -134,14 +137,10 @@ export class Staff {
     ) {
       this.errorMessage =
         'Password must be at least 8 characters.';
-      console.log('PASSWORD VALIDATION FAILED');
       return;
     }
 
     this.saving = true;
-
-    console.log('saving = TRUE');
-    console.log('editingStaff:', this.editingStaff);
 
     if (this.editingStaff) {
 
@@ -152,16 +151,11 @@ export class Staff {
         role: this.form.role
       };
 
-      console.log('SENDING UPDATE REQUEST');
-
       this.staffService
         .updateStaff(this.editingStaff.id, request)
         .subscribe({
 
-          next: (response) => {
-
-            console.log('UPDATE NEXT:', response);
-
+          next: () => {
             this.saving = false;
             this.showForm = false;
             this.editingStaff = null;
@@ -173,18 +167,11 @@ export class Staff {
           },
 
           error: (error) => {
-
-            console.log('UPDATE ERROR:', error);
-
             this.saving = false;
 
             this.errorMessage =
               error?.error?.message ??
               'Unable to update staff member.';
-          },
-
-          complete: () => {
-            console.log('UPDATE COMPLETE');
           }
         });
 
@@ -199,51 +186,29 @@ export class Staff {
       role: this.form.role
     };
 
-    console.log('CREATE REQUEST:', request);
-    console.log('SENDING CREATE REQUEST');
-
     this.staffService
       .createStaff(request)
       .subscribe({
 
-        next: (response) => {
-
-          console.log('CREATE NEXT:', response);
-
+        next: () => {
           this.saving = false;
-
-          console.log('saving = FALSE');
-
           this.showForm = false;
           this.editingStaff = null;
 
           this.successMessage =
             'Staff member created successfully.';
 
-          console.log('MODAL CLOSED');
-
           this.loadStaff();
         },
 
         error: (error) => {
-
-          console.log('CREATE ERROR:', error);
-
           this.saving = false;
-
-          console.log('saving = FALSE FROM ERROR');
 
           this.errorMessage =
             error?.error?.message ??
             'Unable to create staff member.';
-        },
-
-        complete: () => {
-          console.log('CREATE COMPLETE');
         }
       });
-
-    console.log('SUBSCRIBE REGISTERED');
   }
 
   toggleStatus(member: StaffMember): void {
