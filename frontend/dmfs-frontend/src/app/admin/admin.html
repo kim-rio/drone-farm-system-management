@@ -44,7 +44,7 @@
   <section class="stats">
 
     @for (
-      stat of dashboardStats;
+      stat of dashboardStats();
       track stat.title
     ) {
 
@@ -67,6 +67,14 @@
     }
 
   </section>
+
+  @if (errorMessage()) {
+
+    <section class="error-card">
+      {{ errorMessage() }}
+    </section>
+
+  }
 
   <section class="section">
 
@@ -134,7 +142,7 @@
               cy="60"
               r="48"
               [style.stroke-dashoffset]="
-                getProgressOffset(activeStaffProgress)
+                getProgressOffset(activeStaffProgress())
               "
             ></circle>
 
@@ -143,7 +151,7 @@
           <div class="circle-value">
 
             <strong>
-              {{ activeStaffProgress }}%
+              {{ activeStaffProgress() }}%
             </strong>
 
             <span>
@@ -162,7 +170,7 @@
             </span>
 
             <strong>
-              {{ dashboardStats[0].value }}
+              {{ dashboardStats()[0].value }}
             </strong>
           </div>
 
@@ -172,7 +180,7 @@
             </span>
 
             <strong>
-              {{ dashboardStats[1].value }}
+              {{ dashboardStats()[1].value }}
             </strong>
           </div>
 
@@ -182,7 +190,7 @@
             </span>
 
             <strong>
-              {{ inactiveStaff }}
+              {{ inactiveStaff() }}
             </strong>
           </div>
 
@@ -236,7 +244,7 @@
               cy="60"
               r="48"
               [style.stroke-dashoffset]="
-                getProgressOffset(operationProgress)
+                getProgressOffset(operationProgress())
               "
             ></circle>
 
@@ -245,7 +253,7 @@
           <div class="circle-value">
 
             <strong>
-              {{ operationProgress }}%
+              {{ operationProgress() }}%
             </strong>
 
             <span>
@@ -264,7 +272,7 @@
             </span>
 
             <strong>
-              {{ dashboardStats[2].value }}
+              {{ dashboardStats()[2].value }}
             </strong>
           </div>
 
@@ -274,7 +282,7 @@
             </span>
 
             <strong>
-              {{ dashboardStats[3].value }}
+              {{ dashboardStats()[3].value }}
             </strong>
           </div>
 
@@ -284,7 +292,7 @@
             </span>
 
             <strong>
-              {{ totalOperations }}
+              {{ totalOperations() }}
             </strong>
           </div>
 
@@ -325,11 +333,22 @@
           </div>
 
           <strong>
-            Company Account
+            {{ company()?.name || 'Company Account' }}
           </strong>
 
           <span>
-            Your company is registered on the DMFS platform.
+
+            @if (company()) {
+
+              {{ company()!.name }}
+              is registered on the DMFS platform.
+
+            } @else {
+
+              Company information is loading.
+
+            }
+
           </span>
 
         </div>
@@ -342,7 +361,7 @@
             </span>
 
             <strong>
-              {{ dashboardStats[0].value }}
+              {{ dashboardStats()[0].value }}
             </strong>
           </div>
 
@@ -352,7 +371,7 @@
             </span>
 
             <strong>
-              {{ dashboardStats[2].value }}
+              {{ dashboardStats()[2].value }}
             </strong>
           </div>
 
@@ -362,7 +381,7 @@
             </span>
 
             <strong>
-              {{ dashboardStats[3].value }}
+              {{ dashboardStats()[3].value }}
             </strong>
           </div>
 
@@ -415,7 +434,7 @@
           </span>
 
           <strong>
-            {{ dashboardStats[0].value }}
+            {{ dashboardStats()[0].value }}
           </strong>
 
         </div>
@@ -427,7 +446,7 @@
           </span>
 
           <strong>
-            {{ dashboardStats[1].value }}
+            {{ dashboardStats()[1].value }}
           </strong>
 
         </div>
@@ -439,7 +458,7 @@
           </span>
 
           <strong>
-            {{ inactiveStaff }}
+            {{ inactiveStaff() }}
           </strong>
 
         </div>
@@ -468,6 +487,14 @@
 
         </div>
 
+        <button
+          type="button"
+          class="view-button"
+          (click)="openOperations()"
+        >
+          View Operations
+        </button>
+
       </div>
 
       <div class="user-overview">
@@ -475,7 +502,7 @@
         <div class="user-total">
 
           <strong>
-            {{ totalOperations }}
+            {{ totalOperations() }}
           </strong>
 
           <span>
@@ -491,7 +518,7 @@
           </span>
 
           <strong>
-            {{ dashboardStats[2].value }}
+            {{ dashboardStats()[2].value }}
           </strong>
 
         </div>
@@ -503,7 +530,7 @@
           </span>
 
           <strong>
-            {{ dashboardStats[3].value }}
+            {{ dashboardStats()[3].value }}
           </strong>
 
         </div>

@@ -110,7 +110,7 @@ export class Management {
   }
 
   newSurveyRequest(): void {
-    this.router.navigate(['/management/surveys/new']);
+    this.router.navigate(['/management/service-request/create']);
   }
 
   openSettings(): void {

@@ -56,7 +56,6 @@ export interface ServiceRequest {
   updatedAt?: string;
 }
 
-
 export interface CreateServiceRequestPayload {
 
   customer: {
@@ -82,7 +81,6 @@ export interface CreateServiceRequestPayload {
   status?: string;
 }
 
-
 @Injectable({
   providedIn: 'root'
 })
@@ -90,12 +88,9 @@ export class ServiceRequestService {
 
   private readonly http = inject(HttpClient);
 
-  private readonly apiUrl =
-    'http://localhost:8080/api/service-requests';
-
+  private readonly apiUrl = '/api/service-requests';
 
   getRequests(): Observable<ServiceRequest[]> {
-
     return this.http.get<ServiceRequest[]>(
       this.apiUrl,
       {
@@ -104,11 +99,9 @@ export class ServiceRequestService {
     );
   }
 
-
   getRequest(
     id: number
   ): Observable<ServiceRequest> {
-
     return this.http.get<ServiceRequest>(
       `${this.apiUrl}/${id}`,
       {
@@ -117,11 +110,9 @@ export class ServiceRequestService {
     );
   }
 
-
   createRequest(
     request: CreateServiceRequestPayload
   ): Observable<ServiceRequest> {
-
     return this.http.post<ServiceRequest>(
       this.apiUrl,
       request,
@@ -131,12 +122,10 @@ export class ServiceRequestService {
     );
   }
 
-
   updateRequest(
     id: number,
     request: CreateServiceRequestPayload
   ): Observable<ServiceRequest> {
-
     return this.http.put<ServiceRequest>(
       `${this.apiUrl}/${id}`,
       request,
@@ -146,12 +135,10 @@ export class ServiceRequestService {
     );
   }
 
-
   updateStatus(
     id: number,
     status: string
   ): Observable<void> {
-
     return this.http.patch<void>(
       `${this.apiUrl}/${id}/status`,
       {},
@@ -164,11 +151,9 @@ export class ServiceRequestService {
     );
   }
 
-
   deleteRequest(
     id: number
   ): Observable<void> {
-
     return this.http.delete<void>(
       `${this.apiUrl}/${id}`,
       {
