@@ -35,21 +35,35 @@
     <div class="sidebar-bottom">
 
       <div class="account">
-        <div class="account-avatar">SA</div>
+
+        <div class="account-avatar">
+          {{ getInitials() }}
+        </div>
 
         <div class="account-details">
-          <strong>Super Admin</strong>
+
+          <strong>
+            {{ user?.firstName }} {{ user?.lastName }}
+          </strong>
+
           <span>Super Admin Account</span>
+
         </div>
+
       </div>
 
       <button
         type="button"
         class="logout"
-        (click)="navigate('/login')"
+        (click)="logout()"
       >
+
         <span class="logout-circle">?</span>
-        <span class="logout-text">Logout</span>
+
+        <span class="logout-text">
+          Logout
+        </span>
+
       </button>
 
     </div>
@@ -64,17 +78,27 @@
         type="button"
         class="open-menu-button"
         (click)="toggleSidebar()"
+        aria-label="Toggle navigation"
       >
         ?
       </button>
 
       <div class="top-user">
-        <div class="top-avatar">SA</div>
+
+        <div class="top-avatar">
+          {{ getInitials() }}
+        </div>
 
         <div class="top-user-details">
-          <strong>Super Admin</strong>
+
+          <strong>
+            {{ user?.firstName }} {{ user?.lastName }}
+          </strong>
+
           <span>SUPER ADMIN</span>
+
         </div>
+
       </div>
 
     </header>
@@ -83,14 +107,20 @@
 
       <div class="page-header">
 
-        <div>
-          <p class="eyebrow">SUPER ADMIN PORTAL</p>
+        <div class="title-area">
 
-          <h2>Companies</h2>
+          <p class="eyebrow">
+            SUPER ADMIN PORTAL
+          </p>
+
+          <h2>
+            Companies
+          </h2>
 
           <p class="description">
             Manage subscriber companies registered on the platform.
           </p>
+
         </div>
 
         <div class="quick-actions">
@@ -111,35 +141,67 @@
       <section class="stats">
 
         <article class="stat-card">
-          <span class="stat-label">Total Companies</span>
-          <strong class="stat-number">{{ totalCompanies }}</strong>
+
+          <span class="stat-label">
+            Total Companies
+          </span>
+
+          <strong class="stat-number">
+            {{ totalCompanies }}
+          </strong>
+
           <span class="stat-description">
             All subscriber companies
           </span>
+
         </article>
 
         <article class="stat-card">
-          <span class="stat-label">Active</span>
-          <strong class="stat-number">{{ activeCompanies }}</strong>
+
+          <span class="stat-label">
+            Active
+          </span>
+
+          <strong class="stat-number">
+            {{ activeCompanies }}
+          </strong>
+
           <span class="stat-description">
             Currently active
           </span>
+
         </article>
 
         <article class="stat-card">
-          <span class="stat-label">Suspended</span>
-          <strong class="stat-number">{{ suspendedCompanies }}</strong>
+
+          <span class="stat-label">
+            Suspended
+          </span>
+
+          <strong class="stat-number">
+            {{ suspendedCompanies }}
+          </strong>
+
           <span class="stat-description">
             Currently suspended
           </span>
+
         </article>
 
         <article class="stat-card">
-          <span class="stat-label">Expired</span>
-          <strong class="stat-number">{{ expiredCompanies }}</strong>
+
+          <span class="stat-label">
+            Expired
+          </span>
+
+          <strong class="stat-number">
+            {{ expiredCompanies }}
+          </strong>
+
           <span class="stat-description">
             Expired companies
           </span>
+
         </article>
 
       </section>
@@ -147,10 +209,28 @@
       <section class="company-section">
 
         <div class="section-heading">
+
           <div>
-            <p class="eyebrow">SUBSCRIBERS</p>
-            <h3>Company List</h3>
+
+            <p class="eyebrow">
+              SUBSCRIBERS
+            </p>
+
+            <h3>
+              Company List
+            </h3>
+
           </div>
+
+          @if (!loading && !error && companies.length > 0) {
+
+            <span class="company-count">
+              {{ companies.length }}
+              {{ companies.length === 1 ? 'company' : 'companies' }}
+            </span>
+
+          }
+
         </div>
 
         @if (loading) {
@@ -162,7 +242,10 @@
         } @else if (error) {
 
           <div class="state error">
-            <span>{{ error }}</span>
+
+            <span>
+              {{ error }}
+            </span>
 
             <button
               type="button"
@@ -170,13 +253,16 @@
             >
               Retry
             </button>
+
           </div>
 
         } @else if (companies.length === 0) {
 
           <div class="empty-state">
 
-            <strong>No companies registered</strong>
+            <strong>
+              No companies registered
+            </strong>
 
             <span>
               Register the first subscriber company to get started.
@@ -187,8 +273,15 @@
               class="action-pill dark"
               (click)="registerCompany()"
             >
-              <span class="plus">+</span>
-              <span>Register Company</span>
+
+              <span class="plus">
+                +
+              </span>
+
+              <span>
+                Register Company
+              </span>
+
             </button>
 
           </div>
@@ -202,14 +295,16 @@
               <table>
 
                 <thead>
+
                   <tr>
                     <th>Company</th>
                     <th>Registration No.</th>
                     <th>Email</th>
                     <th>Status</th>
                     <th>Created</th>
-                    <th>Actions</th>
+                    <th class="actions-column">Actions</th>
                   </tr>
+
                 </thead>
 
                 <tbody>
@@ -222,29 +317,43 @@
                     <tr>
 
                       <td>
+
                         <div class="company-name">
+
                           <div class="company-avatar">
                             {{ company.name.charAt(0).toUpperCase() }}
                           </div>
 
-                          <div>
-                            <strong>{{ company.name }}</strong>
-                            <span>{{ company.phone || 'No phone' }}</span>
+                          <div class="company-name-text">
+
+                            <strong>
+                              {{ company.name }}
+                            </strong>
+
+                            <span>
+                              {{ company.phone || 'No phone' }}
+                            </span>
+
                           </div>
+
                         </div>
+
                       </td>
 
                       <td>
+
                         <span class="company-code">
                           {{ company.registrationNumber }}
                         </span>
+
                       </td>
 
-                      <td>
+                      <td class="email-cell">
                         {{ company.email || '—' }}
                       </td>
 
                       <td>
+
                         <span
                           class="status"
                           [class.active]="company.status === 'ACTIVE'"
@@ -253,9 +362,10 @@
                         >
                           {{ company.status }}
                         </span>
+
                       </td>
 
-                      <td>
+                      <td class="date-cell">
                         {{ formatDate(company.createdAt) }}
                       </td>
 
@@ -265,6 +375,7 @@
 
                           <button
                             type="button"
+                            class="view-action"
                             (click)="viewCompany(company.id)"
                           >
                             View
