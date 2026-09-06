@@ -1,7 +1,6 @@
 package com.dmfs.client.controller;
 
 import com.dmfs.client.dto.ClientResponse;
-import com.dmfs.client.entity.Client;
 import com.dmfs.client.entity.ClientStatus;
 import com.dmfs.client.entity.ClientType;
 import com.dmfs.client.service.ClientService;
@@ -45,12 +44,12 @@ public class ClientController {
                         request.clientCode(),
                         request.type(),
                         request.companyName(),
+                        request.registrationNumber(),
                         request.firstName(),
                         request.lastName(),
                         request.email(),
                         request.phone(),
                         request.address(),
-                        request.identificationNumber(),
                         request.tin()
                 )
         );
@@ -110,12 +109,12 @@ public class ClientController {
                         id,
                         request.type(),
                         request.companyName(),
+                        request.registrationNumber(),
                         request.firstName(),
                         request.lastName(),
                         request.email(),
                         request.phone(),
                         request.address(),
-                        request.identificationNumber(),
                         request.tin(),
                         request.status()
                 )
@@ -148,18 +147,20 @@ public class ClientController {
 
             String companyName,
 
+            String registrationNumber,
+
             String firstName,
 
             String lastName,
 
             @Email
+            @NotBlank
             String email,
 
+            @NotBlank
             String phone,
 
             String address,
-
-            String identificationNumber,
 
             String tin
     ) {
@@ -172,17 +173,20 @@ public class ClientController {
 
             String companyName,
 
+            String registrationNumber,
+
             String firstName,
 
             String lastName,
 
+            @Email
+            @NotBlank
             String email,
 
+            @NotBlank
             String phone,
 
             String address,
-
-            String identificationNumber,
 
             String tin,
 

@@ -4,7 +4,9 @@
 
     <div>
       <h1>Clients</h1>
-      <p>Manage registered clients and their farms.</p>
+      <p>
+        Manage registered companies and individuals.
+      </p>
     </div>
 
     <button
@@ -18,7 +20,6 @@
 
   </div>
 
-
   @if (loading) {
 
     <div class="state">
@@ -26,7 +27,6 @@
     </div>
 
   }
-
 
   @if (!loading && errorMessage) {
 
@@ -36,15 +36,19 @@
 
   }
 
-
-  @if (!loading && !errorMessage && clients.length === 0) {
+  @if (
+    !loading &&
+    !errorMessage &&
+    clients.length === 0
+  ) {
 
     <div class="empty">
 
       <h2>No clients yet</h2>
 
       <p>
-        Register your first client to get started.
+        Register a company or individual client
+        to get started.
       </p>
 
       <button
@@ -60,21 +64,24 @@
 
   }
 
-
-  @if (!loading && clients.length > 0) {
+  @if (!loading && !errorMessage && clients.length > 0) {
 
     <div class="client-grid">
 
-      @for (client of clients; track client.id) {
+      @for (
+        client of clients;
+        track client.id
+      ) {
 
-        <div
+        <button
+          type="button"
           class="client-card"
           (click)="openClient(client)">
 
           <div class="client-top">
 
             <div class="avatar">
-              {{ getClientName(client).charAt(0).toUpperCase() }}
+              {{ getClientInitial(client) }}
             </div>
 
             <div>
@@ -84,27 +91,26 @@
               </h2>
 
               <span class="code">
-                Code: {{ client.customerCode }}
+                Code: {{ client.clientCode }}
               </span>
 
             </div>
 
           </div>
 
-
           <div class="client-info">
 
             <div>
               <span>Email</span>
               <strong>
-                {{ client.email }}
+                {{ client.email || '—' }}
               </strong>
             </div>
 
             <div>
               <span>Phone</span>
               <strong>
-                {{ client.phone || 'â€”' }}
+                {{ client.phone || '—' }}
               </strong>
             </div>
 
@@ -124,12 +130,11 @@
 
           </div>
 
-
           <div class="view">
-            View Client â†’
+            View Client ?
           </div>
 
-        </div>
+        </button>
 
       }
 

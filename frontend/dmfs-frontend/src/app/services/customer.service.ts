@@ -2,33 +2,53 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+export type ClientType =
+  | 'INDIVIDUAL'
+  | 'COMPANY';
+
+export type ClientStatus =
+  | 'ACTIVE'
+  | 'INACTIVE'
+  | 'SUSPENDED';
+
 export interface Customer {
   id: number;
-  customerCode: string;
-  type: string;
+  clientCode: string;
+  type: ClientType;
+
   companyName?: string;
+  registrationNumber?: string;
+  tin?: string;
+
   firstName?: string;
   lastName?: string;
+
   email: string;
   phone?: string;
   address?: string;
-  identificationNumber?: string;
-  tin?: string;
-  status?: string;
+
+  status?: ClientStatus;
+  companyId?: number;
+  registeredBy?: number | null;
+
+  createdAt?: string;
+  updatedAt?: string | null;
 }
 
 export interface CreateCustomerRequest {
-  customerCode: string;
-  type: string;
+  clientCode: string;
+  type: ClientType;
+
   companyName?: string;
+  registrationNumber?: string;
+  tin?: string;
+
   firstName?: string;
   lastName?: string;
+
   email: string;
   phone?: string;
   address?: string;
-  identificationNumber?: string;
-  tin?: string;
-  password?: string;
 }
 
 @Injectable({

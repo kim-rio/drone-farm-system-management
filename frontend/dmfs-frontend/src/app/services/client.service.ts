@@ -2,9 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-export type ClientType =
-  | 'INDIVIDUAL'
-  | 'EXPLORATION_COMPANY';
+export type ClientType = 'COMPANY' | 'INDIVIDUAL';
 
 export type ClientStatus =
   | 'ACTIVE'
@@ -12,48 +10,55 @@ export type ClientStatus =
   | 'SUSPENDED';
 
 export interface Client {
+
   id: number;
+
   clientCode: string;
+
   type: ClientType;
+
   companyName?: string;
+  registrationNumber?: string;
+  tin?: string;
+
   firstName?: string;
   lastName?: string;
-  email?: string;
+
+  email: string;
+
   phone?: string;
+
   address?: string;
-  identificationNumber?: string;
-  tin?: string;
+
   status: ClientStatus;
-  companyId: number;
-  registeredBy: number | null;
-  createdAt: string;
-  updatedAt: string | null;
+
+  companyId?: number;
+
+  registeredBy?: number | null;
+
+  createdAt?: string;
+
+  updatedAt?: string | null;
 }
 
 export interface CreateClientRequest {
-  clientCode: string;
-  type: ClientType;
-  companyName?: string;
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  phone?: string;
-  address?: string;
-  identificationNumber?: string;
-  tin?: string;
-}
 
-export interface UpdateClientRequest {
+  clientCode: string;
+
   type: ClientType;
+
   companyName?: string;
+  registrationNumber?: string;
+  tin?: string;
+
   firstName?: string;
   lastName?: string;
-  email?: string;
-  phone?: string;
+
+  email: string;
+
+  phone: string;
+
   address?: string;
-  identificationNumber?: string;
-  tin?: string;
-  status: ClientStatus;
 }
 
 @Injectable({
@@ -63,7 +68,8 @@ export class ClientService {
 
   private readonly http = inject(HttpClient);
 
-  private readonly apiUrl = '/api/clients';
+  private readonly apiUrl =
+    'http://localhost:8080/api/clients';
 
   getClients(): Observable<Client[]> {
 
@@ -100,7 +106,9 @@ export class ClientService {
 
   updateClient(
     id: number,
-    client: UpdateClientRequest
+    client: CreateClientRequest & {
+      status: ClientStatus;
+    }
   ): Observable<Client> {
 
     return this.http.put<Client>(

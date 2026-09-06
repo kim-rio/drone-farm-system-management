@@ -1,6 +1,8 @@
 package com.dmfs.service.service;
 
 import com.dmfs.client.entity.Client;
+import com.dmfs.client.entity.ClientCompany;
+import com.dmfs.client.entity.ClientIndividual;
 import com.dmfs.farm.entity.Block;
 import com.dmfs.farm.entity.Farm;
 import com.dmfs.service.dto.ServiceRequestResponse;
@@ -69,25 +71,48 @@ public class ServiceRequestMapper {
                             : null
             );
 
-            customerInfo.setCompanyName(
-                    client.getCompanyName()
-            );
+            ClientCompany companyProfile =
+                    client.getCompanyProfile();
 
-            customerInfo.setFirstName(
-                    client.getFirstName()
-            );
+            ClientIndividual individualProfile =
+                    client.getIndividualProfile();
 
-            customerInfo.setLastName(
-                    client.getLastName()
-            );
+            if (client.getType() != null
+                    && client.getType().name().equals("COMPANY")) {
 
-            customerInfo.setEmail(
-                    client.getEmail()
-            );
+                if (companyProfile != null) {
 
-            customerInfo.setPhone(
-                    client.getPhone()
-            );
+                    customerInfo.setCompanyName(
+                            companyProfile.getCompanyName()
+                    );
+
+                    customerInfo.setEmail(
+                            companyProfile.getEmail()
+                    );
+
+                    customerInfo.setPhone(
+                            companyProfile.getPhone()
+                    );
+                }
+
+            } else if (individualProfile != null) {
+
+                customerInfo.setFirstName(
+                        individualProfile.getFirstName()
+                );
+
+                customerInfo.setLastName(
+                        individualProfile.getLastName()
+                );
+
+                customerInfo.setEmail(
+                        individualProfile.getEmail()
+                );
+
+                customerInfo.setPhone(
+                        individualProfile.getPhone()
+                );
+            }
 
             customerInfo.setStatus(
                     client.getStatus() != null

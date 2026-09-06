@@ -1,16 +1,16 @@
 import {
+  ChangeDetectorRef,
   Component,
   OnInit,
-  inject,
-  ChangeDetectorRef
+  inject
 } from '@angular/core';
 
 import { Router } from '@angular/router';
 
 import {
-  Customer,
-  CustomerService
-} from '../../../services/customer.service';
+  Client,
+  ClientService
+} from '../../../services/client.service';
 
 @Component({
   selector: 'app-client-list',
@@ -20,11 +20,16 @@ import {
 })
 export class ClientList implements OnInit {
 
-  private readonly customerService = inject(CustomerService);
-  private readonly router = inject(Router);
-  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly clientService =
+    inject(ClientService);
 
-  clients: Customer[] = [];
+  private readonly router =
+    inject(Router);
+
+  private readonly cdr =
+    inject(ChangeDetectorRef);
+
+  clients: Client[] = [];
 
   loading = true;
 
@@ -39,47 +44,52 @@ export class ClientList implements OnInit {
     this.loading = true;
     this.errorMessage = '';
 
-    this.customerService.getCustomers().subscribe({
+    this.clientService
+      .getClients()
+      .subscribe({
 
-      next: (customers: Customer[]) => {
+        next: (clients: Client[]) => {
 
-        console.log('CUSTOMERS RECEIVED:', customers);
+          this.clients = clients;
 
-        this.clients = customers;
+          this.loading = false;
 
-        this.loading = false;
+          this.cdr.detectChanges();
+        },
 
-        console.log('LOADING:', this.loading);
-        console.log('CLIENT COUNT:', this.clients.length);
+        error: (error: unknown) => {
 
-        // Force Angular to update the page
-        this.cdr.detectChanges();
-      },
+          console.error(
+            'CLIENT LOAD ERROR:',
+            error
+          );
 
-      error: (error: unknown) => {
+          this.loading = false;
 
-        console.error('CUSTOMER LOAD ERROR:', error);
+          if (
+            typeof error === 'object' &&
+            error !== null &&
+            'status' in error
+          ) {
 
-        this.loading = false;
+            const status =
+              (error as { status: number }).status;
 
-        if (
-          typeof error === 'object' &&
-          error !== null &&
-          'status' in error
-        ) {
+            if (status === 401) {
 
-          const status =
-            (error as { status: number }).status;
+              this.errorMessage =
+                'Your session has expired. Please log in again.';
 
-          if (status === 401) {
+            } else if (status === 403) {
 
-            this.errorMessage =
-              'Your session has expired. Please log in again.';
+              this.errorMessage =
+                'You do not have permission to view clients.';
 
-          } else if (status === 403) {
+            } else {
 
-            this.errorMessage =
-              'You do not have permission to view clients.';
+              this.errorMessage =
+                'Unable to load clients.';
+            }
 
           } else {
 
@@ -87,16 +97,9 @@ export class ClientList implements OnInit {
               'Unable to load clients.';
           }
 
-        } else {
-
-          this.errorMessage =
-            'Unable to load clients.';
+          this.cdr.detectChanges();
         }
-
-        // Force Angular to update the page
-        this.cdr.detectChanges();
-      }
-    });
+      });
   }
 
   registerClient(): void {
@@ -106,7 +109,7 @@ export class ClientList implements OnInit {
     ]);
   }
 
-  openClient(client: Customer): void {
+  openClient(client: Client): void {
 
     if (!client.id) {
       return;
@@ -118,10 +121,12 @@ export class ClientList implements OnInit {
     ]);
   }
 
-  getClientName(client: Customer): string {
+  getClientName(client: Client): string {
 
-    if (client.companyName?.trim()) {
-      return client.companyName;
+    if (client.type === 'COMPANY') {
+
+      return client.companyName?.trim()
+        || 'Unnamed Company';
     }
 
     const fullName =
@@ -129,5 +134,12 @@ export class ClientList implements OnInit {
         .trim();
 
     return fullName || 'Unnamed Client';
+  }
+
+  getClientInitial(client: Client): string {
+
+    return this.getClientName(client)
+      .charAt(0)
+      .toUpperCase();
   }
 }
