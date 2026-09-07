@@ -19,7 +19,7 @@
           class="back"
           (click)="backToRequests()">
 
-          ← Service Requests
+          â† Service Requests
 
         </button>
 
@@ -166,18 +166,18 @@
 
       <div class="details-grid">
 
-        <!-- CUSTOMER -->
+        <!-- client -->
 
         <section class="card">
 
           <div class="card-heading">
 
             <span>
-              CUSTOMER
+              client
             </span>
 
             <h2>
-              Customer Information
+              client Information
             </h2>
 
           </div>
@@ -187,35 +187,35 @@
             <div>
               <span>Name</span>
               <strong>
-                {{ getCustomerName() }}
+                {{ getClientName() }}
               </strong>
             </div>
 
             <div>
-              <span>Customer Code</span>
+              <span>client Code</span>
               <strong>
-                {{ request.customer.customerCode || '—' }}
+                {{ request.client.clientCode || 'â€”' }}
               </strong>
             </div>
 
             <div>
               <span>Type</span>
               <strong>
-                {{ request.customer.type || '—' }}
+                {{ request.client.type || 'â€”' }}
               </strong>
             </div>
 
             <div>
               <span>Email</span>
               <strong>
-                {{ request.customer.email || '—' }}
+                {{ request.client.email || 'â€”' }}
               </strong>
             </div>
 
             <div>
               <span>Phone</span>
               <strong>
-                {{ request.customer.phone || '—' }}
+                {{ request.client.phone || 'â€”' }}
               </strong>
             </div>
 
@@ -245,7 +245,7 @@
             <div>
               <span>Farm</span>
               <strong>
-                {{ request.farm.name || '—' }}
+                {{ request.farm.name || 'â€”' }}
               </strong>
             </div>
 
@@ -255,7 +255,7 @@
                 {{
                   request.farm.areaHectares != null
                     ? request.farm.areaHectares + ' ha'
-                    : '—'
+                    : 'â€”'
                 }}
               </strong>
             </div>
@@ -263,7 +263,7 @@
             <div>
               <span>Description</span>
               <strong>
-                {{ request.farm.description || '—' }}
+                {{ request.farm.description || 'â€”' }}
               </strong>
             </div>
 
@@ -293,7 +293,7 @@
             <div>
               <span>Block</span>
               <strong>
-                {{ request.farmBlock.name || '—' }}
+                {{ request.farmBlock.name || 'â€”' }}
               </strong>
             </div>
 
@@ -303,7 +303,7 @@
                 {{
                   request.farmBlock.areaHectares != null
                     ? request.farmBlock.areaHectares + ' ha'
-                    : '—'
+                    : 'â€”'
                 }}
               </strong>
             </div>
@@ -311,14 +311,14 @@
             <div>
               <span>Centre Latitude</span>
               <strong>
-                {{ request.farmBlock.centerLatitude ?? '—' }}
+                {{ request.farmBlock.centerLatitude ?? 'â€”' }}
               </strong>
             </div>
 
             <div>
               <span>Centre Longitude</span>
               <strong>
-                {{ request.farmBlock.centerLongitude ?? '—' }}
+                {{ request.farmBlock.centerLongitude ?? 'â€”' }}
               </strong>
             </div>
 
@@ -348,21 +348,21 @@
             <div>
               <span>Service</span>
               <strong>
-                {{ request.serviceCatalogue.name || '—' }}
+                {{ request.serviceCatalogue.name || 'â€”' }}
               </strong>
             </div>
 
             <div>
               <span>Category</span>
               <strong>
-                {{ request.serviceCatalogue.category || '—' }}
+                {{ request.serviceCatalogue.category || 'â€”' }}
               </strong>
             </div>
 
             <div>
               <span>Unit</span>
               <strong>
-                {{ request.serviceCatalogue.unitOfMeasurement || '—' }}
+                {{ request.serviceCatalogue.unitOfMeasurement || 'â€”' }}
               </strong>
             </div>
 
@@ -382,7 +382,7 @@
                 {{
                   request.serviceCatalogue.minimumArea != null
                     ? request.serviceCatalogue.minimumArea + ' ha'
-                    : '—'
+                    : 'â€”'
                 }}
               </strong>
             </div>
@@ -393,7 +393,7 @@
                 {{
                   request.serviceCatalogue.estimatedDurationMinutes != null
                     ? request.serviceCatalogue.estimatedDurationMinutes + ' minutes'
-                    : '—'
+                    : 'â€”'
                 }}
               </strong>
             </div>
@@ -479,37 +479,37 @@
 
             <div class="form-group">
 
-              <label for="customer">
-                Customer *
+              <label for="client">
+                client *
               </label>
 
               <select
-                id="customer"
-                name="customer"
-                [(ngModel)]="selectedCustomerId"
-                (ngModelChange)="onCustomerChange()"
+                id="client"
+                name="client"
+                [(ngModel)]="selectedClientId"
+                (ngModelChange)="onClientChange()"
                 required>
 
                 <option [ngValue]="null">
-                  Select customer
+                  Select client
                 </option>
 
                 @for (
-                  customer of customers;
-                  track customer.id
+                  client of clients;
+                  track client.id
                 ) {
 
                   <option
-                    [ngValue]="customer.id">
+                    [ngValue]="client.id">
 
                     {{
-                      customer.companyName ||
+                      client.companyName ||
                       (
-                        (customer.firstName || '') +
+                        (client.firstName || '') +
                         ' ' +
-                        (customer.lastName || '')
+                        (client.lastName || '')
                       ).trim() ||
-                      customer.clientCode
+                      client.clientCode
                     }}
 
                   </option>
@@ -532,7 +532,7 @@
                 name="farm"
                 [(ngModel)]="selectedFarmId"
                 (ngModelChange)="onFarmChange()"
-                [disabled]="!selectedCustomerId"
+                [disabled]="!selectedClientId"
                 required>
 
                 <option [ngValue]="null">
@@ -726,3 +726,4 @@
   }
 
 </div>
+

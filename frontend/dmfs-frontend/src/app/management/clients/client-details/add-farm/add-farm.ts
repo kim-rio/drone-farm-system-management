@@ -30,7 +30,7 @@ export class AddFarm {
     inject(ChangeDetectorRef);
 
   @Input({ required: true })
-  customerId!: number;
+  clientId!: number;
 
   @Output()
   closed = new EventEmitter<void>();
@@ -94,7 +94,7 @@ export class AddFarm {
 
     this.farmService
       .createFarm(
-        this.customerId,
+        this.clientId,
         {
           name: this.farm.name.trim(),
           description: this.farm.description.trim(),

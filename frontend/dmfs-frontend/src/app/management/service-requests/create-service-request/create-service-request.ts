@@ -10,9 +10,9 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
 import {
-  Customer,
-  CustomerService
-} from '../../../services/customer.service';
+  Client,
+  ClientService
+} from '../../../services/client.service';
 
 import {
   Farm,
@@ -47,8 +47,8 @@ import {
 })
 export class CreateServiceRequest implements OnInit {
 
-  private readonly customerService =
-    inject(CustomerService);
+  private readonly clientService =
+    inject(ClientService);
 
   private readonly farmService =
     inject(FarmService);
@@ -73,7 +73,7 @@ export class CreateServiceRequest implements OnInit {
      DATA
      ============================== */
 
-  customers: Customer[] = [];
+  clients: Client[] = [];
 
   farms: Farm[] = [];
 
@@ -86,7 +86,7 @@ export class CreateServiceRequest implements OnInit {
      FORM
      ============================== */
 
-  selectedCustomerId: number | null = null;
+  selectedClientId: number | null = null;
 
   selectedFarmId: number | null = null;
 
@@ -103,7 +103,7 @@ export class CreateServiceRequest implements OnInit {
      STATE
      ============================== */
 
-  loadingCustomers = true;
+  loadingClients = true;
 
   loadingServices = true;
 
@@ -124,29 +124,29 @@ export class CreateServiceRequest implements OnInit {
 
   ngOnInit(): void {
 
-    this.loadCustomers();
+    this.loadClients();
 
     this.loadServices();
   }
 
 
   /* ==============================
-     CUSTOMERS
+     clients
      ============================== */
 
-  loadCustomers(): void {
+  loadClients(): void {
 
-    this.loadingCustomers = true;
+    this.loadingClients = true;
 
-    this.customerService
-      .getCustomers()
+    this.clientService
+      .getClients()
       .subscribe({
 
-        next: (customers) => {
+        next: (clients) => {
 
-          this.customers = customers;
+          this.clients = clients;
 
-          this.loadingCustomers = false;
+          this.loadingClients = false;
 
           this.cdr.detectChanges();
         },
@@ -154,14 +154,14 @@ export class CreateServiceRequest implements OnInit {
         error: (error) => {
 
           console.error(
-            'CUSTOMER LOAD ERROR:',
+            'Client LOAD ERROR:',
             error
           );
 
-          this.loadingCustomers = false;
+          this.loadingClients = false;
 
           this.errorMessage =
-            'Unable to load customers.';
+            'Unable to load clients.';
 
           this.cdr.detectChanges();
         }
@@ -213,10 +213,10 @@ export class CreateServiceRequest implements OnInit {
 
 
   /* ==============================
-     CUSTOMER CHANGED
+     Client CHANGED
      ============================== */
 
-  onCustomerChange(): void {
+  onClientChange(): void {
 
     this.selectedFarmId = null;
 
@@ -228,12 +228,12 @@ export class CreateServiceRequest implements OnInit {
 
     this.errorMessage = '';
 
-    if (!this.selectedCustomerId) {
+    if (!this.selectedClientId) {
       return;
     }
 
     this.loadFarms(
-      this.selectedCustomerId
+      this.selectedClientId
     );
   }
 
@@ -243,13 +243,13 @@ export class CreateServiceRequest implements OnInit {
      ============================== */
 
   loadFarms(
-    customerId: number
+    clientId: number
   ): void {
 
     this.loadingFarms = true;
 
     this.farmService
-      .getCustomerFarms(customerId)
+      .getClientFarms(clientId)
       .subscribe({
 
         next: (farms) => {
@@ -271,7 +271,7 @@ export class CreateServiceRequest implements OnInit {
           this.loadingFarms = false;
 
           this.errorMessage =
-            'Unable to load farms for this customer.';
+            'Unable to load farms for this Client.';
 
           this.cdr.detectChanges();
         }
@@ -368,10 +368,10 @@ export class CreateServiceRequest implements OnInit {
 
     this.errorMessage = '';
 
-    if (!this.selectedCustomerId) {
+    if (!this.selectedClientId) {
 
       this.errorMessage =
-        'Please select a customer.';
+        'Please select a Client.';
 
       return;
     }
@@ -412,8 +412,8 @@ export class CreateServiceRequest implements OnInit {
     const payload:
       CreateServiceRequestPayload = {
 
-      customer: {
-        id: this.selectedCustomerId
+      client: {
+        id: this.selectedClientId
       },
 
       farm: {
@@ -481,7 +481,7 @@ export class CreateServiceRequest implements OnInit {
           if (error?.status === 400) {
 
             this.errorMessage =
-              'The selected customer, farm, block or service is invalid.';
+              'The selected Client, farm, block or service is invalid.';
 
           } else if (error?.status === 401) {
 

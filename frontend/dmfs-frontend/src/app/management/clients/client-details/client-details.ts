@@ -11,9 +11,9 @@ import {
 } from '@angular/router';
 
 import {
-  Customer,
-  CustomerService
-} from '../../../services/customer.service';
+  Client,
+  ClientService
+} from '../../../services/client.service';
 
 import {
   Farm,
@@ -37,8 +37,8 @@ export class ClientDetails implements OnInit {
   private readonly router =
     inject(Router);
 
-  private readonly customerService =
-    inject(CustomerService);
+  private readonly clientService =
+    inject(ClientService);
 
   private readonly farmService =
     inject(FarmService);
@@ -46,7 +46,7 @@ export class ClientDetails implements OnInit {
   private readonly cdr =
     inject(ChangeDetectorRef);
 
-  client: Customer | null = null;
+  client: Client | null = null;
 
   farms: Farm[] = [];
 
@@ -65,10 +65,10 @@ export class ClientDetails implements OnInit {
     const idParam =
       this.route.snapshot.paramMap.get('id');
 
-    const customerId =
+    const clientId =
       Number(idParam);
 
-    if (!customerId || Number.isNaN(customerId)) {
+    if (!clientId || Number.isNaN(clientId)) {
 
       this.loading = false;
 
@@ -82,9 +82,9 @@ export class ClientDetails implements OnInit {
       return;
     }
 
-    this.loadClient(customerId);
+    this.loadClient(clientId);
 
-    this.loadFarms(customerId);
+    this.loadFarms(clientId);
   }
 
   // ==========================================
@@ -93,11 +93,11 @@ export class ClientDetails implements OnInit {
 
   loadClient(id: number): void {
 
-    this.customerService
-      .getCustomer(id)
+    this.clientService
+      .getClient(id)
       .subscribe({
 
-        next: (client: Customer) => {
+        next: (client: Client) => {
 
           console.log(
             'CLIENT DETAILS:',
@@ -132,14 +132,14 @@ export class ClientDetails implements OnInit {
   // LOAD FARMS
   // ==========================================
 
-  loadFarms(customerId: number): void {
+  loadFarms(clientId: number): void {
 
     this.farmsLoading = true;
 
     this.farmErrorMessage = '';
 
     this.farmService
-      .getCustomerFarms(customerId)
+      .getClientFarms(clientId)
       .subscribe({
 
         next: (farms: Farm[]) => {

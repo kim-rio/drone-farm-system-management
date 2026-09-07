@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+﻿import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
@@ -31,7 +31,11 @@ export class Login {
     this.loading = true;
     this.errorMessage = '';
 
-    this.authService.login(this.email, this.password).subscribe({
+    this.authService.login(
+      this.email.trim(),
+      this.password
+    ).subscribe({
+
       next: (user) => {
 
         this.loading = false;
@@ -42,34 +46,26 @@ export class Login {
             this.router.navigate(['/super-admin']);
             break;
 
-          case 'MANAGEMENT':
-            this.router.navigate(['/management']);
-            break;
-
           case 'ADMIN':
             this.router.navigate(['/admin']);
             break;
 
-          case 'CUSTOMER':
-            this.router.navigate(['/customer']);
+          case 'MANAGEMENT':
+            this.router.navigate(['/management']);
             break;
 
           case 'DRONE_OPERATOR':
-          case 'OPERATOR':
-            this.router.navigate(['/operator']);
+            this.router.navigate(['/drone-operator']);
             break;
 
           case 'GEOLOGIST':
-          case 'SURVEYOR':
-            this.router.navigate(['/surveyor']);
-            break;
-
-          case 'FINANCE':
-            this.router.navigate(['/finance']);
+            this.router.navigate(['/geologist']);
             break;
 
           default:
-            this.errorMessage = `Unsupported user role: ${user.role}`;
+            this.authService.clearSession();
+            this.errorMessage =
+              `Unsupported user role: ${user.role}`;
             break;
         }
       },
@@ -81,8 +77,11 @@ export class Login {
         if (error?.status === 401) {
           this.errorMessage = 'Invalid email or password.';
         } else {
-          this.errorMessage = 'Unable to connect to the server.';
+          this.errorMessage =
+            'Unable to connect to the server.';
         }
+
+        console.error('LOGIN ERROR:', error);
       }
     });
   }

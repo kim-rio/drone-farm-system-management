@@ -1,0 +1,324 @@
+﻿<div
+  class="dashboard"
+  [class.sidebar-open]="sidebarOpen"
+>
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">DM</div>
+
+      <div class="brand-text">
+        <strong>DMFS</strong>
+        <span>{{ getRoleLabel() }}</span>
+      </div>
+    </div>
+
+    <nav class="navigation">
+      @for (item of menuItems; track item.route) {
+        <button
+          type="button"
+          class="nav-item"
+          [class.active]="isActive(item.route)"
+          (click)="navigate(item.route)"
+        >
+          <span class="nav-indicator"></span>
+          <span>{{ item.label }}</span>
+        </button>
+      }
+    </nav>
+
+    <div class="sidebar-bottom">
+      <button type="button" class="account">
+        <div class="account-avatar">
+          {{ getInitials() }}
+        </div>
+
+        <div class="account-details">
+          <strong>
+            {{ firstName }} {{ lastName }}
+          </strong>
+          <span>{{ getRoleLabel() }}</span>
+        </div>
+      </button>
+
+      <button
+        type="button"
+        class="logout"
+        (click)="logout()"
+      >
+        <span class="logout-circle">↪</span>
+        <span class="logout-text">Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        @if (!sidebarOpen) {
+          <button
+            type="button"
+            class="open-menu-button"
+            (click)="toggleSidebar()"
+            aria-label="Open navigation"
+          >
+            ☰
+          </button>
+        }
+      </div>
+
+      <div class="topbar-right">
+        <div class="top-user">
+          <div class="top-avatar">
+            {{ getInitials() }}
+          </div>
+
+          <div class="top-user-details">
+            <strong>
+              {{ firstName }} {{ lastName }}
+            </strong>
+            <span>{{ getRoleLabel() }}</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section class="page">
+
+      <div class="page-header">
+        <div class="title-area">
+          <p class="eyebrow">
+            {{ getRoleLabel() }} PORTAL
+          </p>
+
+          <h2>{{ title }}</h2>
+
+          <p class="description">
+            {{ subtitle }}
+          </p>
+        </div>
+      </div>
+
+      <section class="stats">
+
+        <article class="stat-card">
+          <span class="stat-label">
+            Assigned Work
+          </span>
+
+          <strong class="stat-number">
+            —
+          </strong>
+
+          <span class="stat-description">
+            Current assignments
+          </span>
+        </article>
+
+        <article class="stat-card">
+          <span class="stat-label">
+            In Progress
+          </span>
+
+          <strong class="stat-number">
+            —
+          </strong>
+
+          <span class="stat-description">
+            Active work
+          </span>
+        </article>
+
+        <article class="stat-card">
+          <span class="stat-label">
+            Completed
+          </span>
+
+          <strong class="stat-number">
+            —
+          </strong>
+
+          <span class="stat-description">
+            Completed activities
+          </span>
+        </article>
+
+        <article class="stat-card">
+          <span class="stat-label">
+            Pending
+          </span>
+
+          <strong class="stat-number">
+            —
+          </strong>
+
+          <span class="stat-description">
+            Requires attention
+          </span>
+        </article>
+
+      </section>
+
+      <section class="section">
+
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">
+              WORKSPACE
+            </p>
+
+            <h3>
+              Quick Access
+            </h3>
+          </div>
+        </div>
+
+        <div class="quick-access-grid">
+
+          @for (item of menuItems; track item.route) {
+
+            @if (
+              item.route !== '/drone-operator' &&
+              item.route !== '/geologist'
+            ) {
+
+              <button
+                type="button"
+                class="action-card"
+                (click)="navigate(item.route)"
+              >
+
+                <div class="action-icon">
+                  {{ item.label.charAt(0) }}
+                </div>
+
+                <div class="action-content">
+                  <strong>
+                    {{ item.label }}
+                  </strong>
+
+                  <p>
+                    {{ item.description }}
+                  </p>
+                </div>
+
+                <span class="arrow">
+                  →
+                </span>
+
+              </button>
+
+            }
+
+          }
+
+        </div>
+
+      </section>
+
+      <section class="lower-grid">
+
+        <article class="overview-card">
+
+          <div class="card-header">
+
+            <div>
+              <p class="eyebrow">
+                WORK
+              </p>
+
+              <h3>
+                Work Overview
+              </h3>
+
+              <p>
+                Current operational workload and activity.
+              </p>
+            </div>
+
+          </div>
+
+          <div class="overview-list">
+
+            <div class="overview-row">
+              <span>
+                Assigned Work
+              </span>
+
+              <strong>—</strong>
+            </div>
+
+            <div class="overview-row">
+              <span>
+                In Progress
+              </span>
+
+              <strong>—</strong>
+            </div>
+
+            <div class="overview-row">
+              <span>
+                Completed
+              </span>
+
+              <strong>—</strong>
+            </div>
+
+            <div class="overview-row">
+              <span>
+                Pending
+              </span>
+
+              <strong>—</strong>
+            </div>
+
+          </div>
+
+        </article>
+
+        <article class="overview-card">
+
+          <div class="card-header">
+
+            <div>
+              <p class="eyebrow">
+                ACTIVITY
+              </p>
+
+              <h3>
+                Recent Activity
+              </h3>
+
+              <p>
+                Latest activities assigned to you.
+              </p>
+            </div>
+
+          </div>
+
+          <div class="activity-overview">
+
+            <div class="activity-empty">
+
+              <div class="activity-circle">
+                —
+              </div>
+
+              <strong>
+                No recent activity
+              </strong>
+
+              <span>
+                New assigned activities will appear here.
+              </span>
+
+            </div>
+
+          </div>
+
+        </article>
+
+      </section>
+
+    </section>
+  </main>
+</div>

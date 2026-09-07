@@ -11,7 +11,7 @@
         class="back-button"
         (click)="backToClients()">
 
-        ← Back to Clients
+        â† Back to Clients
 
       </button>
 
@@ -78,7 +78,7 @@
           </h2>
 
           <p>
-            Customer Code:
+            Client Code:
             <strong>
               {{ client.clientCode }}
             </strong>
@@ -96,7 +96,7 @@
           <span>First Name</span>
 
           <strong>
-            {{ client.firstName || '—' }}
+            {{ client.firstName || 'â€”' }}
           </strong>
 
         </div>
@@ -107,7 +107,7 @@
           <span>Last Name</span>
 
           <strong>
-            {{ client.lastName || '—' }}
+            {{ client.lastName || 'â€”' }}
           </strong>
 
         </div>
@@ -118,7 +118,7 @@
           <span>Company Name</span>
 
           <strong>
-            {{ client.companyName || '—' }}
+            {{ client.companyName || 'â€”' }}
           </strong>
 
         </div>
@@ -126,7 +126,7 @@
 
         <div class="detail-item">
 
-          <span>Customer Type</span>
+          <span>Client Type</span>
 
           <strong>
             {{ client.type }}
@@ -151,7 +151,7 @@
           <span>Contact</span>
 
           <strong>
-            {{ client.phone || '—' }}
+            {{ client.phone || 'â€”' }}
           </strong>
 
         </div>
@@ -162,7 +162,7 @@
           <span>TIN</span>
 
           <strong>
-            {{ client.tin || '—' }}
+            {{ client.tin || 'â€”' }}
           </strong>
 
         </div>
@@ -184,7 +184,7 @@
           <span>Address</span>
 
           <strong>
-            {{ client.address || '—' }}
+            {{ client.address || 'â€”' }}
           </strong>
 
         </div>
@@ -313,7 +313,7 @@
                 </div>
 
                 <span class="view-farm">
-                  View →
+                  View â†’
                 </span>
 
               </div>
@@ -338,7 +338,7 @@
 
                     } @else {
 
-                      —
+                      â€”
 
                     }
 
@@ -355,7 +355,7 @@
 
                   <strong>
 
-                    {{ farm.latitude ?? '—' }}
+                    {{ farm.latitude ?? 'â€”' }}
 
                   </strong>
 
@@ -370,7 +370,7 @@
 
                   <strong>
 
-                    {{ farm.longitude ?? '—' }}
+                    {{ farm.longitude ?? 'â€”' }}
 
                   </strong>
 
@@ -409,10 +409,11 @@
 @if (showAddFarm && client) {
 
   <app-add-farm
-    [customerId]="client.id"
+    [clientId]="client.id"
     (closed)="closeAddFarm()"
     (created)="farmCreated()">
   </app-add-farm>
 
 }
+
 

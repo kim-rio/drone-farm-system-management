@@ -15,7 +15,7 @@
       </h1>
 
       <p>
-        Create a service request for a customer, farm and block.
+        Create a service request for a client, farm and block.
       </p>
 
     </div>
@@ -54,18 +54,18 @@
       #requestForm="ngForm">
 
 
-      <!-- CUSTOMER -->
+      <!-- client -->
 
       <div class="form-section">
 
         <div class="section-heading">
 
           <p class="eyebrow">
-            CUSTOMER
+            client
           </p>
 
           <h2>
-            Select Customer
+            Select client
           </h2>
 
         </div>
@@ -73,36 +73,36 @@
 
         <div class="form-group">
 
-          <label for="customer">
-            Customer *
+          <label for="client">
+            client *
           </label>
 
           <select
-            id="customer"
-            name="customer"
-            [(ngModel)]="selectedCustomerId"
-            (ngModelChange)="onCustomerChange()"
+            id="client"
+            name="client"
+            [(ngModel)]="selectedClientId"
+            (ngModelChange)="onClientChange()"
             required>
 
             <option [ngValue]="null">
-              Select a customer
+              Select a client
             </option>
 
             @for (
-              customer of customers;
-              track customer.id
+              client of clients;
+              track client.id
             ) {
 
-              <option [ngValue]="customer.id">
+              <option [ngValue]="client.id">
 
                 {{
-                  customer.companyName
+                  client.companyName
                   || (
-                    (customer.firstName || '') +
+                    (client.firstName || '') +
                     ' ' +
-                    (customer.lastName || '')
+                    (client.lastName || '')
                   ).trim()
-                  || customer.clientCode
+                  || client.clientCode
                 }}
 
               </option>
@@ -111,10 +111,10 @@
 
           </select>
 
-          @if (loadingCustomers) {
+          @if (loadingClients) {
 
             <small>
-              Loading customers...
+              Loading clients...
             </small>
 
           }
@@ -152,13 +152,13 @@
             name="farm"
             [(ngModel)]="selectedFarmId"
             (ngModelChange)="onFarmChange()"
-            [disabled]="!selectedCustomerId || loadingFarms"
+            [disabled]="!selectedClientId || loadingFarms"
             required>
 
             <option [ngValue]="null">
 
-              @if (!selectedCustomerId) {
-                Select a customer first
+              @if (!selectedClientId) {
+                Select a client first
               } @else if (loadingFarms) {
                 Loading farms...
               } @else {
@@ -181,13 +181,13 @@
           </select>
 
           @if (
-            selectedCustomerId &&
+            selectedClientId &&
             !loadingFarms &&
             farms.length === 0
           ) {
 
             <small class="warning">
-              This customer has no registered farms.
+              This client has no registered farms.
             </small>
 
           }
@@ -249,7 +249,7 @@
                 {{ block.name }}
 
                 @if (block.areaHectares !== null) {
-                  — {{ block.areaHectares }} ha
+                  â€” {{ block.areaHectares }} ha
                 }
 
               </option>
@@ -324,7 +324,7 @@
 
                 {{ service.name }}
 
-                —
+                â€”
                 {{ service.category }}
 
               </option>
@@ -470,7 +470,7 @@
           [disabled]="
             saving ||
             requestForm.invalid ||
-            !selectedCustomerId ||
+            !selectedClientId ||
             !selectedFarmId ||
             !selectedBlockId ||
             !selectedServiceId
@@ -491,3 +491,4 @@
   </div>
 
 </div>
+

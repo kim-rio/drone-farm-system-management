@@ -13,11 +13,11 @@ import {
 } from '@angular/router';
 
 import {
-  Customer,
-  CustomerService,
-  CreateCustomerRequest,
+  Client,
+  ClientService,
+  CreateClientRequest,
   ClientType
-} from '../../../services/customer.service';
+} from '../../../services/client.service';
 
 @Component({
   selector: 'app-register-clients',
@@ -28,14 +28,14 @@ import {
 })
 export class RegisterClients {
 
-  private readonly customerService = inject(CustomerService);
+  private readonly ClientService = inject(ClientService);
   private readonly router = inject(Router);
 
   loading = signal(false);
   errorMessage = signal('');
   successMessage = signal('');
 
-  client: CreateCustomerRequest = {
+  client: CreateClientRequest = {
     clientCode: '',
     type: 'INDIVIDUAL',
     companyName: '',
@@ -114,9 +114,9 @@ export class RegisterClients {
 
     this.loading.set(true);
 
-    this.customerService.createCustomer(this.client).subscribe({
-      next: (customer: Customer) => {
-        console.log('CLIENT CREATED:', customer);
+    this.ClientService.createClient(this.client).subscribe({
+      next: (Client: Client) => {
+        console.log('CLIENT CREATED:', Client);
 
         this.loading.set(false);
         this.successMessage.set(
@@ -161,3 +161,4 @@ export class RegisterClients {
     this.router.navigate(['/management/clients']);
   }
 }
+

@@ -1,0 +1,214 @@
+﻿<section class="farm-page">
+
+  <div class="page-header">
+
+    <div>
+
+      <span class="eyebrow">
+        MANAGEMENT
+      </span>
+
+      <h1>
+        Farms
+      </h1>
+
+      <p>
+        View and manage farms belonging to company clients.
+      </p>
+
+    </div>
+
+    <button
+      type="button"
+      class="secondary-button"
+      (click)="backToDashboard()"
+    >
+      Dashboard
+    </button>
+
+  </div>
+
+
+  @if (errorMessage) {
+
+    <div class="error-message">
+      {{ errorMessage }}
+    </div>
+
+  }
+
+
+  @if (loading) {
+
+    <div class="panel loading-state">
+      Loading farms...
+    </div>
+
+  } @else if (!farms.length) {
+
+    <div class="panel empty-state">
+
+      <strong>
+        No farms found
+      </strong>
+
+      <p>
+        Farms registered under clients will appear here.
+      </p>
+
+    </div>
+
+  } @else {
+
+    <div class="panel">
+
+      <div class="panel-header">
+
+        <div>
+
+          <span class="eyebrow">
+            FARM REGISTER
+          </span>
+
+          <h2>
+            Client Farms
+          </h2>
+
+        </div>
+
+        <span class="count">
+          {{ farms.length }}
+        </span>
+
+      </div>
+
+
+      <div class="table-wrapper">
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>
+                Farm
+              </th>
+
+              <th>
+                Client
+              </th>
+
+              <th>
+                Area
+              </th>
+
+              <th>
+                Location
+              </th>
+
+              <th>
+                Action
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody>
+
+            @for (
+              item of farms;
+              track item.farm.id
+            ) {
+
+              <tr>
+
+                <td>
+
+                  <strong>
+                    {{ item.farm.name }}
+                  </strong>
+
+                  @if (item.farm.description) {
+
+                    <small>
+                      {{ item.farm.description }}
+                    </small>
+
+                  }
+
+                </td>
+
+
+                <td>
+
+                  <button
+                    type="button"
+                    class="link-button"
+                    (click)="openClient(item.client)"
+                  >
+                    {{ getClientName(item.client) }}
+                  </button>
+
+                </td>
+
+
+                <td>
+
+                  @if (item.farm.areaHectares !== null) {
+                    {{ item.farm.areaHectares }} ha
+                  } @else {
+                    —
+                  }
+
+                </td>
+
+
+                <td>
+
+                  @if (
+                    item.farm.latitude !== null &&
+                    item.farm.longitude !== null
+                  ) {
+
+                    {{ item.farm.latitude }},
+                    {{ item.farm.longitude }}
+
+                  } @else {
+
+                    —
+
+                  }
+
+                </td>
+
+
+                <td>
+
+                  <button
+                    type="button"
+                    class="view-button"
+                    (click)="openFarm(item)"
+                  >
+                    View
+                  </button>
+
+                </td>
+
+              </tr>
+
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  }
+
+</section>

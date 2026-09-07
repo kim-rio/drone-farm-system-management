@@ -255,7 +255,7 @@ export class CompanyDetails implements OnInit {
   ): string {
 
     if (!date) {
-      return '—';
+      return 'ï¿½';
     }
 
     return new Date(date).toLocaleString();

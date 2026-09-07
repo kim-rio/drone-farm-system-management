@@ -1,16 +1,10 @@
-import { Component, inject } from '@angular/core';
+﻿import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService } from '../services/auth.service';
+import { AuthService, LoginResponse } from '../services/auth.service';
 
-interface MenuItem {
+interface ManagementMenuItem {
   label: string;
   route: string;
-}
-
-interface Stat {
-  title: string;
-  value: number;
-  description: string;
 }
 
 @Component({
@@ -21,116 +15,42 @@ interface Stat {
 })
 export class Management {
 
-  private router = inject(Router);
-  private authService = inject(AuthService);
+  private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
 
   sidebarOpen = true;
 
-  user = this.authService.getCurrentUser();
+  user: LoginResponse | null =
+    this.authService.getCurrentUser();
 
-  menuItems: MenuItem[] = [
+  menuItems: ManagementMenuItem[] = [
+
     {
       label: 'Dashboard',
       route: '/management'
     },
+
     {
       label: 'Clients',
       route: '/management/clients'
     },
 
     {
-    label: 'Service Catalogue',
-    route: '/management/service-catalogue'
-    },
-
-    {
-  label: 'Service Requests',
-  route: '/management/service-requests'
-   },
-    {
       label: 'Farms',
       route: '/management/farms'
     },
+
     {
-      label: 'Survey Requests',
-      route: '/management/surveys'
-    },
-    {
-      label: 'Data Analysis',
-      route: '/management/analysis'
-    },
-    {
-      label: 'Reports',
-      route: '/management/reports'
-    },
-    {
-      label: 'Finance',
-      route: '/management/finance'
+      label: 'Service Requests',
+      route: '/management/service-requests'
     }
+
   ];
-
-  dashboardStats: Stat[] = [
-    {
-      title: 'Registered Clients',
-      value: 0,
-      description: 'Total clients registered'
-    },
-    {
-      title: 'Registered Farms',
-      value: 0,
-      description: 'Total farms in the system'
-    },
-    {
-      title: 'Pending Survey Requests',
-      value: 0,
-      description: 'Requests awaiting action'
-    },
-    {
-      title: 'Active Field Operations',
-      value: 0,
-      description: 'Operations currently active'
-    }
-  ];
-
-  surveyProgress = 0;
-  fieldOperationProgress = 0;
-  dataAnalysisProgress = 0;
-  farmProgress = 0;
-
-  toggleSidebar(): void {
-    this.sidebarOpen = !this.sidebarOpen;
-  }
-
-  navigate(route: string): void {
-    this.router.navigate([route]);
-  }
-
-  registerClient(): void {
-    this.router.navigate(['/management/clients/register']);
-  }
-
-  newSurveyRequest(): void {
-    this.router.navigate(['/management/service-request/create']);
-  }
-
-  openSettings(): void {
-    this.router.navigate(['/management/settings']);
-  }
-
-  logout(): void {
-    this.authService.logout().subscribe({
-      next: () => {
-        this.router.navigate(['/login']);
-      },
-      error: () => {
-        this.router.navigate(['/login']);
-      }
-    });
-  }
 
   getInitials(): string {
+
     if (!this.user) {
-      return 'M';
+      return 'MG';
     }
 
     const first =
@@ -139,14 +59,35 @@ export class Management {
     const last =
       this.user.lastName?.charAt(0) ?? '';
 
-    return (first + last).toUpperCase();
+    return `${first}${last}`.toUpperCase();
   }
 
-  getProgressOffset(progress: number): number {
-    const circumference = 301.59;
-
-    return circumference -
-      (progress / 100) * circumference;
+  toggleSidebar(): void {
+    this.sidebarOpen = !this.sidebarOpen;
   }
 
+  navigate(route: string): void {
+    this.router.navigateByUrl(route);
+  }
+
+  isActive(route: string): boolean {
+
+    if (route === '/management') {
+      return (
+        this.router.url === '/management' ||
+        this.router.url === '/management/'
+      );
+    }
+
+    return this.router.url.startsWith(route);
+  }
+
+  logout(): void {
+
+    this.authService.logout().subscribe({
+      next: () => this.router.navigate(['/login']),
+      error: () => this.router.navigate(['/login'])
+    });
+
+  }
 }

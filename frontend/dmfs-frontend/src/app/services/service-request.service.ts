@@ -5,9 +5,9 @@ import { Observable } from 'rxjs';
 export interface ServiceRequest {
   id: number;
 
-  customer: {
+  client: {
     id: number;
-    customerCode?: string;
+    clientCode?: string;
     type?: string;
     companyName?: string;
     firstName?: string;
@@ -58,7 +58,7 @@ export interface ServiceRequest {
 
 export interface CreateServiceRequestPayload {
 
-  customer: {
+  client: {
     id: number;
   };
 
@@ -162,3 +162,4 @@ export class ServiceRequestService {
     );
   }
 }
+

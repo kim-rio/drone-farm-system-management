@@ -16,9 +16,9 @@ import {
 } from '../../../services/service-request.service';
 
 import {
-  Customer,
-  CustomerService
-} from '../../../services/customer.service';
+  Client,
+  ClientService
+} from '../../../services/client.service';
 
 import {
   Farm,
@@ -59,8 +59,8 @@ export class ServiceRequestDetails implements OnInit {
   private readonly requestService =
     inject(ServiceRequestService);
 
-  private readonly customerService =
-    inject(CustomerService);
+  private readonly clientService =
+    inject(ClientService);
 
   private readonly farmService =
     inject(FarmService);
@@ -98,7 +98,7 @@ export class ServiceRequestDetails implements OnInit {
      EDIT FORM
      ============================== */
 
-  customers: Customer[] = [];
+  clients: Client[] = [];
 
   farms: Farm[] = [];
 
@@ -107,7 +107,7 @@ export class ServiceRequestDetails implements OnInit {
   services: ServiceCatalogue[] = [];
 
 
-  selectedCustomerId: number | null = null;
+  selectedClientId: number | null = null;
 
   selectedFarmId: number | null = null;
 
@@ -201,8 +201,8 @@ export class ServiceRequestDetails implements OnInit {
     request: ServiceRequest
   ): void {
 
-    this.selectedCustomerId =
-      request.customer?.id ?? null;
+    this.selectedClientId =
+      request.client?.id ?? null;
 
     this.selectedFarmId =
       request.farm?.id ?? null;
@@ -233,14 +233,14 @@ export class ServiceRequestDetails implements OnInit {
 
     this.editing = true;
 
-    this.loadCustomers();
+    this.loadClients();
 
     this.loadServices();
 
-    if (this.selectedCustomerId) {
+    if (this.selectedClientId) {
 
       this.loadFarms(
-        this.selectedCustomerId
+        this.selectedClientId
       );
     }
 
@@ -273,18 +273,18 @@ export class ServiceRequestDetails implements OnInit {
 
 
   /* ==============================
-     CUSTOMERS
+     clients
      ============================== */
 
-  loadCustomers(): void {
+  loadClients(): void {
 
-    this.customerService
-      .getCustomers()
+    this.clientService
+      .getClients()
       .subscribe({
 
-        next: (customers) => {
+        next: (clients) => {
 
-          this.customers = customers;
+          this.clients = clients;
 
           this.cdr.detectChanges();
         },
@@ -292,7 +292,7 @@ export class ServiceRequestDetails implements OnInit {
         error: (error) => {
 
           console.error(
-            'CUSTOMER LOAD ERROR:',
+            'Client LOAD ERROR:',
             error
           );
         }
@@ -305,7 +305,7 @@ export class ServiceRequestDetails implements OnInit {
      ============================== */
 
   loadFarms(
-    customerId: number
+    clientId: number
   ): void {
 
     this.farms = [];
@@ -317,7 +317,7 @@ export class ServiceRequestDetails implements OnInit {
     this.selectedBlockId = null;
 
     this.farmService
-      .getCustomerFarms(customerId)
+      .getClientFarms(clientId)
       .subscribe({
 
         next: (farms) => {
@@ -338,9 +338,9 @@ export class ServiceRequestDetails implements OnInit {
   }
 
 
-  onCustomerChange(): void {
+  onClientChange(): void {
 
-    if (!this.selectedCustomerId) {
+    if (!this.selectedClientId) {
 
       this.farms = [];
 
@@ -354,7 +354,7 @@ export class ServiceRequestDetails implements OnInit {
     }
 
     this.loadFarms(
-      this.selectedCustomerId
+      this.selectedClientId
     );
   }
 
@@ -454,7 +454,7 @@ export class ServiceRequestDetails implements OnInit {
     }
 
     if (
-      !this.selectedCustomerId ||
+      !this.selectedClientId ||
       !this.selectedFarmId ||
       !this.selectedBlockId ||
       !this.selectedServiceId ||
@@ -470,8 +470,8 @@ export class ServiceRequestDetails implements OnInit {
     const payload:
       CreateServiceRequestPayload = {
 
-      customer: {
-        id: this.selectedCustomerId
+      client: {
+        id: this.selectedClientId
       },
 
       farm: {
@@ -671,28 +671,28 @@ export class ServiceRequestDetails implements OnInit {
 
 
   /* ==============================
-     CUSTOMER DISPLAY
+     Client DISPLAY
      ============================== */
 
-  getCustomerName(): string {
+  getClientName(): string {
 
-    if (!this.request?.customer) {
-      return 'Unknown Customer';
+    if (!this.request?.client) {
+      return 'Unknown Client';
     }
 
-    const customer =
-      this.request.customer;
+    const Client =
+      this.request.client;
 
-    if (customer.companyName?.trim()) {
-      return customer.companyName;
+    if (Client.companyName?.trim()) {
+      return Client.companyName;
     }
 
     const fullName =
-      `${customer.firstName ?? ''} ${customer.lastName ?? ''}`
+      `${Client.firstName ?? ''} ${Client.lastName ?? ''}`
         .trim();
 
     return fullName ||
-      customer.customerCode ||
-      'Unknown Customer';
+      Client.clientCode ||
+      'Unknown Client';
   }
 }

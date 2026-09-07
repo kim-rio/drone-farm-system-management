@@ -1,6 +1,9 @@
 import { Component, inject } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
-import { AuthService, LoginResponse } from '../../services/auth.service';
+import {
+  AuthService,
+  LoginResponse
+} from '../../services/auth.service';
 
 interface AdminMenuItem {
   label: string;
@@ -15,20 +18,52 @@ interface AdminMenuItem {
   styleUrl: './admin-layout.scss'
 })
 export class AdminLayout {
+
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
 
   sidebarOpen = true;
 
-  user: LoginResponse | null = this.authService.getCurrentUser();
+  user: LoginResponse | null =
+    this.authService.getCurrentUser();
 
   menuItems: AdminMenuItem[] = [
-    { label: 'Dashboard', route: '/admin' },
-    { label: 'Staff', route: '/admin/staff' },
-    { label: 'My Company', route: '/admin/company' },
-    { label: 'Operations', route: '/admin/operations' },
-    { label: 'Reports', route: '/admin/reports' },
-    { label: 'Settings', route: '/admin/settings' }
+
+    {
+      label: 'Dashboard',
+      route: '/admin'
+    },
+
+    {
+      label: 'Staff',
+      route: '/admin/staff'
+    },
+
+    {
+      label: 'My Company',
+      route: '/admin/company'
+    },
+
+    {
+      label: 'Operations',
+      route: '/admin/operations'
+    },
+
+    {
+      label: 'Service Catalogue',
+      route: '/admin/operations/service-catalogue'
+    },
+
+    {
+      label: 'Reports',
+      route: '/admin/reports'
+    },
+
+    {
+      label: 'Settings',
+      route: '/admin/settings'
+    }
+
   ];
 
   toggleSidebar(): void {
@@ -36,27 +71,38 @@ export class AdminLayout {
   }
 
   navigate(route: string): void {
-    this.router.navigate([route]);
+    this.router.navigateByUrl(route);
   }
 
   isActive(route: string): boolean {
+
     if (route === '/admin') {
-      return this.router.url === '/admin' || this.router.url === '/admin/';
+      return (
+        this.router.url === '/admin' ||
+        this.router.url === '/admin/'
+      );
     }
 
     return this.router.url.startsWith(route);
   }
 
   getInitials(): string {
-    if (!this.user) return 'AD';
 
-    const first = this.user.firstName?.charAt(0) ?? '';
-    const last = this.user.lastName?.charAt(0) ?? '';
+    if (!this.user) {
+      return 'AD';
+    }
+
+    const first =
+      this.user.firstName?.charAt(0) ?? '';
+
+    const last =
+      this.user.lastName?.charAt(0) ?? '';
 
     return `${first}${last}`.toUpperCase();
   }
 
   logout(): void {
+
     this.authService.logout().subscribe({
       next: () => this.router.navigate(['/login']),
       error: () => this.router.navigate(['/login'])

@@ -126,8 +126,8 @@ export class ServiceRequestList implements OnInit {
 
     return this.requests.filter(request => {
 
-      const customerName =
-        this.getCustomerName(request)
+      const clientName =
+        this.getClientName(request)
           .toLowerCase();
 
       const farmName =
@@ -144,7 +144,7 @@ export class ServiceRequestList implements OnInit {
 
       const matchesSearch =
         !search ||
-        customerName.includes(search) ||
+        clientName.includes(search) ||
         farmName.includes(search) ||
         blockName.includes(search) ||
         serviceName.includes(search) ||
@@ -160,31 +160,31 @@ export class ServiceRequestList implements OnInit {
 
 
   /* ==============================
-     CUSTOMER NAME
+     CLIENT NAME
      ============================== */
 
-  getCustomerName(
+  getClientName(
     request: ServiceRequest
   ): string {
 
-    const customer =
-      request.customer;
+    const client =
+      request.client;
 
-    if (!customer) {
-      return 'Unknown Customer';
+    if (!client) {
+      return 'Unknown Client';
     }
 
-    if (customer.companyName?.trim()) {
-      return customer.companyName;
+    if (client.companyName?.trim()) {
+      return client.companyName;
     }
 
     const fullName =
-      `${customer.firstName ?? ''} ${customer.lastName ?? ''}`
+      `${client.firstName ?? ''} ${client.lastName ?? ''}`
         .trim();
 
     return fullName ||
-      customer.customerCode ||
-      'Unknown Customer';
+      client.clientCode ||
+      'Unknown Client';
   }
 
 

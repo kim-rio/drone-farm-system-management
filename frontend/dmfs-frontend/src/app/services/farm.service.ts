@@ -4,33 +4,21 @@ import { Observable } from 'rxjs';
 
 export interface Farm {
   id: number;
-
   name: string;
-
   description: string | null;
-
   latitude: number | null;
-
   longitude: number | null;
-
   areaHectares: number | null;
-
-  customerId: number | null;
-
+  clientId: number | null;
   createdAt?: string;
-
   updatedAt?: string;
 }
 
 export interface CreateFarmRequest {
   name: string;
-
   description?: string;
-
   latitude: number;
-
   longitude: number;
-
   areaHectares?: number;
 }
 
@@ -45,12 +33,12 @@ export class FarmService {
     'http://localhost:8080/api/farms';
 
   createFarm(
-    customerId: number,
+    clientId: number,
     farm: CreateFarmRequest
   ): Observable<Farm> {
 
     return this.http.post<Farm>(
-      `${this.apiUrl}/customer/${customerId}`,
+      `${this.apiUrl}/client/${clientId}`,
       farm,
       {
         withCredentials: true
@@ -58,12 +46,12 @@ export class FarmService {
     );
   }
 
-  getCustomerFarms(
-    customerId: number
+  getClientFarms(
+    clientId: number
   ): Observable<Farm[]> {
 
     return this.http.get<Farm[]>(
-      `${this.apiUrl}/customer/${customerId}`,
+      `${this.apiUrl}/client/${clientId}`,
       {
         withCredentials: true
       }
