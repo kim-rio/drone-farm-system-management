@@ -1,0 +1,15 @@
+<div class="eyebrow">Geologist portal</div>
+<h1>AI Reports</h1>
+<p class="subtitle">Draft geological summaries generated from survey data.</p>
+
+<div class="panel">
+  <div class="row-list">
+    <div class="row-item" *ngFor="let r of reports">
+      <div class="row-left">
+        <div class="row-title">{{ r.id }}</div>
+        <div class="row-sub">{{ r.generated }}</div>
+      </div>
+      <span class="badge">Ready</span>
+    </div>
+  </div>
+</div>

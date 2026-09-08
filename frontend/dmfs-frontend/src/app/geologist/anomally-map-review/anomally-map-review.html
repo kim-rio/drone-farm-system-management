@@ -1,0 +1,123 @@
+<ng-container *ngIf="!selected; else detail">
+  <div class="eyebrow">Geologist portal</div>
+  <h1>Anomaly Map Review</h1>
+  <p class="subtitle">Review raw and processed survey data before approving magnetic anomaly maps.</p>
+
+  <div class="filters">
+    <div class="search">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3" stroke-linecap="round"/>
+      </svg>
+      <input
+        type="text"
+        placeholder="Search survey, client or location..."
+        [(ngModel)]="searchTerm"
+      />
+    </div>
+    <select [(ngModel)]="statusFilter">
+      <option *ngFor="let opt of statusOptions" [value]="opt">{{ opt }}</option>
+    </select>
+  </div>
+
+  <div class="list">
+    <div class="row" *ngFor="let survey of filteredSurveys">
+      <div class="row-main">
+        <span class="pulse" [class.pending]="survey.status === 'PENDING'"></span>
+        <div>
+          <div class="row-id">{{ survey.surveyCode }}</div>
+          <div class="row-title">{{ survey.title }}</div>
+        </div>
+      </div>
+      <div class="row-cell">{{ survey.client }}</div>
+      <div class="row-cell">{{ survey.mapName }}</div>
+      <div class="row-cell">{{ survey.date }}</div>
+      <div class="row-cell">{{ survey.anomalyCount }} anomalies</div>
+      <button class="view-btn" (click)="openSurvey(survey)">
+        View
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="empty" *ngIf="filteredSurveys.length === 0">
+      No surveys match your search.
+    </div>
+  </div>
+</ng-container>
+
+<ng-template #detail>
+  <a class="back-link" (click)="backToList()">
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M19 12H5M11 6l-6 6 6 6" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    Back to Reviews
+  </a>
+
+  <div class="detail-head">
+    <div>
+      <div class="eyebrow">Anomaly map review</div>
+      <h1>{{ selected!.surveyCode }}</h1>
+      <p class="subtitle">{{ selected!.title }}</p>
+    </div>
+    <span class="status-badge" [class.pending]="selected!.status === 'PENDING'" [class.approved]="selected!.status === 'APPROVED'" [class.rejected]="selected!.status === 'REJECTED'">
+      {{ selected!.status }}
+    </span>
+  </div>
+
+  <div class="detail-grid">
+    <div class="detail-left">
+      <div class="card">
+        <div class="card-title">Survey Information</div>
+        <div class="info-grid">
+          <div>
+            <div class="info-label">Client</div>
+            <div class="info-value">{{ selected!.client }}</div>
+          </div>
+          <div>
+            <div class="info-label">Location</div>
+            <div class="info-value">{{ selected!.mapName }}</div>
+          </div>
+          <div>
+            <div class="info-label">Survey date</div>
+            <div class="info-value">{{ selected!.date }}</div>
+          </div>
+          <div>
+            <div class="info-label">Anomalies</div>
+            <div class="info-value">{{ selected!.anomalyCount }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card map-card">
+        <div class="card-title-row">
+          <div>
+            <div class="card-title">Magnetic Anomaly Map</div>
+            <div class="card-sub">Processed magnetic survey visualization</div>
+          </div>
+          <button class="ghost-btn">Full screen</button>
+        </div>
+        <div class="map-placeholder"><img [src]="mapFileUrl(selected!.id)" alt="Generated magnetic anomaly map" /></div>
+      </div>
+    </div>
+
+    <div class="detail-right">
+      <div class="card">
+        <div class="card-title">Survey Data</div>
+        <a class="data-link" href="#">Raw magnetometer data <span>&rarr;</span></a>
+        <a class="data-link" href="#">Processed data <span>&rarr;</span></a>
+        <a class="data-link" href="#">Processing metadata <span>&rarr;</span></a>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Geologist Review</div>
+        <p class="card-sub">Verify the raw data, processed data and anomaly map before making a decision.</p>
+        <textarea rows="4" placeholder="Enter review comments..." [(ngModel)]="reviewComment"></textarea>
+        <div class="review-actions">
+          <button class="reject-btn" (click)="reject()">Reject map</button>
+          <button class="approve-btn" (click)="approve()">Approve map</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-template>

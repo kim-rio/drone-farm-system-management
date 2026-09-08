@@ -1,0 +1,58 @@
+<div class="eyebrow">Geologist portal</div>
+<h1>Geologist Dashboard</h1>
+<p class="subtitle">Monitor magnetic surveys, review anomaly maps, and verify geological results.</p>
+
+<div class="stats">
+  <div class="stat-card" [class]="stat.tone" *ngFor="let stat of stats">
+    <div class="stat-icon" [ngSwitch]="stat.icon">
+      <svg *ngSwitchCase="'clipboard'" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="6" y="4" width="12" height="17" rx="1.5"/><path d="M9 4V3a1 1 0 011-1h4a1 1 0 011 1v1" stroke-linecap="round"/>
+        <path d="M9 12l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <svg *ngSwitchCase="'clock'" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2" stroke-linecap="round"/>
+      </svg>
+      <svg *ngSwitchCase="'map'" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 4l-6 2v14l6-2 6 2 6-2V4l-6 2-6-2z" stroke-linejoin="round"/>
+        <path d="M9 4v14M15 6v14"/>
+      </svg>
+      <svg *ngSwitchCase="'file'" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M6 2.5h8l4 4v15H6z" stroke-linejoin="round"/>
+        <path d="M9 12h6M9 16h6" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div>
+      <div class="stat-number">{{ stat.value }}</div>
+      <div class="stat-label">{{ stat.label }}</div>
+      <div class="stat-sub">{{ stat.sub }}</div>
+    </div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-head">
+    <div>
+      <div class="panel-title">Surveys Awaiting Geological Review</div>
+      <div class="panel-sub">Processed magnetic anomaly maps waiting for geologist verification.</div>
+    </div>
+    <a routerLink="/geologist/anomaly-map-review" class="view-all">View all &rarr;</a>
+  </div>
+
+  <div class="survey-grid">
+    <div class="survey-card" [class]="survey.tone" *ngFor="let survey of surveys">
+      <div class="survey-top">
+        <div class="survey-id"><span class="pulse"></span>{{ survey.id }}</div>
+        <div class="survey-time">&#8226; {{ survey.time }}</div>
+      </div>
+      <div class="survey-title">{{ survey.title }}</div>
+      <div class="survey-meta">{{ survey.client }}</div>
+      <div class="survey-meta">{{ survey.location }}</div>
+      <div class="survey-meta">{{ survey.anomalies }} anomalies</div>
+      <div class="survey-footer">
+        <button class="view-map-btn" [routerLink]="['/geologist/anomaly-map-review']" [queryParams]="{ id: survey.id }">
+          View Map
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

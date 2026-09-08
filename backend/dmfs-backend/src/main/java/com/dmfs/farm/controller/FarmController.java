@@ -19,15 +19,15 @@ public class FarmController {
         this.farmService = farmService;
     }
 
-    @PostMapping("/customer/{customerId}")
+    @PostMapping("/client/{clientId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN', 'MANAGEMENT')")
     public ResponseEntity<FarmResponse> createFarm(
-            @PathVariable Long customerId,
+            @PathVariable Long clientId,
             @RequestBody FarmRequest request
     ) {
 
         Farm farm = farmService.createFarm(
-                customerId,
+                clientId,
                 request.name(),
                 request.description(),
                 request.latitude(),
@@ -40,14 +40,14 @@ public class FarmController {
         );
     }
 
-    @GetMapping("/customer/{customerId}")
+    @GetMapping("/client/{clientId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN', 'MANAGEMENT')")
-    public ResponseEntity<List<FarmResponse>> getCustomerFarms(
-            @PathVariable Long customerId
+    public ResponseEntity<List<FarmResponse>> getClientFarms(
+            @PathVariable Long clientId
     ) {
 
         List<FarmResponse> farms =
-                farmService.getCustomerFarms(customerId)
+                farmService.getCustomerFarms(clientId)
                         .stream()
                         .map(FarmResponse::from)
                         .toList();

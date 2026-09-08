@@ -22,6 +22,8 @@ public class ServiceRequestResponse {
 
     private String status;
 
+    private String operatorDecisionReason;
+
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
@@ -105,6 +107,9 @@ public class ServiceRequestResponse {
     public void setStatus(String status) {
         this.status = status;
     }
+
+    public String getOperatorDecisionReason() { return operatorDecisionReason; }
+    public void setOperatorDecisionReason(String operatorDecisionReason) { this.operatorDecisionReason = operatorDecisionReason; }
 
 
     public LocalDateTime getCreatedAt() {

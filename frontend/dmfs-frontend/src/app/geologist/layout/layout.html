@@ -1,0 +1,117 @@
+<div class="shell" [class.mobile]="isMobile">
+  <div class="scrim" *ngIf="isMobile && mobileOpen" (click)="toggleSidebar()"></div>
+
+  <aside
+    class="sidebar"
+    [class.collapsed]="!isMobile && desktopCollapsed"
+    [class.open]="isMobile && mobileOpen"
+  >
+    <div class="brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 20l6-11 4 6 3-5 5 10H3z" stroke-linejoin="round" stroke-linecap="round" />
+        </svg>
+      </div>
+      <div class="brand-text" *ngIf="isMobile || !desktopCollapsed">
+        <div class="brand-name">GeoExplore</div>
+        <div class="brand-sub">Mineral Exploration</div>
+      </div>
+    </div>
+
+    <ul class="nav">
+      <li *ngFor="let item of navItems">
+        <a
+          [routerLink]="item.path"
+          routerLinkActive="active"
+          (click)="closeMobileNav()"
+          [title]="item.label"
+        >
+          <span class="icon" [ngSwitch]="item.icon">
+            <svg *ngSwitchCase="'grid'" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/>
+              <rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>
+            </svg>
+            <svg *ngSwitchCase="'clock'" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2" stroke-linecap="round"/>
+            </svg>
+            <svg *ngSwitchCase="'map'" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 4l-6 2v14l6-2 6 2 6-2V4l-6 2-6-2z" stroke-linejoin="round"/>
+              <path d="M9 4v14M15 6v14" />
+            </svg>
+            <svg *ngSwitchCase="'file'" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M6 2.5h8l4 4v15H6z" stroke-linejoin="round"/>
+              <path d="M9 12h6M9 16h6" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="label" *ngIf="isMobile || !desktopCollapsed">{{ item.label }}</span>
+          <span class="dot" *ngIf="item.badge && (isMobile || !desktopCollapsed)"></span>
+        </a>
+      </li>
+    </ul>
+
+    <div class="sidebar-bottom">
+      <a href="#" title="Settings">
+        <span class="icon">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19 12a7 7 0 00-.2-1.6l2-1.5-2-3.4-2.3.9a7 7 0 00-2.7-1.6L13.4 2h-2.8l-.4 2.8a7 7 0 00-2.7 1.6l-2.3-.9-2 3.4 2 1.5A7 7 0 005 12a7 7 0 00.2 1.6l-2 1.5 2 3.4 2.3-.9a7 7 0 002.7 1.6l.4 2.8h2.8l.4-2.8a7 7 0 002.7-1.6l2.3.9 2-3.4-2-1.5c.13-.5.2-1.05.2-1.6z" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span class="label" *ngIf="isMobile || !desktopCollapsed">Settings</span>
+      </a>
+      <a href="#" title="Log out">
+        <span class="icon">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a1 1 0 01-1-1V4a1 1 0 011-1h4" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M16 17l5-5-5-5M21 12H9" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span class="label" *ngIf="isMobile || !desktopCollapsed">Log out</span>
+      </a>
+    </div>
+  </aside>
+
+  <div class="content">
+    <header class="topbar">
+      <button
+        class="icon-btn menu-btn"
+        (click)="toggleSidebar()"
+        [attr.aria-label]="isMobile ? 'Toggle navigation' : 'Collapse navigation'"
+      >
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 6h18M3 12h18M3 18h18" stroke-linecap="round"/>
+        </svg>
+      </button>
+
+      <div class="app-id">
+        <div class="app-icon">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 20l6-11 4 6 3-5 5 10H3z" stroke-linejoin="round" stroke-linecap="round" />
+          </svg>
+        </div>
+        <span class="app-name">GeoExplore</span>
+      </div>
+
+      <div class="topbar-right">
+        <button class="icon-btn bell" aria-label="Notifications">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M13.7 21a2 2 0 01-3.4 0" stroke-linecap="round"/>
+          </svg>
+          <span class="dot"></span>
+        </button>
+        <div class="user">
+          <div class="avatar">GL</div>
+          <div class="user-text">
+            <div class="user-name">Geologist</div>
+            <div class="user-role">Field reviewer</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="main">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

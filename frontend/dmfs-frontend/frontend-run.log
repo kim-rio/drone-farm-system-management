@@ -1,0 +1,54 @@
+
+> dmfs-frontend@0.0.0 start
+> ng serve --host 127.0.0.1
+
+> Building...
+√ Building...
+Initial chunk files | Names                   |  Raw size
+main.js             | main                    |  86.00 kB | 
+chunk-53D2M2UI.js   | -                       |   2.00 kB | 
+chunk-C76BKCDW.js   | -                       |   1.42 kB | 
+chunk-VJQIXUAX.js   | -                       |   1.33 kB | 
+chunk-VUJOFXKG.js   | -                       | 938 bytes | 
+styles.css          | styles                  |  96 bytes | 
+
+                    | Initial total           |  91.80 kB
+
+Lazy chunk files    | Names                   |  Raw size
+chunk-XVLVPWN6.js   | service-request-details |  73.28 kB | 
+chunk-R6BZ7V6T.js   | super-admin             |  69.65 kB | 
+chunk-44QP44S2.js   | client-details          |  62.87 kB | 
+chunk-WT4ZW3FU.js   | farm-details            |  60.43 kB | 
+chunk-2OSJT7L3.js   | company-details         |  56.96 kB | 
+chunk-MYMZQ5GZ.js   | companies               |  56.10 kB | 
+chunk-SUEI7HOI.js   | register                |  55.69 kB | 
+chunk-LGW3GRKT.js   | admin                   |  52.11 kB | 
+chunk-Q6XGUVIZ.js   | service-catalogue       |  49.61 kB | 
+chunk-U6SCB57X.js   | create-service-request  |  48.26 kB | 
+chunk-HJRISRUH.js   | management              |  46.86 kB | 
+chunk-HDOL2DGF.js   | edit                    |  44.12 kB | 
+chunk-J7C2LJDS.js   | service-request-list    |  41.84 kB | 
+chunk-YHAWLCJD.js   | staff                   |  38.97 kB | 
+chunk-NWUCZ5QH.js   | anomally-map-review     |  37.37 kB | 
+...and 19 more lazy chunks files. Use "--verbose" to show all the files.
+
+Application bundle generation complete. [15.174 seconds] - 2026-09-08T10:27:16.666Z
+
+Watch mode enabled. Watching for file changes...
+NOTE: Raw file sizes do not reflect development server per-request transformations.
+  ➜  Local:   http://127.0.0.1:4200/
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names            | Raw size
+main.js             | main             | 86.56 kB | 
+
+Lazy chunk files    | Names            | Raw size
+chunk-556EM5NQ.js   | geologist-routes | 32.02 kB | 
+chunk-T63IB666.js   | surveys          | 13.11 kB | 
+chunk-POC4YTJK.js   | operations       | 10.72 kB | 
+chunk-K65VYFLN.js   | survey-data      |  6.84 kB | 
+chunk-DBNZESNL.js   | -                |  1.79 kB | 
+
+Application bundle generation complete. [7.254 seconds] - 2026-09-08T10:44:05.389Z
+
+Page reload sent to client(s).

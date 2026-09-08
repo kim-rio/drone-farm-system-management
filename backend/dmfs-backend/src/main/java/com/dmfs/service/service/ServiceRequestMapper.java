@@ -34,6 +34,7 @@ public class ServiceRequestMapper {
         response.setStatus(
                 request.getStatus()
         );
+        response.setOperatorDecisionReason(request.getOperatorDecisionReason());
 
         response.setCreatedAt(
                 request.getCreatedAt()

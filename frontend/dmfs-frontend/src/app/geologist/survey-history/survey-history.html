@@ -1,0 +1,15 @@
+<div class="eyebrow">Geologist portal</div>
+<h1>Survey History</h1>
+<p class="subtitle">Every magnetic survey logged in the field, most recent first.</p>
+
+<div class="panel">
+  <div class="row-list">
+    <div class="row-item" *ngFor="let r of records">
+      <div class="row-left">
+        <div class="row-title">{{ r.id }} &middot; {{ r.title }}</div>
+        <div class="row-sub">{{ r.client }} &middot; {{ r.location }}</div>
+      </div>
+      <span class="badge" [class.completed]="r.status === 'Completed'">{{ r.status }}</span>
+    </div>
+  </div>
+</div>
