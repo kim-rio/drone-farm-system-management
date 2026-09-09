@@ -6,11 +6,11 @@
 Install:
 
 - Git
-- Java JDK 21
+- Java JDK 25
 - Docker Desktop
 
 V
-Java must be JDK 21.
+Java must be JDK 25.
 
 1. Clone the Repository
 git clone <REPOSITORY_URL>
