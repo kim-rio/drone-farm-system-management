@@ -63,6 +63,7 @@ export class FarmDetails implements OnInit {
   blocksErrorMessage = '';
 
   showAddBlock = false;
+  blockAuditMessage = '';
 
   ngOnInit(): void {
 
@@ -217,6 +218,21 @@ export class FarmDetails implements OnInit {
 
     this.loadBlocks();
 
+    this.cdr.detectChanges();
+  }
+
+  auditBlocks(): void {
+    if (!this.farm) return;
+    const allocated = this.blocks.reduce((sum, block) => sum + (block.areaHectares ?? 0), 0);
+    const missingArea = this.blocks.filter(block => !block.areaHectares || block.areaHectares <= 0).length;
+    if (missingArea) {
+      this.blockAuditMessage = `${missingArea} block(s) need an area before they can be used for a service request.`;
+    } else if (this.farm.areaHectares && allocated > this.farm.areaHectares) {
+      this.blockAuditMessage = `Block area (${allocated} ha) exceeds the farm area (${this.farm.areaHectares} ha). Fix block areas.`;
+    } else {
+      const remaining = this.farm.areaHectares ? this.farm.areaHectares - allocated : 0;
+      this.blockAuditMessage = `Check passed: ${this.blocks.length} block(s) are valid${this.farm.areaHectares ? `; ${remaining.toFixed(2)} ha remains unallocated.` : '.'}`;
+    }
     this.cdr.detectChanges();
   }
 

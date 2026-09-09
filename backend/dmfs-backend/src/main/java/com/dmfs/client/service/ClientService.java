@@ -11,6 +11,8 @@ import com.dmfs.client.entity.ClientType;
 import com.dmfs.client.repository.ClientRepository;
 import com.dmfs.company.entity.SubscriberCompany;
 import com.dmfs.company.repository.SubscriberCompanyRepository;
+import com.dmfs.farm.entity.Farm;
+import com.dmfs.farm.service.FarmService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -24,15 +26,18 @@ public class ClientService {
     private final ClientRepository clientRepository;
     private final UserRepository userRepository;
     private final SubscriberCompanyRepository companyRepository;
+    private final FarmService farmService;
 
     public ClientService(
             ClientRepository clientRepository,
             UserRepository userRepository,
-            SubscriberCompanyRepository companyRepository
+            SubscriberCompanyRepository companyRepository,
+            FarmService farmService
     ) {
         this.clientRepository = clientRepository;
         this.userRepository = userRepository;
         this.companyRepository = companyRepository;
+        this.farmService = farmService;
     }
 
     @Transactional
@@ -90,6 +95,17 @@ public class ClientService {
         );
 
         return clientRepository.save(client);
+    }
+
+    @Transactional
+    public Client createWithInitialFarm(String clientCode, ClientType type, String companyName,
+            String registrationNumber, String firstName, String lastName, String email, String phone,
+            String address, String tin, String farmName, String farmDescription, Double latitude,
+            Double longitude, Double areaHectares) {
+        Client client = create(clientCode, type, companyName, registrationNumber, firstName, lastName,
+                email, phone, address, tin);
+        farmService.createFarm(client.getId(), farmName, farmDescription, latitude, longitude, areaHectares);
+        return client;
     }
 
     @Transactional(readOnly = true)

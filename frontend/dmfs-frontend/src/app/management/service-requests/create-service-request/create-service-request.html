@@ -336,9 +336,9 @@
         </div>
 
 
-        @if (selectedService) {
+          @if (selectedService) {
 
-          <div class="service-preview">
+            <div class="service-preview">
 
             <div>
 
@@ -351,6 +351,10 @@
               </strong>
 
             </div>
+
+            @if (quotedTotal !== null) {
+              <p class="warning">Estimated payment: {{ quotedTotal | number:'1.0-2' }} ({{ selectedService.standardPrice | number:'1.0-2' }} per {{ selectedService.unitOfMeasurement }} × block area).</p>
+            }
 
             <div>
 
@@ -413,21 +417,7 @@
         </div>
 
 
-        <div class="form-group">
-
-          <label for="requestedDate">
-            Requested Date *
-          </label>
-
-          <input
-            id="requestedDate"
-            name="requestedDate"
-            type="date"
-            [(ngModel)]="requestedDate"
-            required
-          />
-
-        </div>
+        <p class="warning">The request timestamp is recorded automatically when you submit.</p>
 
 
         <div class="form-group">

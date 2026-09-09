@@ -55,6 +55,18 @@ public class ClientController {
         );
     }
 
+    @PostMapping("/with-initial-farm")
+    @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGEMENT')")
+    public ClientResponse createWithInitialFarm(@Valid @RequestBody CreateClientWithFarmRequest request) {
+        CreateClientRequest client = request.client();
+        FarmDetails farm = request.farm();
+        return ClientResponse.from(clientService.createWithInitialFarm(client.clientCode(), client.type(),
+                client.companyName(), client.registrationNumber(), client.firstName(), client.lastName(),
+                client.email(), client.phone(), client.address(), client.tin(), farm.name(), farm.description(),
+                farm.latitude(), farm.longitude(), farm.areaHectares()));
+    }
+
     @GetMapping
     @PreAuthorize("""
             hasAnyRole(
@@ -194,4 +206,9 @@ public class ClientController {
             ClientStatus status
     ) {
     }
+
+    public record CreateClientWithFarmRequest(@Valid @NotNull CreateClientRequest client,
+            @Valid @NotNull FarmDetails farm) { }
+    public record FarmDetails(@NotBlank String name, String description, @NotNull Double latitude,
+            @NotNull Double longitude, @NotNull Double areaHectares) { }
 }

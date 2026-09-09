@@ -19,6 +19,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 @Table(name = "service_request")
@@ -81,10 +83,12 @@ public class ServiceRequest {
         return id;
     }
 
+    @JsonProperty("client")
     public Client getCustomer() {
         return customer;
     }
 
+    @JsonAlias("client")
     public void setCustomer(Client customer) {
         this.customer = customer;
     }

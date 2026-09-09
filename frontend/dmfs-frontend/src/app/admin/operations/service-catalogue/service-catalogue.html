@@ -329,14 +329,14 @@
             <label>
 
               <span>
-                Unit of Measurement
+                Area unit (SI)
               </span>
 
               <input
                 type="text"
                 name="unitOfMeasurement"
                 [(ngModel)]="form.unitOfMeasurement"
-                placeholder="e.g. Acre"
+                placeholder="e.g. hectare (ha) or square metre (m²)"
                 required
               >
 
@@ -346,7 +346,7 @@
             <label>
 
               <span>
-                Standard Price
+                Price per unit
               </span>
 
               <input
@@ -364,7 +364,7 @@
             <label>
 
               <span>
-                Minimum Area
+                Minimum service area
               </span>
 
               <input
@@ -454,20 +454,15 @@
           </label>
 
 
-          <label>
-
-            <span>
-              Required Personnel
-            </span>
-
-            <textarea
-              name="requiredPersonnel"
-              [(ngModel)]="form.requiredPersonnel"
-              rows="2"
-              placeholder="e.g. Geologist, drone operator"
-            ></textarea>
-
-          </label>
+          <fieldset class="personnel-roles">
+            <legend>Required personnel roles *</legend>
+            @for (role of personnelRoles; track role.value) {
+              <label>
+                <input type="checkbox" [value]="role.value" [(ngModel)]="selectedPersonnelRoles" name="personnel-{{ role.value }}">
+                <span>{{ role.label }}</span>
+              </label>
+            }
+          </fieldset>
 
 
           <div class="form-actions">

@@ -30,6 +30,10 @@ public class ServiceCatalogueService {
     }
 
     public ServiceCatalogue createService(ServiceCatalogue service) {
+        validatePersonnelRole(service);
+        if (serviceCatalogueRepository.existsByNameIgnoreCase(service.getName())) {
+            throw new IllegalArgumentException("A service with this name already exists");
+        }
         return serviceCatalogueRepository.save(service);
     }
 
@@ -38,6 +42,11 @@ public class ServiceCatalogueService {
             ServiceCatalogue updatedService
     ) {
         ServiceCatalogue existingService = getServiceById(id);
+
+        validatePersonnelRole(updatedService);
+        if (serviceCatalogueRepository.existsByNameIgnoreCaseAndIdNot(updatedService.getName(), id)) {
+            throw new IllegalArgumentException("A service with this name already exists");
+        }
 
         existingService.setName(updatedService.getName());
         existingService.setCategory(updatedService.getCategory());
@@ -69,5 +78,14 @@ public class ServiceCatalogueService {
         ServiceCatalogue service = getServiceById(id);
         service.setStatus("INACTIVE");
         serviceCatalogueRepository.save(service);
+    }
+
+    private void validatePersonnelRole(ServiceCatalogue service) {
+        String role = service.getRequiredPersonnel();
+        if (role == null || role.isBlank() || java.util.Arrays.stream(role.split(","))
+                .anyMatch(value -> !"GEOLOGIST".equals(value) && !"DRONE_OPERATOR".equals(value))) {
+            throw new IllegalArgumentException(
+                    "Required personnel must be GEOLOGIST or DRONE_OPERATOR");
+        }
     }
 }

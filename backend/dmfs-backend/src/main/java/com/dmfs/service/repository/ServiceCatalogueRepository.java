@@ -6,4 +6,6 @@ import com.dmfs.service.entity.ServiceCatalogue;
 
 public interface ServiceCatalogueRepository
         extends JpaRepository<ServiceCatalogue, Long> {
+    boolean existsByNameIgnoreCase(String name);
+    boolean existsByNameIgnoreCaseAndIdNot(String name, Long id);
 }

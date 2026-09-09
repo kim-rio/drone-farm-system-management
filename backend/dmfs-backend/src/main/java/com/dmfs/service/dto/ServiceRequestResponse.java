@@ -3,6 +3,7 @@ package com.dmfs.service.dto;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ServiceRequestResponse {
 
@@ -42,6 +43,7 @@ public class ServiceRequestResponse {
     }
 
 
+    @JsonProperty("client")
     public CustomerInfo getCustomer() {
         return customer;
     }

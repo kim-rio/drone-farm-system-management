@@ -136,6 +136,7 @@
 }
 
 .stat-card {
+  position: relative;
   min-width: 0;
   min-height: 128px;
   display: flex;
@@ -146,6 +147,25 @@
   border: 1px solid #e5e5e3;
   border-radius: 10px;
 }
+
+.stat-card::before {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 8px;
+  background: #f0f3f1;
+  color: #245a43;
+  font-size: 15px;
+  font-weight: 700;
+}
+.stat-card:nth-child(1)::before { content: '♙'; }
+.stat-card:nth-child(2)::before { content: '✓'; }
+.stat-card:nth-child(3)::before { content: '◷'; }
+.stat-card:nth-child(4)::before { content: '⌁'; }
 
 .stat-label {
   color: #777;

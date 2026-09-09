@@ -94,8 +94,6 @@ export class CreateServiceRequest implements OnInit {
 
   selectedServiceId: number | null = null;
 
-  requestedDate = '';
-
   notes = '';
 
 
@@ -359,6 +357,15 @@ export class CreateServiceRequest implements OnInit {
     );
   }
 
+  get selectedBlock(): Block | undefined {
+    return this.blocks.find(block => block.id === this.selectedBlockId);
+  }
+
+  get quotedTotal(): number | null {
+    if (!this.selectedService || !this.selectedBlock?.areaHectares) return null;
+    return this.selectedService.standardPrice * this.selectedBlock.areaHectares;
+  }
+
 
   /* ==============================
      SUBMIT
@@ -400,11 +407,13 @@ export class CreateServiceRequest implements OnInit {
       return;
     }
 
-    if (!this.requestedDate) {
+    if (!this.selectedBlock?.areaHectares) {
+      this.errorMessage = 'The selected block needs an area before it can be serviced.';
+      return;
+    }
 
-      this.errorMessage =
-        'Please select a requested date.';
-
+    if (this.selectedService && this.selectedBlock.areaHectares < this.selectedService.minimumArea) {
+      this.errorMessage = `This block is below the minimum service area (${this.selectedService.minimumArea} ${this.selectedService.unitOfMeasurement}).`;
       return;
     }
 
@@ -427,9 +436,6 @@ export class CreateServiceRequest implements OnInit {
       serviceCatalogue: {
         id: this.selectedServiceId
       },
-
-      requestedDate:
-        this.requestedDate,
 
       notes:
         this.notes.trim(),

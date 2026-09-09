@@ -48,6 +48,9 @@ export class RegisterClients {
     address: ''
   };
 
+  initialFarm = { name: '', description: '', latitude: undefined as number | undefined,
+    longitude: undefined as number | undefined, areaHectares: undefined as number | undefined };
+
   setType(type: ClientType): void {
     this.client.type = type;
     this.errorMessage.set('');
@@ -112,9 +115,19 @@ export class RegisterClients {
     this.client.clientCode =
       'CLI-' + Date.now().toString().slice(-6);
 
+    if (!this.initialFarm.name.trim() || this.initialFarm.latitude === undefined ||
+      this.initialFarm.longitude === undefined || !this.initialFarm.areaHectares || this.initialFarm.areaHectares <= 0) {
+      this.errorMessage.set('A farm name, valid coordinates, and area are required for every client.');
+      return;
+    }
+
     this.loading.set(true);
 
-    this.ClientService.createClient(this.client).subscribe({
+    this.ClientService.createClientWithInitialFarm(this.client, {
+      name: this.initialFarm.name.trim(), description: this.initialFarm.description.trim(),
+      latitude: this.initialFarm.latitude, longitude: this.initialFarm.longitude,
+      areaHectares: this.initialFarm.areaHectares
+    }).subscribe({
       next: (Client: Client) => {
         console.log('CLIENT CREATED:', Client);
 

@@ -61,6 +61,8 @@ export interface CreateClientRequest {
   address?: string;
 }
 
+export interface InitialFarmRequest { name: string; description?: string; latitude: number; longitude: number; areaHectares: number; }
+
 @Injectable({
   providedIn: 'root'
 })
@@ -102,6 +104,10 @@ export class ClientService {
         withCredentials: true
       }
     );
+  }
+
+  createClientWithInitialFarm(client: CreateClientRequest, farm: InitialFarmRequest): Observable<Client> {
+    return this.http.post<Client>(`${this.apiUrl}/with-initial-farm`, { client, farm }, { withCredentials: true });
   }
 
   updateClient(

@@ -1,5 +1,11 @@
 :host {
   display: block;
+  min-height: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 28px 32px 40px;
+  background: #f7f7f5;
+  color: #111;
 }
 
 .eyebrow {
@@ -11,7 +17,9 @@
 }
 
 h1 {
-  font-size: 22px;
+  font-size: clamp(25px, 2.2vw, 32px);
+  line-height: 1.1;
+  letter-spacing: -1px;
   margin: 4px 0 6px;
 }
 
@@ -29,8 +37,8 @@ h1 {
 }
 
 .stat-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-c);
+  background: #fff;
+  border: 1px solid #e5e5e3;
   border-radius: 10px;
   padding: 16px;
   display: flex;
@@ -74,8 +82,8 @@ h1 {
 .stat-sub { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; }
 
 .panel {
-  background: var(--bg-card);
-  border: 1px solid var(--border-c);
+  background: #fff;
+  border: 1px solid #e5e5e3;
   border-radius: 10px;
   padding: 20px;
 }
@@ -99,13 +107,21 @@ h1 {
 }
 
 .survey-card {
-  border: 1px solid var(--border-c);
+  border: 1px solid #e5e5e3;
   border-radius: 8px;
   padding: 14px 14px 12px;
   border-top: 3px solid var(--danger);
 
   &.ochre { border-top-color: var(--ochre); }
   &.teal { border-top-color: var(--teal); }
+}
+
+@media (max-width: 800px) {
+  :host { padding: 23px 20px 34px; }
+}
+
+@media (max-width: 600px) {
+  :host { padding: 19px 14px 30px; }
 }
 
 .survey-top {

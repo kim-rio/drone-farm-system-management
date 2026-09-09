@@ -5,6 +5,7 @@ import { AuthService, LoginResponse } from '../services/auth.service';
 interface ManagementMenuItem {
   label: string;
   route: string;
+  icon: string;
 }
 
 @Component({
@@ -27,22 +28,26 @@ export class Management {
 
     {
       label: 'Dashboard',
-      route: '/management'
+      route: '/management',
+      icon: '▦'
     },
 
     {
       label: 'Clients',
-      route: '/management/clients'
+      route: '/management/clients',
+      icon: '♙'
     },
 
     {
       label: 'Farms',
-      route: '/management/farms'
+      route: '/management/farms',
+      icon: '⌂'
     },
 
     {
       label: 'Service Requests',
-      route: '/management/service-requests'
+      route: '/management/service-requests',
+      icon: '✓'
     }
 
   ];

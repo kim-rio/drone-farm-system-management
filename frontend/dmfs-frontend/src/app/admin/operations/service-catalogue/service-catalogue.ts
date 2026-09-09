@@ -17,6 +17,11 @@ import {
 })
 export class ServiceCataloguePage implements OnInit {
 
+  readonly personnelRoles = [
+    { value: 'GEOLOGIST', label: 'Geologist' },
+    { value: 'DRONE_OPERATOR', label: 'Drone Operator' }
+  ];
+
   private readonly router = inject(Router);
 
   private readonly serviceCatalogueService =
@@ -44,6 +49,8 @@ export class ServiceCataloguePage implements OnInit {
     requiredPersonnel: '',
     estimatedDurationMinutes: 60
   };
+
+  selectedPersonnelRoles: string[] = [];
 
   ngOnInit(): void {
     this.loadServices();
@@ -95,6 +102,7 @@ export class ServiceCataloguePage implements OnInit {
       estimatedDurationMinutes: 60
 
     };
+    this.selectedPersonnelRoles = [];
 
     this.showForm = true;
 
@@ -119,6 +127,7 @@ export class ServiceCataloguePage implements OnInit {
         service.estimatedDurationMinutes
 
     };
+    this.selectedPersonnelRoles = (service.requiredPersonnel ?? '').split(',').filter(Boolean);
 
     this.showForm = true;
 
@@ -134,9 +143,11 @@ export class ServiceCataloguePage implements OnInit {
 
   save(): void {
 
-    const payload = {
-      ...this.form
-    };
+    if (!this.selectedPersonnelRoles.length) {
+      this.errorMessage = 'Select at least one required personnel role.';
+      return;
+    }
+    const payload = { ...this.form, requiredPersonnel: this.selectedPersonnelRoles.join(',') };
 
     if (this.editingId === null) {
 

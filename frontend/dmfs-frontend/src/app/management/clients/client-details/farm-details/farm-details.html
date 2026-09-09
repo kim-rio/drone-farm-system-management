@@ -190,6 +190,13 @@
         <button
           type="button"
           class="secondary-button"
+          (click)="auditBlocks()">
+          Check Blocks
+        </button>
+
+        <button
+          type="button"
+          class="secondary-button"
           (click)="addBlock()">
 
           + Add Block
@@ -197,6 +204,10 @@
         </button>
 
       </div>
+
+      @if (blockAuditMessage) {
+        <div class="state-card">{{ blockAuditMessage }}</div>
+      }
 
 
       <!-- BLOCK LOADING -->

@@ -45,7 +45,7 @@ export interface ServiceRequest {
     estimatedDurationMinutes?: number;
   };
 
-  requestedDate: string;
+  requestedDate?: string;
 
   notes?: string;
 
@@ -74,7 +74,7 @@ export interface CreateServiceRequestPayload {
     id: number;
   };
 
-  requestedDate: string;
+  requestedDate?: string;
 
   notes?: string;
 

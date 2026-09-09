@@ -37,6 +37,21 @@ public class BlockService {
 
         Block block = new Block();
 
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("Block name is required");
+        }
+        if (areaHectares == null || areaHectares <= 0) {
+            throw new IllegalArgumentException("Block area must be greater than zero");
+        }
+        if (farm.getAreaHectares() != null) {
+            double allocated = blockRepository.findByFarmId(farmId).stream()
+                    .map(Block::getAreaHectares).filter(java.util.Objects::nonNull)
+                    .mapToDouble(Double::doubleValue).sum();
+            if (allocated + areaHectares > farm.getAreaHectares()) {
+                throw new IllegalArgumentException("Block area exceeds the farm's unallocated area");
+            }
+        }
+
         block.setName(name);
         block.setDescription(description);
         block.setAreaHectares(areaHectares);
