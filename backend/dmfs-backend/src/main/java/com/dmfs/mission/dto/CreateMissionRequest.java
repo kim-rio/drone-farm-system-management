@@ -10,6 +10,9 @@ public class CreateMissionRequest {
     @NotNull(message = "Service request is required")
     private Long serviceRequestId;
 
+    @NotNull(message = "Drone operator is required")
+    private Long operatorId;
+
     @NotNull(message = "Scheduled date is required")
     private LocalDate scheduledDate;
 
@@ -27,6 +30,14 @@ public class CreateMissionRequest {
 
     public void setServiceRequestId(Long serviceRequestId) {
         this.serviceRequestId = serviceRequestId;
+    }
+
+    public Long getOperatorId() {
+        return operatorId;
+    }
+
+    public void setOperatorId(Long operatorId) {
+        this.operatorId = operatorId;
     }
 
 

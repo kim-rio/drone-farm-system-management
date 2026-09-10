@@ -1,5 +1,13 @@
 package com.dmfs.mission.service;
 
+import java.time.LocalDate;
+import java.util.List;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.dmfs.auth.entity.Role;
 import com.dmfs.auth.entity.User;
 import com.dmfs.auth.repository.UserRepository;
@@ -15,14 +23,6 @@ import com.dmfs.mission.entity.MissionStatus;
 import com.dmfs.mission.repository.MissionRepository;
 import com.dmfs.service.entity.ServiceRequest;
 import com.dmfs.service.repository.ServiceRequestRepository;
-
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-import java.util.List;
 
 @Service
 public class MissionService {
@@ -209,8 +209,18 @@ public class MissionService {
                 cleanNotes(request.getNotes())
         );
 
+        User operator = userRepository
+                .findByIdAndCompany(request.getOperatorId(), company)
+                .orElseThrow(() -> new RuntimeException("Operator not found"));
+
+        if (operator.getRole() != Role.DRONE_OPERATOR || !operator.isActive()) {
+            throw new RuntimeException("Selected drone operator is not available");
+        }
+
+        mission.setOperator(operator);
+
         mission.setStatus(
-                MissionStatus.PLANNED
+                MissionStatus.ASSIGNED
         );
 
 
@@ -402,6 +412,38 @@ public class MissionService {
                 missionRepository.save(mission)
         );
     }
+    // =========================================================
+// GET DRONE OPERATORS
+// =========================================================
+
+@Transactional(readOnly = true)
+public List<MissionResponse.OperatorInfo> getDroneOperators() {
+
+    SubscriberCompany company = getCurrentCompany();
+
+    List<User> operators =
+            userRepository
+                    .findByCompanyAndRoleInOrderByFirstNameAsc(
+                            company,
+                            List.of(Role.DRONE_OPERATOR)
+                    );
+
+    return operators.stream()
+            .filter(User::isActive)
+            .map(user -> {
+
+                MissionResponse.OperatorInfo info =
+                        new MissionResponse.OperatorInfo();
+
+                info.setId(user.getId());
+                info.setFirstName(user.getFirstName());
+                info.setLastName(user.getLastName());
+                info.setEmail(user.getEmail());
+
+                return info;
+            })
+            .toList();
+}
 
 
     // =========================================================

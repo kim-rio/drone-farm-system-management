@@ -146,7 +146,20 @@ export const routes: Routes = [
     canActivate: [roleGuard(['MANAGEMENT'])],
     loadComponent: () =>
       import('./management/management')
-        .then(m => m.Management)
+        .then(m => m.Management),
+    children: [
+      { path: 'clients', loadComponent: () => import('./management/clients/client-list/client-list').then(m => m.ClientList) },
+      { path: 'clients/register', loadComponent: () => import('./management/clients/register-clients/register-clients').then(m => m.RegisterClients) },
+      { path: 'clients/:clientId/farms/:farmId', loadComponent: () => import('./management/clients/client-details/farm-details/farm-details').then(m => m.FarmDetails) },
+      { path: 'clients/:id', loadComponent: () => import('./management/clients/client-details/client-details').then(m => m.ClientDetails) },
+      { path: 'farms', component: FarmList },
+      { path: 'service-requests', loadComponent: () => import('./management/service-requests/service-request-list/service-request-list').then(m => m.ServiceRequestList) },
+      { path: 'service-requests/new', loadComponent: () => import('./management/service-requests/create-service-request/create-service-request').then(m => m.CreateServiceRequest) },
+      { path: 'service-requests/:id', loadComponent: () => import('./management/service-requests/service-request-details/service-request-details').then(m => m.ServiceRequestDetails) },
+      { path: 'missions', loadComponent: () => import('./management/missions/mission-list/mission-list').then(m => m.MissionList) },
+      { path: 'missions/new', loadComponent: () => import('./management/missions/create-mission/create-mission').then(m => m.CreateMission) },
+      { path: 'missions/:id', loadComponent: () => import('./management/missions/mission-details/mission-details').then(m => m.MissionDetails) }
+    ]
   },
 
   {
@@ -207,6 +220,29 @@ export const routes: Routes = [
       import('./management/service-requests/service-request-details/service-request-details')
         .then(m => m.ServiceRequestDetails)
   },
+  {
+  path: 'management/missions',
+  canActivate: [roleGuard(['MANAGEMENT'])],
+  loadComponent: () =>
+    import('./management/missions/mission-list/mission-list')
+      .then(m => m.MissionList)
+},
+
+{
+  path: 'management/missions/new',
+  canActivate: [roleGuard(['MANAGEMENT'])],
+  loadComponent: () =>
+    import('./management/missions/create-mission/create-mission')
+      .then(m => m.CreateMission)
+},
+
+{
+  path: 'management/missions/:id',
+  canActivate: [roleGuard(['MANAGEMENT'])],
+  loadComponent: () =>
+    import('./management/missions/mission-details/mission-details')
+      .then(m => m.MissionDetails)
+},
 
 
   // ==========================================================
@@ -215,6 +251,7 @@ export const routes: Routes = [
 
   {
     path: 'drone-operator',
+    pathMatch: 'full',
     canActivate: [roleGuard(['DRONE_OPERATOR'])],
     loadComponent: () => import('./drone-operator/operator-workspace').then(m => m.OperatorWorkspace),
     data: { page: 'dashboard' }

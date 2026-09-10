@@ -1,0 +1,232 @@
+<div class="page">
+
+  <div class="page-header">
+
+    <div>
+
+      <button
+        type="button"
+        class="back"
+        (click)="cancel()">
+
+        ← Missions
+
+      </button>
+
+      <p class="eyebrow">
+        FIELD OPERATIONS
+      </p>
+
+      <h1>
+        Create Mission
+      </h1>
+
+      <p>
+        Convert a service request into a field mission.
+      </p>
+
+    </div>
+
+  </div>
+
+
+  @if (errorMessage) {
+
+    <div class="alert">
+      {{ errorMessage }}
+    </div>
+
+  }
+
+
+  @if (loading) {
+
+    <div class="state">
+      Loading service requests...
+    </div>
+
+  } @else {
+
+    <section class="card">
+
+      <form
+        (ngSubmit)="save()">
+
+        <div class="form-group">
+
+          <label for="request">
+            Service Request *
+          </label>
+
+          <select
+            id="request"
+            name="request"
+            [(ngModel)]="selectedRequestId"
+            required>
+
+            <option [ngValue]="null">
+              Select service request
+            </option>
+
+            @for (
+              request of requests;
+              track request.id
+            ) {
+
+              <option
+                [ngValue]="request.id">
+
+                Request #{{ request.id }}
+                —
+                {{ request.serviceCatalogue.name }}
+                —
+                {{ getClientName(request) }}
+
+              </option>
+
+            }
+
+          </select>
+
+        </div>
+
+        <div class="form-group">
+
+          <label for="operator">
+            Drone Operator *
+          </label>
+
+          <select
+            id="operator"
+            name="operator"
+            [(ngModel)]="selectedOperatorId"
+            required>
+
+            <option [ngValue]="null">Select drone operator</option>
+
+            @for (operator of operators; track operator.id) {
+              <option [ngValue]="operator.id">
+                {{ operator.firstName }} {{ operator.lastName }} — {{ operator.email }}
+              </option>
+            }
+
+          </select>
+
+          @if (operators.length === 0) {
+            <small class="field-help">No active drone operators are available. Add one in Staff before scheduling this mission.</small>
+          }
+
+        </div>
+
+
+        @if (getSelectedRequest(); as request) {
+
+          <div class="request-preview">
+
+            <h3>
+              Selected Request
+            </h3>
+
+            <div class="preview-grid">
+
+              <div>
+                <span>Client</span>
+                <strong>
+                  {{ getClientName(request) }}
+                </strong>
+              </div>
+
+              <div>
+                <span>Farm</span>
+                <strong>
+                  {{ request.farm.name || '—' }}
+                </strong>
+              </div>
+
+              <div>
+                <span>Block</span>
+                <strong>
+                  {{ request.farmBlock.name || '—' }}
+                </strong>
+              </div>
+
+              <div>
+                <span>Service</span>
+                <strong>
+                  {{ request.serviceCatalogue.name || '—' }}
+                </strong>
+              </div>
+
+            </div>
+
+          </div>
+
+        }
+
+
+        <div class="form-group">
+
+          <label for="scheduledDate">
+            Scheduled Date *
+          </label>
+
+          <input
+            id="scheduledDate"
+            type="date"
+            name="scheduledDate"
+            [(ngModel)]="scheduledDate"
+            required />
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="notes">
+            Operational Notes
+          </label>
+
+          <textarea
+            id="notes"
+            name="notes"
+            rows="5"
+            [(ngModel)]="notes"
+            placeholder="Instructions for the field operation...">
+          </textarea>
+
+        </div>
+
+
+        <div class="actions">
+
+          <button
+            type="button"
+            class="secondary"
+            (click)="cancel()">
+
+            Cancel
+
+          </button>
+
+          <button
+            type="submit"
+            class="primary"
+            [disabled]="saving">
+
+            @if (saving) {
+              Creating...
+            } @else {
+              Create Mission
+            }
+
+          </button>
+
+        </div>
+
+      </form>
+
+    </section>
+
+  }
+
+</div>

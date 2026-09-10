@@ -37,7 +37,7 @@ import java.time.OffsetDateTime;
                 )
         }
 )
-public class Survey {
+public class Surveyy {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

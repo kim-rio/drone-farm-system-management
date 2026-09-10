@@ -1,22 +1,22 @@
 package com.dmfs.survey.repository;
 
-import com.dmfs.company.entity.SubscriberCompany;
-import com.dmfs.service.entity.ServiceRequest;
-import com.dmfs.survey.entity.Survey;
-
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import java.util.List;
 import java.util.Optional;
 
-public interface SurveyRepository
-        extends JpaRepository<Survey, Long> {
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.dmfs.company.entity.SubscriberCompany;
+import com.dmfs.service.entity.ServiceRequest;
+import com.dmfs.survey.entity.Surveyy;
+
+public interface SurveyyRepository
+        extends JpaRepository<Surveyy, Long> {
 
     /*
      * Get all surveys belonging to the
      * authenticated subscriber company.
      */
-    List<Survey> findByCompanyOrderByCreatedAtDesc(
+    List<Surveyy> findByCompanyOrderByCreatedAtDesc(
             SubscriberCompany company
     );
 
@@ -25,7 +25,7 @@ public interface SurveyRepository
      * Find one survey while enforcing
      * company-level tenant isolation.
      */
-    Optional<Survey> findByIdAndCompany(
+    Optional<Surveyy> findByIdAndCompany(
             Long id,
             SubscriberCompany company
     );
@@ -44,7 +44,7 @@ public interface SurveyRepository
      * Find surveys associated with a
      * particular service request.
      */
-    List<Survey> findByServiceRequestOrderByCreatedAtDesc(
+    List<Surveyy> findByServiceRequestOrderByCreatedAtDesc(
             ServiceRequest serviceRequest
     );
 
@@ -53,7 +53,7 @@ public interface SurveyRepository
      * Find surveys assigned to a
      * particular operator.
      */
-    List<Survey> findByCompanyAndOperatorIdOrderByCreatedAtDesc(
+    List<Surveyy> findByCompanyAndOperatorIdOrderByCreatedAtDesc(
             SubscriberCompany company,
             Long operatorId
     );

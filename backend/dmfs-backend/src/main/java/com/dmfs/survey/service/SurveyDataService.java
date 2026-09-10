@@ -1,32 +1,32 @@
 package com.dmfs.survey.service;
 
-import com.dmfs.auth.entity.User;
-import com.dmfs.auth.repository.UserRepository;
-import com.dmfs.company.entity.SubscriberCompany;
-import com.dmfs.survey.dto.SurveyDataResponse;
-import com.dmfs.survey.entity.Survey;
-import com.dmfs.survey.entity.SurveyData;
-import com.dmfs.survey.repository.SurveyDataRepository;
-import com.dmfs.survey.repository.SurveyRepository;
+import java.util.List;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import com.dmfs.auth.entity.User;
+import com.dmfs.auth.repository.UserRepository;
+import com.dmfs.company.entity.SubscriberCompany;
+import com.dmfs.survey.dto.SurveyDataResponse;
+import com.dmfs.survey.entity.Surveyy;
+import com.dmfs.survey.entity.SurveyyData;
+import com.dmfs.survey.repository.SurveyyDataRepository;
+import com.dmfs.survey.repository.SurveyyRepository;
 
 @Service
 public class SurveyDataService {
 
-    private final SurveyDataRepository surveyDataRepository;
-    private final SurveyRepository surveyRepository;
+    private final SurveyyDataRepository surveyDataRepository;
+    private final SurveyyRepository surveyRepository;
     private final UserRepository userRepository;
 
 
     public SurveyDataService(
-            SurveyDataRepository surveyDataRepository,
-            SurveyRepository surveyRepository,
+            SurveyyDataRepository surveyDataRepository,
+            SurveyyRepository surveyRepository,
             UserRepository userRepository
     ) {
         this.surveyDataRepository = surveyDataRepository;
@@ -47,7 +47,7 @@ public class SurveyDataService {
         SubscriberCompany company =
                 getCurrentUserCompany();
 
-        Survey survey =
+        Surveyy survey =
                 surveyRepository
                         .findByIdAndCompany(
                                 surveyId,
@@ -83,7 +83,7 @@ public class SurveyDataService {
         SubscriberCompany company =
                 getCurrentUserCompany();
 
-        SurveyData data =
+        SurveyyData data =
                 surveyDataRepository
                         .findByIdAndCompany(
                                 id,
@@ -117,7 +117,7 @@ public class SurveyDataService {
                 getCurrentUserCompany();
 
 
-        Survey survey =
+        Surveyy survey =
                 surveyRepository
                         .findByIdAndCompany(
                                 surveyId,
@@ -134,8 +134,8 @@ public class SurveyDataService {
                 getCurrentUser();
 
 
-        SurveyData surveyData =
-                new SurveyData();
+        SurveyyData surveyData =
+                new SurveyyData();
 
         surveyData.setSurvey(
                 survey
@@ -189,7 +189,7 @@ public class SurveyDataService {
                 getCurrentUserCompany();
 
 
-        SurveyData data =
+        SurveyyData data =
                 surveyDataRepository
                         .findByIdAndCompany(
                                 id,
@@ -266,7 +266,7 @@ public class SurveyDataService {
     // =========================================================
 
     private SurveyDataResponse toResponse(
-            SurveyData data
+            SurveyyData data
     ) {
 
         SurveyDataResponse response =

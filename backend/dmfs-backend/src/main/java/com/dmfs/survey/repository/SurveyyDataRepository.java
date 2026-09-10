@@ -1,23 +1,23 @@
 package com.dmfs.survey.repository;
 
-import com.dmfs.company.entity.SubscriberCompany;
-import com.dmfs.survey.entity.Survey;
-import com.dmfs.survey.entity.SurveyData;
-
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import java.util.List;
 import java.util.Optional;
 
-public interface SurveyDataRepository
-        extends JpaRepository<SurveyData, Long> {
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.dmfs.company.entity.SubscriberCompany;
+import com.dmfs.survey.entity.Surveyy;
+import com.dmfs.survey.entity.SurveyyData;
+
+public interface SurveyyDataRepository
+        extends JpaRepository<SurveyyData, Long> {
 
     /*
      * Get all uploaded data files belonging
      * to a particular survey.
      */
-    List<SurveyData> findBySurveyOrderByUploadedAtDesc(
-            Survey survey
+    List<SurveyyData> findBySurveyOrderByUploadedAtDesc(
+            Surveyy survey
     );
 
 
@@ -25,7 +25,7 @@ public interface SurveyDataRepository
      * Get one survey-data record while enforcing
      * company-level tenant isolation.
      */
-    Optional<SurveyData> findByIdAndCompany(
+    Optional<SurveyyData> findByIdAndCompany(
             Long id,
             SubscriberCompany company
     );
@@ -35,7 +35,7 @@ public interface SurveyDataRepository
      * Get all uploaded survey data belonging
      * to the authenticated subscriber company.
      */
-    List<SurveyData> findByCompanyOrderByUploadedAtDesc(
+    List<SurveyyData> findByCompanyOrderByUploadedAtDesc(
             SubscriberCompany company
     );
 
@@ -44,8 +44,8 @@ public interface SurveyDataRepository
      * Get survey data for a particular survey
      * while enforcing tenant isolation.
      */
-    List<SurveyData> findBySurveyAndCompanyOrderByUploadedAtDesc(
-            Survey survey,
+    List<SurveyyData> findBySurveyAndCompanyOrderByUploadedAtDesc(
+            Surveyy survey,
             SubscriberCompany company
     );
 
@@ -53,7 +53,7 @@ public interface SurveyDataRepository
     /*
      * Find data uploaded by a specific user.
      */
-    List<SurveyData> findByCompanyAndUploadedByIdOrderByUploadedAtDesc(
+    List<SurveyyData> findByCompanyAndUploadedByIdOrderByUploadedAtDesc(
             SubscriberCompany company,
             Long uploadedById
     );

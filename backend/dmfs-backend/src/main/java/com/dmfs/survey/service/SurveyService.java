@@ -1,5 +1,15 @@
 package com.dmfs.survey.service;
 
+import java.util.List;
+
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.dmfs.auth.entity.Role;
 import com.dmfs.auth.entity.User;
 import com.dmfs.auth.repository.UserRepository;
@@ -9,25 +19,14 @@ import com.dmfs.service.repository.ServiceRequestRepository;
 import com.dmfs.survey.dto.CreateSurveyRequest;
 import com.dmfs.survey.dto.SurveyResponse;
 import com.dmfs.survey.dto.UpdateSurveyRequest;
-import com.dmfs.survey.entity.Survey;
 import com.dmfs.survey.entity.SurveyStatus;
-import com.dmfs.survey.repository.SurveyRepository;
-
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.Point;
-
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
+import com.dmfs.survey.entity.Surveyy;
+import com.dmfs.survey.repository.SurveyyRepository;
 
 @Service
 public class SurveyService {
 
-    private final SurveyRepository surveyRepository;
+    private final SurveyyRepository surveyRepository;
     private final ServiceRequestRepository serviceRequestRepository;
     private final UserRepository userRepository;
 
@@ -36,7 +35,7 @@ public class SurveyService {
 
 
     public SurveyService(
-            SurveyRepository surveyRepository,
+            SurveyyRepository surveyRepository,
             ServiceRequestRepository serviceRequestRepository,
             UserRepository userRepository
     ) {
@@ -84,7 +83,7 @@ public class SurveyService {
         SubscriberCompany company =
                 getCurrentUserCompany();
 
-        Survey survey =
+        Surveyy survey =
                 surveyRepository
                         .findByIdAndCompany(id, company)
                         .orElseThrow(() ->
@@ -172,7 +171,7 @@ public class SurveyService {
         );
 
 
-        Survey survey = new Survey();
+        Surveyy survey = new Surveyy();
 
         survey.setSurveyCode(surveyCode);
 
@@ -249,7 +248,7 @@ public class SurveyService {
         SubscriberCompany company =
                 getCurrentUserCompany();
 
-        Survey survey =
+        Surveyy survey =
                 surveyRepository
                         .findByIdAndCompany(
                                 id,
@@ -341,7 +340,7 @@ public class SurveyService {
         SubscriberCompany company =
                 getCurrentUserCompany();
 
-        Survey survey =
+        Surveyy survey =
                 surveyRepository
                         .findByIdAndCompany(
                                 id,
@@ -391,7 +390,7 @@ public class SurveyService {
         SubscriberCompany company =
                 getCurrentUserCompany();
 
-        Survey survey =
+        Surveyy survey =
                 surveyRepository
                         .findByIdAndCompany(
                                 id,
@@ -441,7 +440,7 @@ public class SurveyService {
         SubscriberCompany company =
                 getCurrentUserCompany();
 
-        Survey survey =
+        Surveyy survey =
                 surveyRepository
                         .findByIdAndCompany(
                                 id,
@@ -622,7 +621,7 @@ public class SurveyService {
     // =========================================================
 
     private SurveyResponse toResponse(
-            Survey survey
+            Surveyy survey
     ) {
 
         SurveyResponse response =
@@ -743,7 +742,40 @@ public class SurveyService {
         return response;
     }
 
-    private User getCurrentUser() {
-        throw new UnsupportedOperationException("Not supported yet.");
+   private User getCurrentUser() {
+
+    Authentication authentication =
+            SecurityContextHolder
+                    .getContext()
+                    .getAuthentication();
+
+    if (authentication == null
+            || authentication.getName() == null
+            || authentication.getName().isBlank()) {
+
+        throw new RuntimeException(
+                "Authenticated user not found"
+        );
     }
+
+    User user =
+            userRepository
+                    .findByEmail(
+                            authentication.getName()
+                    )
+                    .orElseThrow(() ->
+                            new RuntimeException(
+                                    "Authenticated user not found"
+                            )
+                    );
+
+    if (user.getCompany() == null) {
+
+        throw new RuntimeException(
+                "User is not assigned to a company"
+        );
+    }
+
+    return user;
+}
 }

@@ -1,18 +1,1139 @@
 <div class="shell">
-  <aside class="sidebar"><a class="brand" routerLink="/drone-operator"><span class="brand-mark">✦</span><span>Terra<span>Flight</span></span></a>
-    <div class="operator"><span class="avatar">{{ initials }}</span><div><strong>{{ name }} {{ user?.lastName }}</strong><small>Drone operator</small></div></div>
-    <nav><a routerLink="/drone-operator" [class.active]="page==='dashboard'"><i>⌂</i>Overview</a><a routerLink="/drone-operator/missions" [class.active]="page==='missions'||page==='detail'"><i>◈</i>My missions <b>{{ pending.length }}</b></a><a routerLink="/drone-operator/surveys" [class.active]="page==='surveys'"><i>⌁</i>Field surveys</a><a routerLink="/drone-operator/data" [class.active]="page==='data'"><i>⇧</i>Data handoff</a></nav>
-    <div class="side-foot"><span class="online-dot"></span>System online<button (click)="logout()">Sign out →</button></div></aside>
-  <main><header><div><p class="eyebrow">OPERATOR WORKSPACE</p><h1>{{ page==='dashboard' ? 'Good day, '+name : page==='detail' ? selected?.missionCode || 'Mission details' : page==='missions' ? 'My missions' : page==='surveys' ? 'Field surveys' : 'Data handoff' }}</h1><p class="muted">{{ page==='dashboard' ? 'Here is your field activity at a glance.' : 'Execute assigned work and keep the field team moving.' }}</p></div><div class="header-date">{{ (today[0]?.scheduledDate || '2026-09-10') | date:'EEEE, d MMM' }}<span>East Africa time</span></div></header>
-    <div *ngIf="error" class="alert">{{ error }} <button (click)="error=''">×</button></div>
-    <section *ngIf="loading" class="loading"><span></span>Loading your missions…</section>
-    <ng-container *ngIf="!loading">
-      <ng-container *ngIf="page==='dashboard'"><section class="hero"><div><p class="eyebrow">FIELD READINESS</p><h2>{{ active.length ? 'You have a mission in progress.' : pending.length ? 'A mission needs your attention.' : 'You’re clear for field operations.' }}</h2><p>{{ active.length ? active[0].missionCode+' is active at '+(active[0].farm?.name || 'the assigned farm')+'.' : pending.length ? pending[0].missionCode+' is ready for your acceptance.' : 'New assignments will appear here as soon as management schedules them.' }}</p><a [routerLink]="active.length ? ['/drone-operator/missions', active[0].id] : ['/drone-operator/missions']">{{ active.length ? 'Open active mission →' : 'View my missions →' }}</a></div><div class="radar"><span>⌁</span><small>FLIGHT OPS</small></div></section>
-      <section class="metrics"><article><span class="metric-icon amber">◷</span><div><strong>{{ pending.length }}</strong><p>Awaiting acceptance</p></div></article><article><span class="metric-icon blue">◈</span><div><strong>{{ today.length }}</strong><p>Scheduled today</p></div></article><article><span class="metric-icon green">↗</span><div><strong>{{ active.length }}</strong><p>In progress</p></div></article><article><span class="metric-icon purple">✓</span><div><strong>{{ completed.length }}</strong><p>Completed</p></div></article></section>
-      <section class="section-title"><div><h2>Priority missions</h2><p>Work that needs action from you.</p></div><a routerLink="/drone-operator/missions">See all missions →</a></section><div class="mission-list"><ng-container *ngFor="let m of missions.slice(0,4)"><article class="mission-card"><div class="mission-top"><span class="code">{{ m.missionCode }}</span><span class="status" [class]="'status '+m.status.toLowerCase()">{{ statusLabel(m.status) }}</span></div><h3>{{ m.farm?.name || 'Farm assignment' }}</h3><p>{{ m.farmBlock?.name || 'Block to be confirmed' }} · {{ m.customer?.clientCode || 'Client details pending' }}</p><div class="mission-meta"><span>◷ {{ m.scheduledDate | date:'d MMM, y' }}</span><span>◉ {{ m.drone?.name || 'Drone allocation pending' }}</span></div><a [routerLink]="['/drone-operator/missions',m.id]">Review mission →</a></article></ng-container><p *ngIf="!missions.length" class="empty">No missions have been assigned to you yet.</p></div></ng-container>
-      <ng-container *ngIf="page==='missions'"><section class="section-title"><div><h2>Assigned to you</h2><p>Accept, start, and complete only your own field work.</p></div></section><div class="table"><div class="row head"><span>Mission</span><span>Location</span><span>Scheduled</span><span>Status</span><span></span></div><a class="row" *ngFor="let m of missions" [routerLink]="['/drone-operator/missions',m.id]"><strong>{{m.missionCode}}<small>{{m.customer?.clientCode || 'Client'}}</small></strong><span>{{m.farm?.name || 'Farm'}}<small>{{m.farmBlock?.name || 'Block'}}</small></span><span>{{m.scheduledDate | date:'d MMM y'}}</span><span class="status" [class]="'status '+m.status.toLowerCase()">{{statusLabel(m.status)}}</span><span>→</span></a><p *ngIf="!missions.length" class="empty">No missions assigned.</p></div></ng-container>
-      <ng-container *ngIf="page==='detail' && selected"><a class="back" routerLink="/drone-operator/missions">← Back to missions</a><section class="detail-grid"><article class="detail-main"><div class="mission-top"><span class="code">{{selected.missionCode}}</span><span class="status" [class]="'status '+selected.status.toLowerCase()">{{statusLabel(selected.status)}}</span></div><h2>{{selected.farm?.name || 'Farm assignment'}}</h2><p class="muted">{{selected.farmBlock?.name}} · {{selected.customer?.clientCode}}</p><div class="action-box" *ngIf="selected.status==='ASSIGNED'"><div><strong>Ready to accept?</strong><p>Confirm you are taking responsibility for this field operation.</p></div><button class="primary" [disabled]="busy" (click)="action('accept', selected)">Accept mission</button></div><div class="action-box" *ngIf="selected.status==='ACCEPTED'"><div><strong>At the site?</strong><p>Start when pre-flight checks and site access are complete.</p></div><button class="primary" [disabled]="busy" (click)="action('start', selected)">Start mission</button></div><div class="action-box" *ngIf="selected.status==='IN_PROGRESS'"><div><strong>Field operation active</strong><p>Start the survey to record your field activity.</p></div><button class="primary" [disabled]="busy" (click)="launchSurvey(selected)">{{surveyFor(selected) ? 'Open field survey' : 'Create field survey'}}</button></div><div class="action-box complete" *ngIf="selected.status==='COMPLETED'"><div><strong>Mission complete</strong><p>The field operation is ready for its data handoff.</p></div><a class="outline" routerLink="/drone-operator/data">View data handoff</a></div><div class="details"><div><small>SCHEDULED</small><strong>{{selected.scheduledDate | date:'EEEE, d MMMM y'}}</strong></div><div><small>DRONE</small><strong>{{selected.drone?.name || 'Not assigned'}}</strong></div><div><small>AREA</small><strong>{{selected.farmBlock?.areaHectares || selected.farm?.areaHectares || '—'}} ha</strong></div><div><small>LOCATION</small><strong>{{selected.farmBlock?.centerLatitude ? selected.farmBlock?.centerLatitude+', '+selected.farmBlock?.centerLongitude : 'Coordinates unavailable'}}</strong></div></div><div class="notes"><small>OPERATION NOTES</small><p>{{selected.notes || 'No additional field instructions were provided.'}}</p></div></article><aside class="workflow"><p class="eyebrow">MISSION FLOW</p><ol><li [class.done]="selected.status!=='ASSIGNED'"><i>1</i>Accept assignment</li><li [class.done]="selected.status==='IN_PROGRESS'||selected.status==='COMPLETED'"><i>2</i>Start mission</li><li [class.done]="surveyFor(selected)?.status==='IN_PROGRESS'||surveyFor(selected)?.status==='COMPLETED'"><i>3</i>Conduct survey</li><li [class.done]="selected.status==='COMPLETED'"><i>4</i>Complete & hand off</li></ol></aside></section></ng-container>
-      <ng-container *ngIf="page==='surveys'"><section class="section-title"><div><h2>Field survey log</h2><p>Survey activity is separate from your mission assignment.</p></div></section><div class="survey-grid"><article *ngFor="let s of surveys"><div class="mission-top"><span class="code">{{s.surveyCode}}</span><span class="status" [class]="'status '+s.status.toLowerCase()">{{statusLabel(s.status)}}</span></div><h3>{{s.surveyName || 'Field survey'}}</h3><p>{{s.startedAt ? (s.startedAt | date:'d MMM y, HH:mm') : 'Awaiting start time'}}</p><button *ngIf="s.status==='DRAFT'" class="primary" (click)="surveyAction('start',s)">Start survey</button><button *ngIf="s.status==='IN_PROGRESS'" class="primary" (click)="surveyAction('complete',s)">Complete survey</button><span *ngIf="s.status==='COMPLETED'" class="done-text">✓ Ready for data handoff</span></article><p *ngIf="!surveys.length" class="empty">Create a survey from an in-progress mission.</p></div></ng-container>
-      <ng-container *ngIf="page==='data'"><section class="handoff"><div class="handoff-icon">⇧</div><p class="eyebrow">RAW SURVEY DATA</p><h2>Data handoff is ready for the next step.</h2><p>Once a survey is complete, upload its CSV or raw magnetometer file here for the geologist. The upload endpoint is not yet exposed by the API, so this workspace correctly keeps the file action unavailable until backend storage is connected.</p><button disabled>Upload survey file</button></section></ng-container>
-    </ng-container></main>
+
+  <!-- =========================================================
+       SIDEBAR
+       ========================================================= -->
+
+  <aside class="sidebar">
+
+    <a class="brand" routerLink="/drone-operator">
+      <span class="brand-mark">✦</span>
+
+      <span>
+        Terra<span>Flight</span>
+      </span>
+    </a>
+
+
+    <div class="operator">
+
+      <span class="avatar">
+        {{ initials }}
+      </span>
+
+      <div>
+        <strong>
+          {{ name }} {{ user?.lastName }}
+        </strong>
+
+        <small>
+          Drone operator
+        </small>
+      </div>
+
+    </div>
+
+
+    <nav>
+
+      <a
+        routerLink="/drone-operator"
+        [class.active]="page === 'dashboard'"
+      >
+        <i>⌂</i>
+        Overview
+      </a>
+
+
+      <a
+        routerLink="/drone-operator/missions"
+        [class.active]="page === 'missions' || page === 'detail'"
+      >
+        <i>◈</i>
+
+        My missions
+
+        <b>
+          {{ pending.length }}
+        </b>
+      </a>
+
+
+      <a
+        routerLink="/drone-operator/surveys"
+        [class.active]="page === 'surveys'"
+      >
+        <i>⌁</i>
+        Field surveys
+      </a>
+
+
+      <a
+        routerLink="/drone-operator/data"
+        [class.active]="page === 'data'"
+      >
+        <i>⇧</i>
+        Data handoff
+      </a>
+
+    </nav>
+
+
+    <div class="side-foot">
+
+      <span class="online-dot"></span>
+
+      System online
+
+      <button
+        type="button"
+        (click)="logout()"
+      >
+        Sign out →
+      </button>
+
+    </div>
+
+  </aside>
+
+
+  <!-- =========================================================
+       MAIN CONTENT
+       ========================================================= -->
+
+  <main>
+
+    <!-- HEADER -->
+
+    <header>
+
+      <div>
+
+        <p class="eyebrow">
+          OPERATOR WORKSPACE
+        </p>
+
+
+        <h1>
+
+          {{
+            page === 'dashboard'
+              ? 'Good day, ' + name
+              : page === 'detail'
+                ? (selected?.missionCode || 'Mission details')
+                : page === 'missions'
+                  ? 'My missions'
+                  : page === 'surveys'
+                    ? 'Field surveys'
+                    : 'Data handoff'
+          }}
+
+        </h1>
+
+
+        <p class="muted">
+
+          {{
+            page === 'dashboard'
+              ? 'Here is your field activity at a glance.'
+              : page === 'detail'
+                ? 'Review the assignment and complete your field operation.'
+                : page === 'missions'
+                  ? 'Execute assigned work and keep the field team moving.'
+                  : page === 'surveys'
+                    ? 'Manage your field survey activity.'
+                    : 'Prepare completed survey data for handoff.'
+          }}
+
+        </p>
+
+      </div>
+
+
+      <div class="header-date">
+
+        {{
+          (today[0]?.scheduledDate || '2026-09-10')
+            | date:'EEEE, d MMM'
+        }}
+
+        <span>
+          East Africa time
+        </span>
+
+      </div>
+
+    </header>
+
+
+    <!-- =========================================================
+         ERROR MESSAGE
+         ========================================================= -->
+
+    <div
+      *ngIf="error"
+      class="alert"
+    >
+
+      {{ error }}
+
+      <button
+        type="button"
+        (click)="error = ''"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <!-- =========================================================
+         MISSIONS LOADING
+         
+         IMPORTANT:
+         Only missions control this loading state.
+         Surveys cannot block the workspace.
+         ========================================================= -->
+
+    <section
+      *ngIf="missionsLoading"
+      class="loading"
+    >
+
+      <span></span>
+
+      Loading your missions…
+
+    </section>
+
+
+    <!-- =========================================================
+         WORKSPACE CONTENT
+         ========================================================= -->
+
+    <ng-container
+      *ngIf="!missionsLoading"
+    >
+
+
+      <!-- =======================================================
+           DASHBOARD
+           ======================================================= -->
+
+      <ng-container
+        *ngIf="page === 'dashboard'"
+      >
+
+        <!-- HERO -->
+
+        <section class="hero">
+
+          <div>
+
+            <p class="eyebrow">
+              FIELD READINESS
+            </p>
+
+
+            <h2>
+
+              {{
+                active.length
+                  ? 'You have a mission in progress.'
+                  : pending.length
+                    ? 'A mission needs your attention.'
+                    : 'You’re clear for field operations.'
+              }}
+
+            </h2>
+
+
+            <p>
+
+              {{
+                active.length
+                  ? active[0].missionCode
+                    + ' is active at '
+                    + (active[0].farm?.name || 'the assigned farm')
+                    + '.'
+
+                  : pending.length
+                    ? pending[0].missionCode
+                      + ' is ready for your acceptance.'
+
+                    : 'New assignments will appear here as soon as management schedules them.'
+              }}
+
+            </p>
+
+
+            <a
+              [routerLink]="
+                active.length
+                  ? ['/drone-operator/missions', active[0].id]
+                  : ['/drone-operator/missions']
+              "
+            >
+
+              {{
+                active.length
+                  ? 'Open active mission →'
+                  : 'View my missions →'
+              }}
+
+            </a>
+
+          </div>
+
+
+          <div class="radar">
+
+            <span>⌁</span>
+
+            <small>
+              FLIGHT OPS
+            </small>
+
+          </div>
+
+        </section>
+
+
+        <!-- METRICS -->
+
+        <section class="metrics">
+
+          <article>
+
+            <span class="metric-icon amber">
+              ◷
+            </span>
+
+            <div>
+
+              <strong>
+                {{ pending.length }}
+              </strong>
+
+              <p>
+                Awaiting acceptance
+              </p>
+
+            </div>
+
+          </article>
+
+
+          <article>
+
+            <span class="metric-icon blue">
+              ◈
+            </span>
+
+            <div>
+
+              <strong>
+                {{ today.length }}
+              </strong>
+
+              <p>
+                Scheduled today
+              </p>
+
+            </div>
+
+          </article>
+
+
+          <article>
+
+            <span class="metric-icon green">
+              ↗
+            </span>
+
+            <div>
+
+              <strong>
+                {{ active.length }}
+              </strong>
+
+              <p>
+                In progress
+              </p>
+
+            </div>
+
+          </article>
+
+
+          <article>
+
+            <span class="metric-icon purple">
+              ✓
+            </span>
+
+            <div>
+
+              <strong>
+                {{ completed.length }}
+              </strong>
+
+              <p>
+                Completed
+              </p>
+
+            </div>
+
+          </article>
+
+        </section>
+
+
+        <!-- PRIORITY MISSIONS HEADER -->
+
+        <section class="section-title">
+
+          <div>
+
+            <h2>
+              Priority missions
+            </h2>
+
+            <p>
+              Work that needs action from you.
+            </p>
+
+          </div>
+
+
+          <a routerLink="/drone-operator/missions">
+            See all missions →
+          </a>
+
+        </section>
+
+
+        <!-- PRIORITY MISSIONS -->
+
+        <div class="mission-list">
+
+          <ng-container
+            *ngFor="let m of missions.slice(0, 4)"
+          >
+
+            <article class="mission-card">
+
+              <div class="mission-top">
+
+                <span class="code">
+                  {{ m.missionCode }}
+                </span>
+
+
+                <span
+                  class="status"
+                  [class]="'status ' + m.status.toLowerCase()"
+                >
+                  {{ statusLabel(m.status) }}
+                </span>
+
+              </div>
+
+
+              <h3>
+                {{ m.farm?.name || 'Farm assignment' }}
+              </h3>
+
+
+              <p>
+                {{ m.farmBlock?.name || 'Block to be confirmed' }}
+                ·
+                {{ m.customer?.clientCode || 'Client details pending' }}
+              </p>
+
+
+              <div class="mission-meta">
+
+                <span>
+                  ◷
+                  {{ m.scheduledDate | date:'d MMM, y' }}
+                </span>
+
+
+                <span>
+                  ◉
+                  {{ m.drone?.name || 'Drone allocation pending' }}
+                </span>
+
+              </div>
+
+
+              <a
+                [routerLink]="[
+                  '/drone-operator/missions',
+                  m.id
+                ]"
+              >
+                Review mission →
+              </a>
+
+            </article>
+
+          </ng-container>
+
+
+          <p
+            *ngIf="!missions.length"
+            class="empty"
+          >
+            No missions have been assigned to you yet.
+          </p>
+
+        </div>
+
+      </ng-container>
+
+
+
+      <!-- =======================================================
+           MY MISSIONS
+           ======================================================= -->
+
+      <ng-container
+        *ngIf="page === 'missions'"
+      >
+
+        <section class="section-title">
+
+          <div>
+
+            <h2>
+              Assigned to you
+            </h2>
+
+            <p>
+              Accept, start, and complete only your own field work.
+            </p>
+
+          </div>
+
+        </section>
+
+
+        <div class="table">
+
+          <div class="row head">
+
+            <span>
+              Mission
+            </span>
+
+            <span>
+              Location
+            </span>
+
+            <span>
+              Scheduled
+            </span>
+
+            <span>
+              Status
+            </span>
+
+            <span></span>
+
+          </div>
+
+
+          <a
+            class="row"
+            *ngFor="let m of missions"
+            [routerLink]="[
+              '/drone-operator/missions',
+              m.id
+            ]"
+          >
+
+            <strong>
+
+              {{ m.missionCode }}
+
+              <small>
+                {{ m.customer?.clientCode || 'Client' }}
+              </small>
+
+            </strong>
+
+
+            <span>
+
+              {{ m.farm?.name || 'Farm' }}
+
+              <small>
+                {{ m.farmBlock?.name || 'Block' }}
+              </small>
+
+            </span>
+
+
+            <span>
+              {{ m.scheduledDate | date:'d MMM y' }}
+            </span>
+
+
+            <span
+              class="status"
+              [class]="'status ' + m.status.toLowerCase()"
+            >
+              {{ statusLabel(m.status) }}
+            </span>
+
+
+            <span>
+              →
+            </span>
+
+          </a>
+
+
+          <p
+            *ngIf="!missions.length"
+            class="empty"
+          >
+            No missions assigned.
+          </p>
+
+        </div>
+
+      </ng-container>
+
+
+
+      <!-- =======================================================
+           MISSION DETAILS
+           ======================================================= -->
+
+      <ng-container
+        *ngIf="page === 'detail' && selected"
+      >
+
+        <a
+          class="back"
+          routerLink="/drone-operator/missions"
+        >
+          ← Back to missions
+        </a>
+
+
+        <section class="detail-grid">
+
+
+          <!-- MAIN DETAIL -->
+
+          <article class="detail-main">
+
+            <div class="mission-top">
+
+              <span class="code">
+                {{ selected.missionCode }}
+              </span>
+
+
+              <span
+                class="status"
+                [class]="'status ' + selected.status.toLowerCase()"
+              >
+                {{ statusLabel(selected.status) }}
+              </span>
+
+            </div>
+
+
+            <h2>
+              {{ selected.farm?.name || 'Farm assignment' }}
+            </h2>
+
+
+            <p class="muted">
+              {{ selected.farmBlock?.name }}
+              ·
+              {{ selected.customer?.clientCode }}
+            </p>
+
+
+            <!-- ACCEPT -->
+
+            <div
+              class="action-box"
+              *ngIf="selected.status === 'ASSIGNED'"
+            >
+
+              <div>
+
+                <strong>
+                  Ready to accept?
+                </strong>
+
+                <p>
+                  Confirm you are taking responsibility for this field operation.
+                </p>
+
+              </div>
+
+
+              <button
+                class="primary"
+                [disabled]="busy"
+                (click)="action('accept', selected)"
+              >
+                Accept mission
+              </button>
+
+            </div>
+
+
+            <!-- START -->
+
+            <div
+              class="action-box"
+              *ngIf="selected.status === 'ACCEPTED'"
+            >
+
+              <div>
+
+                <strong>
+                  At the site?
+                </strong>
+
+                <p>
+                  Start when pre-flight checks and site access are complete.
+                </p>
+
+              </div>
+
+
+              <button
+                class="primary"
+                [disabled]="busy"
+                (click)="action('start', selected)"
+              >
+                Start mission
+              </button>
+
+            </div>
+
+
+            <!-- SURVEY -->
+
+            <div
+              class="action-box"
+              *ngIf="selected.status === 'IN_PROGRESS'"
+            >
+
+              <div>
+
+                <strong>
+                  Field operation active
+                </strong>
+
+                <p>
+                  Start the survey to record your field activity.
+                </p>
+
+              </div>
+
+
+              <button
+                class="primary"
+                [disabled]="busy"
+                (click)="launchSurvey(selected)"
+              >
+
+                {{
+                  surveyFor(selected)
+                    ? 'Open field survey'
+                    : 'Create field survey'
+                }}
+
+              </button>
+
+            </div>
+
+
+            <!-- COMPLETE -->
+
+            <div
+              class="action-box complete"
+              *ngIf="selected.status === 'COMPLETED'"
+            >
+
+              <div>
+
+                <strong>
+                  Mission complete
+                </strong>
+
+                <p>
+                  The field operation is ready for its data handoff.
+                </p>
+
+              </div>
+
+
+              <a
+                class="outline"
+                routerLink="/drone-operator/data"
+              >
+                View data handoff
+              </a>
+
+            </div>
+
+
+            <!-- MISSION DETAILS -->
+
+            <div class="details">
+
+              <div>
+
+                <small>
+                  SCHEDULED
+                </small>
+
+                <strong>
+                  {{ selected.scheduledDate | date:'EEEE, d MMMM y' }}
+                </strong>
+
+              </div>
+
+
+              <div>
+
+                <small>
+                  DRONE
+                </small>
+
+                <strong>
+                  {{ selected.drone?.name || 'Not assigned' }}
+                </strong>
+
+              </div>
+
+
+              <div>
+
+                <small>
+                  AREA
+                </small>
+
+                <strong>
+                  {{
+                    selected.farmBlock?.areaHectares
+                      || selected.farm?.areaHectares
+                      || '—'
+                  }}
+                  ha
+                </strong>
+
+              </div>
+
+
+              <div>
+
+                <small>
+                  LOCATION
+                </small>
+
+                <strong>
+
+                  {{
+                    selected.farmBlock?.centerLatitude
+                      ? selected.farmBlock?.centerLatitude
+                        + ', '
+                        + selected.farmBlock?.centerLongitude
+                      : 'Coordinates unavailable'
+                  }}
+
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <!-- NOTES -->
+
+            <div class="notes">
+
+              <small>
+                OPERATION NOTES
+              </small>
+
+              <p>
+                {{
+                  selected.notes
+                    || 'No additional field instructions were provided.'
+                }}
+              </p>
+
+            </div>
+
+          </article>
+
+
+          <!-- WORKFLOW -->
+
+          <aside class="workflow">
+
+            <p class="eyebrow">
+              MISSION FLOW
+            </p>
+
+
+            <ol>
+
+              <li
+                [class.done]="selected.status !== 'ASSIGNED'"
+              >
+
+                <i>
+                  1
+                </i>
+
+                Accept assignment
+
+              </li>
+
+
+              <li
+                [class.done]="
+                  selected.status === 'IN_PROGRESS'
+                  || selected.status === 'COMPLETED'
+                "
+              >
+
+                <i>
+                  2
+                </i>
+
+                Start mission
+
+              </li>
+
+
+              <li
+                [class.done]="
+                  surveyFor(selected)?.status === 'IN_PROGRESS'
+                  || surveyFor(selected)?.status === 'COMPLETED'
+                "
+              >
+
+                <i>
+                  3
+                </i>
+
+                Conduct survey
+
+              </li>
+
+
+              <li
+                [class.done]="
+                  selected.status === 'COMPLETED'
+                "
+              >
+
+                <i>
+                  4
+                </i>
+
+                Complete & hand off
+
+              </li>
+
+            </ol>
+
+          </aside>
+
+        </section>
+
+      </ng-container>
+
+
+
+      <!-- =======================================================
+           FIELD SURVEYS
+           ======================================================= -->
+
+      <ng-container
+        *ngIf="page === 'surveys'"
+      >
+
+        <section class="section-title">
+
+          <div>
+
+            <h2>
+              Field survey log
+            </h2>
+
+            <p>
+              Survey activity is separate from your mission assignment.
+            </p>
+
+          </div>
+
+        </section>
+
+
+        <div class="survey-grid">
+
+
+          <!-- SURVEY LOADING -->
+
+          <div
+            *ngIf="surveysLoading"
+            class="survey-loading"
+          >
+
+            Loading field surveys…
+
+          </div>
+
+
+          <!-- SURVEYS -->
+
+          <ng-container
+            *ngIf="!surveysLoading"
+          >
+
+            <article
+              *ngFor="let s of surveys"
+            >
+
+              <div class="mission-top">
+
+                <span class="code">
+                  {{ s.surveyCode }}
+                </span>
+
+
+                <span
+                  class="status"
+                  [class]="'status ' + s.status.toLowerCase()"
+                >
+                  {{ statusLabel(s.status) }}
+                </span>
+
+              </div>
+
+
+              <h3>
+                {{ s.surveyName || 'Field survey' }}
+              </h3>
+
+
+              <p>
+
+                {{
+                  s.startedAt
+                    ? (s.startedAt | date:'d MMM y, HH:mm')
+                    : 'Awaiting start time'
+                }}
+
+              </p>
+
+
+              <button
+                *ngIf="s.status === 'DRAFT'"
+                class="primary"
+                [disabled]="busy"
+                (click)="surveyAction('start', s)"
+              >
+                Start survey
+              </button>
+
+
+              <button
+                *ngIf="s.status === 'IN_PROGRESS'"
+                class="primary"
+                [disabled]="busy"
+                (click)="surveyAction('complete', s)"
+              >
+                Complete survey
+              </button>
+
+
+              <span
+                *ngIf="s.status === 'COMPLETED'"
+                class="done-text"
+              >
+                ✓ Ready for data handoff
+              </span>
+
+            </article>
+
+
+            <p
+              *ngIf="!surveys.length"
+              class="empty"
+            >
+              Create a survey from an in-progress mission.
+            </p>
+
+          </ng-container>
+
+        </div>
+
+      </ng-container>
+
+
+
+      <!-- =======================================================
+           DATA HANDOFF
+           ======================================================= -->
+
+      <ng-container
+        *ngIf="page === 'data'"
+      >
+
+        <section class="handoff">
+
+          <div class="handoff-icon">
+            ⇧
+          </div>
+
+
+          <p class="eyebrow">
+            RAW SURVEY DATA
+          </p>
+
+
+          <h2>
+            Data handoff is ready for the next step.
+          </h2>
+
+
+          <p>
+            Once a survey is complete, upload its CSV or raw
+            magnetometer file here for the geologist. The upload
+            endpoint is not yet exposed by the API, so this workspace
+            correctly keeps the file action unavailable until backend
+            storage is connected.
+          </p>
+
+
+          <button disabled>
+            Upload survey file
+          </button>
+
+        </section>
+
+      </ng-container>
+
+
+    </ng-container>
+
+  </main>
+
 </div>
