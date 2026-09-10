@@ -216,6 +216,37 @@ export const routes: Routes = [
   {
     path: 'drone-operator',
     canActivate: [roleGuard(['DRONE_OPERATOR'])],
+    loadComponent: () => import('./drone-operator/operator-workspace').then(m => m.OperatorWorkspace),
+    data: { page: 'dashboard' }
+  },
+  {
+    path: 'drone-operator/missions',
+    canActivate: [roleGuard(['DRONE_OPERATOR'])],
+    loadComponent: () => import('./drone-operator/operator-workspace').then(m => m.OperatorWorkspace),
+    data: { page: 'missions' }
+  },
+  {
+    path: 'drone-operator/missions/:id',
+    canActivate: [roleGuard(['DRONE_OPERATOR'])],
+    loadComponent: () => import('./drone-operator/operator-workspace').then(m => m.OperatorWorkspace),
+    data: { page: 'detail' }
+  },
+  {
+    path: 'drone-operator/surveys',
+    canActivate: [roleGuard(['DRONE_OPERATOR'])],
+    loadComponent: () => import('./drone-operator/operator-workspace').then(m => m.OperatorWorkspace),
+    data: { page: 'surveys' }
+  },
+  {
+    path: 'drone-operator/data',
+    canActivate: [roleGuard(['DRONE_OPERATOR'])],
+    loadComponent: () => import('./drone-operator/operator-workspace').then(m => m.OperatorWorkspace),
+    data: { page: 'data' }
+  },
+
+  {
+    path: 'drone-operator',
+    canActivate: [roleGuard(['DRONE_OPERATOR'])],
     component: RoleWorkspace,
     data: {
       role: 'DRONE_OPERATOR',
