@@ -695,4 +695,15 @@ export class ServiceRequestDetails implements OnInit {
       Client.clientCode ||
       'Unknown Client';
   }
+  createMission(): void {
+  if (!this.request?.id) {
+    return;
+  }
+
+  this.router.navigate(['/management/missions/new'], {
+    queryParams: {
+      serviceRequestId: this.request.id
+    }
+  });
+}
 }

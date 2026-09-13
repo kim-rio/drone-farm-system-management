@@ -1,0 +1,406 @@
+<div class="page">
+
+  @if (loading) {
+
+    <div class="state">
+      Loading mission...
+    </div>
+
+  } @else if (mission) {
+
+    <div class="page-header">
+
+      <div>
+
+        <button
+          type="button"
+          class="back"
+          (click)="back()">
+
+          ← Missions
+
+        </button>
+
+        <p class="eyebrow">
+          FIELD MISSION
+        </p>
+
+        <h1>
+          {{ mission.missionCode }}
+        </h1>
+
+        <p>
+          {{ mission.farm?.name || 'Farm' }}
+        </p>
+
+      </div>
+
+      <span class="status">
+        {{ mission.status }}
+      </span>
+
+    </div>
+
+
+    @if (successMessage) {
+
+      <div class="success">
+        {{ successMessage }}
+      </div>
+
+    }
+
+
+    @if (errorMessage) {
+
+      <div class="alert">
+        {{ errorMessage }}
+      </div>
+
+    }
+
+
+    <div class="details-grid">
+
+      <!-- SERVICE REQUEST -->
+
+      <section class="card">
+
+        <div class="card-heading">
+
+          <span>
+            SERVICE REQUEST
+          </span>
+
+          <h2>
+            Request Information
+          </h2>
+
+        </div>
+
+        <div class="details">
+
+          <div>
+            <span>Request ID</span>
+
+            <strong>
+              #{{ mission.serviceRequest?.id || '—' }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Requested Date</span>
+
+            <strong>
+              {{ mission.serviceRequest?.requestedDate || '—' }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Request Status</span>
+
+            <strong>
+              {{ mission.serviceRequest?.status || '—' }}
+            </strong>
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- FARM -->
+
+      <section class="card">
+
+        <div class="card-heading">
+
+          <span>
+            LOCATION
+          </span>
+
+          <h2>
+            Farm & Block
+          </h2>
+
+        </div>
+
+        <div class="details">
+
+          <div>
+            <span>Farm</span>
+
+            <strong>
+              {{ mission.farm?.name || '—' }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Block</span>
+
+            <strong>
+              {{ mission.farmBlock?.name || '—' }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Area</span>
+
+            <strong>
+              {{ mission.farmBlock?.areaHectares || '—' }}
+              @if (mission.farmBlock?.areaHectares) {
+                ha
+              }
+            </strong>
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- SCHEDULE -->
+
+      <section class="card">
+
+        <div class="card-heading">
+
+          <span>
+            SCHEDULE
+          </span>
+
+          <h2>
+            Field Operation
+          </h2>
+
+        </div>
+
+        <div class="details">
+
+          <div>
+            <span>Scheduled Date</span>
+
+            <strong>
+              {{ mission.scheduledDate }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Status</span>
+
+            <strong>
+              {{ mission.status }}
+            </strong>
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- OPERATOR -->
+
+      <section class="card operator-card">
+
+        <div class="card-heading">
+
+          <span>
+            FIELD TEAM
+          </span>
+
+          <h2>
+            Drone Operator
+          </h2>
+
+        </div>
+
+
+        @if (mission.operator) {
+
+          <div class="assigned-operator">
+
+            <div class="operator-avatar">
+
+              {{
+                mission.operator.firstName.charAt(0)
+              }}{{
+                mission.operator.lastName.charAt(0)
+              }}
+
+            </div>
+
+            <div>
+
+              <strong>
+                {{ getOperatorName() }}
+              </strong>
+
+              <span>
+                {{ mission.operator.email }}
+              </span>
+
+            </div>
+
+          </div>
+
+
+          @if (
+            mission.status !== 'IN_PROGRESS' &&
+            mission.status !== 'COMPLETED'
+          ) {
+
+            <button
+              type="button"
+              class="danger"
+              [disabled]="removing"
+              (click)="removeOperator()">
+
+              @if (removing) {
+                Removing...
+              } @else {
+                Remove Operator
+              }
+
+            </button>
+
+          }
+
+        } @else {
+
+          <div class="unassigned">
+
+            <p>
+              No drone operator has been assigned
+              to this mission.
+            </p>
+
+          </div>
+
+        }
+
+
+        @if (
+          mission.status !== 'IN_PROGRESS' &&
+          mission.status !== 'COMPLETED' &&
+          mission.status !== 'CANCELLED'
+        ) {
+
+          <div class="assignment-form">
+
+            <label for="operator">
+              {{
+                mission.operator
+                  ? 'Reassign Operator'
+                  : 'Assign Operator'
+              }}
+            </label>
+
+            <select
+              id="operator"
+              name="operator"
+              [(ngModel)]="selectedOperatorId">
+
+              <option [ngValue]="null">
+                Select drone operator
+              </option>
+
+              @for (
+                operator of operators;
+                track operator.id
+              ) {
+
+                <option
+                  [ngValue]="operator.id">
+
+                  {{ operator.firstName }}
+                  {{ operator.lastName }}
+
+                </option>
+
+              }
+
+            </select>
+
+
+            <button
+              type="button"
+              class="primary"
+              [disabled]="
+                !selectedOperatorId ||
+                assigning
+              "
+              (click)="assignOperator()">
+
+              @if (assigning) {
+                Assigning...
+              } @else {
+                {{
+                  mission.operator
+                    ? 'Reassign Mission'
+                    : 'Assign Mission'
+                }}
+              }
+
+            </button>
+
+          </div>
+
+        }
+
+      </section>
+
+
+      <!-- NOTES -->
+
+      @if (mission.notes) {
+
+        <section class="card full">
+
+          <div class="card-heading">
+
+            <span>
+              INSTRUCTIONS
+            </span>
+
+            <h2>
+              Operational Notes
+            </h2>
+
+          </div>
+
+          <p>
+            {{ mission.notes }}
+          </p>
+
+        </section>
+
+      }
+
+    </div>
+
+  } @else {
+
+    <div class="empty">
+
+      <h2>
+        Mission not found
+      </h2>
+
+      <p>
+        {{ errorMessage }}
+      </p>
+
+      <button
+        type="button"
+        class="primary"
+        (click)="back()">
+
+        Back to Missions
+
+      </button>
+
+    </div>
+
+  }
+
+</div>

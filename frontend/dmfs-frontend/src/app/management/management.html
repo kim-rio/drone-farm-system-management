@@ -151,6 +151,7 @@
     </header>
 
 
+    @if (isDashboard()) {
     <section class="page">
 
       <div class="page-heading">
@@ -425,6 +426,9 @@
       </section>
 
     </section>
+    } @else {
+      <router-outlet />
+    }
 
   </main>
 

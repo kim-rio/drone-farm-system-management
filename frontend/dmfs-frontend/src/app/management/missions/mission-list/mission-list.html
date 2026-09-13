@@ -1,0 +1,182 @@
+<div class="page">
+
+  <div class="page-header">
+
+    <div>
+
+      <p class="eyebrow">
+        FIELD OPERATIONS
+      </p>
+
+      <h1>
+        Missions
+      </h1>
+
+      <p>
+        Plan missions and assign drone operators
+        for field operations.
+      </p>
+
+    </div>
+
+    <button
+      type="button"
+      class="primary"
+      (click)="createMission()">
+
+      + Create Mission
+
+    </button>
+
+  </div>
+
+
+  @if (errorMessage) {
+
+    <div class="alert">
+      {{ errorMessage }}
+    </div>
+
+  }
+
+
+  @if (loading) {
+
+    <div class="state">
+      Loading missions...
+    </div>
+
+  }
+
+
+  @if (
+    !loading &&
+    !errorMessage &&
+    missions.length === 0
+  ) {
+
+    <div class="empty">
+
+      <h2>
+        No missions yet
+      </h2>
+
+      <p>
+        Create a mission from an approved service request.
+      </p>
+
+      <button
+        type="button"
+        class="primary"
+        (click)="createMission()">
+
+        Create Mission
+
+      </button>
+
+    </div>
+
+  }
+
+
+  @if (
+    !loading &&
+    missions.length > 0
+  ) {
+
+    <div class="mission-grid">
+
+      @for (
+        mission of missions;
+        track mission.id
+      ) {
+
+        <article class="mission-card">
+
+          <div class="mission-header">
+
+            <div>
+
+              <span class="mission-code">
+                {{ mission.missionCode }}
+              </span>
+
+              <h2>
+                {{ mission.farm?.name || 'Farm' }}
+              </h2>
+
+            </div>
+
+            <span
+              class="status"
+              [class]="getStatusClass(mission.status)">
+
+              {{ mission.status }}
+
+            </span>
+
+          </div>
+
+
+          <div class="details">
+
+            <div>
+              <span>Client</span>
+
+              <strong>
+                {{ mission.customer?.clientCode || '—' }}
+              </strong>
+            </div>
+
+
+            <div>
+              <span>Block</span>
+
+              <strong>
+                {{ mission.farmBlock?.name || '—' }}
+              </strong>
+            </div>
+
+
+            <div>
+              <span>Scheduled</span>
+
+              <strong>
+                {{ mission.scheduledDate || '—' }}
+              </strong>
+            </div>
+
+
+            <div>
+              <span>Operator</span>
+
+              <strong>
+                {{ getOperatorName(mission) }}
+              </strong>
+            </div>
+
+          </div>
+
+
+          <div class="actions">
+
+            <button
+              type="button"
+              class="secondary"
+              (click)="viewMission(mission)">
+
+              View Mission
+
+            </button>
+
+          </div>
+
+        </article>
+
+      }
+
+    </div>
+
+  }
+
+</div>

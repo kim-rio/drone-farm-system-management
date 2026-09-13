@@ -1,5 +1,6 @@
 ﻿import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { RouterOutlet } from '@angular/router';
 import { AuthService, LoginResponse } from '../services/auth.service';
 
 interface ManagementMenuItem {
@@ -11,6 +12,7 @@ interface ManagementMenuItem {
 @Component({
   selector: 'app-management',
   standalone: true,
+  imports: [RouterOutlet],
   templateUrl: './management.html',
   styleUrl: './management.scss'
 })
@@ -26,31 +28,37 @@ export class Management {
 
   menuItems: ManagementMenuItem[] = [
 
-    {
-      label: 'Dashboard',
-      route: '/management',
-      icon: '▦'
-    },
+  {
+    label: 'Dashboard',
+    route: '/management',
+    icon: '▦'
+  },
 
-    {
-      label: 'Clients',
-      route: '/management/clients',
-      icon: '♙'
-    },
+  {
+    label: 'Clients',
+    route: '/management/clients',
+    icon: '♙'
+  },
 
-    {
-      label: 'Farms',
-      route: '/management/farms',
-      icon: '⌂'
-    },
+  {
+    label: 'Farms',
+    route: '/management/farms',
+    icon: '⌂'
+  },
 
-    {
-      label: 'Service Requests',
-      route: '/management/service-requests',
-      icon: '✓'
-    }
+  {
+    label: 'Service Requests',
+    route: '/management/service-requests',
+    icon: '✓'
+  },
 
-  ];
+  {
+    label: 'Missions',
+    route: '/management/missions',
+    icon: '◇'
+  }
+
+];
 
   getInitials(): string {
 
@@ -85,6 +93,10 @@ export class Management {
     }
 
     return this.router.url.startsWith(route);
+  }
+
+  isDashboard(): boolean {
+    return this.router.url === '/management' || this.router.url === '/management/';
   }
 
   logout(): void {

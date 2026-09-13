@@ -41,30 +41,23 @@
       <div class="header-actions">
 
         @if (!editing) {
+          <div class="header-actions" *ngIf="!editing">
+  <button
+    class="primary-btn"
+    type="button"
+    (click)="createMission()"
+  >
+    Create Mission
+  </button>
 
-          <button
-            type="button"
-            class="secondary"
-            (click)="startEditing()">
-
-            Edit Request
-
-          </button>
-
-          <button
-            type="button"
-            class="danger"
-            [disabled]="deleting"
-            (click)="deleteRequest()">
-
-            @if (deleting) {
-              Deleting...
-            } @else {
-              Delete
-            }
-
-          </button>
-
+  <button
+    class="secondary-btn"
+    type="button"
+    (click)="startEditing()"
+  >
+    Edit Request
+  </button>
+</div>
         }
 
       </div>
@@ -382,7 +375,7 @@
                 {{
                   request.serviceCatalogue.minimumArea != null
                     ? request.serviceCatalogue.minimumArea + ' ha'
-                    : 'â€”'
+                    : '—'
                 }}
               </strong>
             </div>
@@ -393,7 +386,7 @@
                 {{
                   request.serviceCatalogue.estimatedDurationMinutes != null
                     ? request.serviceCatalogue.estimatedDurationMinutes + ' minutes'
-                    : 'â€”'
+                    : '—'
                 }}
               </strong>
             </div>
