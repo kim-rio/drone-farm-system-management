@@ -1,0 +1,6460 @@
+
+
+============================================================
+FILE: frontend\dmfs-frontend\src\app\admin\admin.ts
+============================================================
+
+import {
+  Component,
+  OnInit,
+  inject,
+  signal,
+  computed
+} from '@angular/core';
+
+import { Router } from '@angular/router';
+
+import {
+  StaffMember,
+  StaffService
+} from './staff/staff.service';
+
+import {
+  Company,
+  CompanyService
+} from './company/company.service';
+
+import {
+  ServiceRequest,
+  ServiceRequestService
+} from '../services/service-request.service';
+
+interface Stat {
+  title: string;
+  value: number;
+  description: string;
+}
+
+@Component({
+  selector: 'app-admin',
+  standalone: true,
+  templateUrl: './admin.html',
+  styleUrl: './admin.scss'
+})
+export class Admin implements OnInit {
+
+  private readonly router = inject(Router);
+  private readonly staffService = inject(StaffService);
+  private readonly companyService = inject(CompanyService);
+  private readonly serviceRequestService =
+    inject(ServiceRequestService);
+
+  dashboardStats = signal<Stat[]>([
+    {
+      title: 'Total Staff',
+      value: 0,
+      description: 'Staff members in your company'
+    },
+    {
+      title: 'Active Staff',
+      value: 0,
+      description: 'Currently active staff'
+    },
+    {
+      title: 'Pending Work',
+      value: 0,
+      description: 'Work requiring attention'
+    },
+    {
+      title: 'Active Operations',
+      value: 0,
+      description: 'Operations currently active'
+    }
+  ]);
+
+  company = signal<Company | null>(null);
+
+  serviceRequests = signal<ServiceRequest[]>([]);
+
+  errorMessage = signal('');
+
+  inactiveStaff = computed(() => {
+
+    const stats = this.dashboardStats();
+
+    return Math.max(
+      stats[0].value - stats[1].value,
+      0
+    );
+  });
+
+  totalOperations = computed(() => {
+
+    const stats = this.dashboardStats();
+
+    return (
+      stats[2].value +
+      stats[3].value
+    );
+  });
+
+  activeStaffProgress = computed(() => {
+
+    const stats = this.dashboardStats();
+
+    const total = stats[0].value;
+
+    if (total <= 0) {
+      return 0;
+    }
+
+    return Math.round(
+      (
+        stats[1].value /
+        total
+      ) * 100
+    );
+  });
+
+  operationProgress = computed(() => {
+
+    const total = this.totalOperations();
+
+    if (total <= 0) {
+      return 0;
+    }
+
+    return Math.round(
+      (
+        this.dashboardStats()[3].value /
+        total
+      ) * 100
+    );
+  });
+
+  ngOnInit(): void {
+    this.loadStaff();
+    this.loadCompany();
+    this.loadServiceRequests();
+  }
+
+  private loadStaff(): void {
+
+    this.staffService.getStaff().subscribe({
+
+      next: (staff: StaffMember[]) => {
+
+        console.log(
+          'ADMIN DASHBOARD STAFF:',
+          staff
+        );
+
+        const currentStats =
+          this.dashboardStats();
+
+        this.dashboardStats.set([
+          {
+            ...currentStats[0],
+            value: staff.length
+          },
+          {
+            ...currentStats[1],
+            value: staff.filter(
+              member => member.active
+            ).length
+          },
+          currentStats[2],
+          currentStats[3]
+        ]);
+
+        console.log(
+          'STAFF STATS:',
+          staff.length,
+          staff.filter(
+            member => member.active
+          ).length
+        );
+      },
+
+      error: (error) => {
+
+        console.error(
+          'Unable to load staff:',
+          error
+        );
+
+        this.errorMessage.set(
+          'Unable to load staff information.'
+        );
+      }
+
+    });
+  }
+
+  private loadCompany(): void {
+
+    this.companyService.getCompany().subscribe({
+
+      next: (company: Company) => {
+
+        console.log(
+          'ADMIN DASHBOARD COMPANY:',
+          company
+        );
+
+        this.company.set(company);
+      },
+
+      error: (error) => {
+
+        console.error(
+          'Unable to load company:',
+          error
+        );
+
+        if (!this.errorMessage()) {
+          this.errorMessage.set(
+            'Unable to load company information.'
+          );
+        }
+      }
+
+    });
+  }
+
+  private loadServiceRequests(): void {
+
+    this.serviceRequestService
+      .getRequests()
+      .subscribe({
+
+        next: (requests: ServiceRequest[]) => {
+
+          console.log(
+            'ADMIN DASHBOARD REQUESTS:',
+            requests
+          );
+
+          this.serviceRequests.set(requests);
+
+          this.updateOperationStats(requests);
+        },
+
+        error: (error) => {
+
+          console.error(
+            'Unable to load service requests:',
+            error
+          );
+
+          if (!this.errorMessage()) {
+            this.errorMessage.set(
+              'Unable to load operational information.'
+            );
+          }
+        }
+
+      });
+  }
+
+  private updateOperationStats(
+    requests: ServiceRequest[]
+  ): void {
+
+    const currentStats =
+      this.dashboardStats();
+
+    this.dashboardStats.set([
+      currentStats[0],
+      currentStats[1],
+      {
+        ...currentStats[2],
+        value: requests.filter(
+          request =>
+            request.status?.toUpperCase() === 'PENDING'
+        ).length
+      },
+      {
+        ...currentStats[3],
+        value: requests.filter(
+          request =>
+            request.status?.toUpperCase() === 'ACTIVE'
+        ).length
+      }
+    ]);
+
+    console.log(
+      'OPERATION STATS:',
+      requests.filter(
+        request =>
+          request.status?.toUpperCase() === 'PENDING'
+      ).length,
+      requests.filter(
+        request =>
+          request.status?.toUpperCase() === 'ACTIVE'
+      ).length
+    );
+  }
+
+  getProgressOffset(
+    progress: number
+  ): number {
+
+    const circumference = 301.59;
+
+    const safeProgress =
+      Math.min(
+        Math.max(progress, 0),
+        100
+      );
+
+    return circumference -
+      (
+        circumference *
+        safeProgress /
+        100
+      );
+  }
+
+  manageStaff(): void {
+    this.router.navigate([
+      '/admin/staff'
+    ]);
+  }
+
+  openCompany(): void {
+    this.router.navigate([
+      '/admin/company'
+    ]);
+  }
+
+  openOperations(): void {
+    this.router.navigate([
+      '/admin/operations'
+    ]);
+  }
+
+  openReports(): void {
+    this.router.navigate([
+      '/admin/reports'
+    ]);
+  }
+}
+
+
+============================================================
+FILE: frontend\dmfs-frontend\src\app\admin\admin.html
+============================================================
+
+<div class="page">
+
+  <div class="page-header">
+
+    <div class="title-area">
+
+      <p class="eyebrow">
+        COMPANY ADMIN PORTAL
+      </p>
+
+      <h2>
+        Dashboard
+      </h2>
+
+      <p class="description">
+        Overview of your company, staff and operational activity.
+      </p>
+
+    </div>
+
+    <div class="quick-actions">
+
+      <button
+        type="button"
+        class="action-pill"
+        (click)="manageStaff()"
+      >
+        <span class="plus">+</span>
+        <span>Manage Staff</span>
+      </button>
+
+      <button
+        type="button"
+        class="action-pill"
+        (click)="openCompany()"
+      >
+        <span>View Company</span>
+      </button>
+
+    </div>
+
+  </div>
+
+  <section class="stats">
+
+    @for (
+      stat of dashboardStats();
+      track stat.title
+    ) {
+
+      <article class="stat-card">
+
+        <span class="stat-label">
+          {{ stat.title }}
+        </span>
+
+        <strong class="stat-number">
+          {{ stat.value }}
+        </strong>
+
+        <span class="stat-description">
+          {{ stat.description }}
+        </span>
+
+      </article>
+
+    }
+
+  </section>
+
+  @if (errorMessage()) {
+
+    <section class="error-card">
+      {{ errorMessage() }}
+    </section>
+
+  }
+
+  <section class="section">
+
+    <div class="section-heading">
+
+      <div>
+
+        <p class="eyebrow">
+          COMPANY
+        </p>
+
+        <h3>
+          Administration
+        </h3>
+
+      </div>
+
+    </div>
+
+    <div class="progress-grid">
+
+      <article class="progress-card">
+
+        <div class="progress-header">
+
+          <div>
+
+            <h4>
+              Company Staff
+            </h4>
+
+            <p>
+              Staff members working for your company
+            </p>
+
+          </div>
+
+          <button
+            type="button"
+            class="view-button"
+            (click)="manageStaff()"
+          >
+            Manage
+          </button>
+
+        </div>
+
+        <div class="circle-container">
+
+          <svg
+            class="progress-circle"
+            viewBox="0 0 120 120"
+          >
+
+            <circle
+              class="circle-background"
+              cx="60"
+              cy="60"
+              r="48"
+            ></circle>
+
+            <circle
+              class="circle-progress"
+              cx="60"
+              cy="60"
+              r="48"
+              [style.stroke-dashoffset]="
+                getProgressOffset(activeStaffProgress())
+              "
+            ></circle>
+
+          </svg>
+
+          <div class="circle-value">
+
+            <strong>
+              {{ activeStaffProgress() }}%
+            </strong>
+
+            <span>
+              Active
+            </span>
+
+          </div>
+
+        </div>
+
+        <div class="progress-labels">
+
+          <div>
+            <span>
+              Total Staff
+            </span>
+
+            <strong>
+              {{ dashboardStats()[0].value }}
+            </strong>
+          </div>
+
+          <div>
+            <span>
+              Active
+            </span>
+
+            <strong>
+              {{ dashboardStats()[1].value }}
+            </strong>
+          </div>
+
+          <div>
+            <span>
+              Inactive
+            </span>
+
+            <strong>
+              {{ inactiveStaff() }}
+            </strong>
+          </div>
+
+        </div>
+
+      </article>
+
+      <article class="progress-card">
+
+        <div class="progress-header">
+
+          <div>
+
+            <h4>
+              Operations
+            </h4>
+
+            <p>
+              Current company operational activity
+            </p>
+
+          </div>
+
+          <button
+            type="button"
+            class="view-button"
+            (click)="openOperations()"
+          >
+            View
+          </button>
+
+        </div>
+
+        <div class="circle-container">
+
+          <svg
+            class="progress-circle"
+            viewBox="0 0 120 120"
+          >
+
+            <circle
+              class="circle-background"
+              cx="60"
+              cy="60"
+              r="48"
+            ></circle>
+
+            <circle
+              class="circle-progress"
+              cx="60"
+              cy="60"
+              r="48"
+              [style.stroke-dashoffset]="
+                getProgressOffset(operationProgress())
+              "
+            ></circle>
+
+          </svg>
+
+          <div class="circle-value">
+
+            <strong>
+              {{ operationProgress() }}%
+            </strong>
+
+            <span>
+              Active
+            </span>
+
+          </div>
+
+        </div>
+
+        <div class="progress-labels">
+
+          <div>
+            <span>
+              Pending
+            </span>
+
+            <strong>
+              {{ dashboardStats()[2].value }}
+            </strong>
+          </div>
+
+          <div>
+            <span>
+              Active
+            </span>
+
+            <strong>
+              {{ dashboardStats()[3].value }}
+            </strong>
+          </div>
+
+          <div>
+            <span>
+              Total Activity
+            </span>
+
+            <strong>
+              {{ totalOperations() }}
+            </strong>
+          </div>
+
+        </div>
+
+      </article>
+
+      <article class="progress-card">
+
+        <div class="progress-header">
+
+          <div>
+
+            <h4>
+              Company Profile
+            </h4>
+
+            <p>
+              Subscriber company information and administration
+            </p>
+
+          </div>
+
+          <button
+            type="button"
+            class="view-button"
+            (click)="openCompany()"
+          >
+            View
+          </button>
+
+        </div>
+
+        <div class="company-status">
+
+          <div class="status-mark">
+            ?
+          </div>
+
+          <strong>
+            {{ company()?.name || 'Company Account' }}
+          </strong>
+
+          <span>
+
+            @if (company()) {
+
+              {{ company()!.name }}
+              is registered on the DMFS platform.
+
+            } @else {
+
+              Company information is loading.
+
+            }
+
+          </span>
+
+        </div>
+
+        <div class="progress-labels">
+
+          <div>
+            <span>
+              Staff
+            </span>
+
+            <strong>
+              {{ dashboardStats()[0].value }}
+            </strong>
+          </div>
+
+          <div>
+            <span>
+              Pending Work
+            </span>
+
+            <strong>
+              {{ dashboardStats()[2].value }}
+            </strong>
+          </div>
+
+          <div>
+            <span>
+              Active Operations
+            </span>
+
+            <strong>
+              {{ dashboardStats()[3].value }}
+            </strong>
+          </div>
+
+        </div>
+
+      </article>
+
+    </div>
+
+  </section>
+
+  <section class="lower-grid">
+
+    <article class="overview-card">
+
+      <div class="card-header">
+
+        <div>
+
+          <p class="eyebrow">
+            STAFF
+          </p>
+
+          <h3>
+            Staff Overview
+          </h3>
+
+          <p>
+            Staff accounts registered under your company.
+          </p>
+
+        </div>
+
+        <button
+          type="button"
+          class="view-button"
+          (click)="manageStaff()"
+        >
+          View Staff
+        </button>
+
+      </div>
+
+      <div class="company-overview">
+
+        <div class="overview-row">
+
+          <span>
+            Total Staff
+          </span>
+
+          <strong>
+            {{ dashboardStats()[0].value }}
+          </strong>
+
+        </div>
+
+        <div class="overview-row">
+
+          <span>
+            Active Staff
+          </span>
+
+          <strong>
+            {{ dashboardStats()[1].value }}
+          </strong>
+
+        </div>
+
+        <div class="overview-row">
+
+          <span>
+            Inactive Staff
+          </span>
+
+          <strong>
+            {{ inactiveStaff() }}
+          </strong>
+
+        </div>
+
+      </div>
+
+    </article>
+
+    <article class="overview-card">
+
+      <div class="card-header">
+
+        <div>
+
+          <p class="eyebrow">
+            OPERATIONS
+          </p>
+
+          <h3>
+            Operations Overview
+          </h3>
+
+          <p>
+            Current operational workload for your company.
+          </p>
+
+        </div>
+
+        <button
+          type="button"
+          class="view-button"
+          (click)="openOperations()"
+        >
+          View Operations
+        </button>
+
+      </div>
+
+      <div class="user-overview">
+
+        <div class="user-total">
+
+          <strong>
+            {{ totalOperations() }}
+          </strong>
+
+          <span>
+            Total Operations
+          </span>
+
+        </div>
+
+        <div class="user-row">
+
+          <span>
+            Pending Work
+          </span>
+
+          <strong>
+            {{ dashboardStats()[2].value }}
+          </strong>
+
+        </div>
+
+        <div class="user-row">
+
+          <span>
+            Active Operations
+          </span>
+
+          <strong>
+            {{ dashboardStats()[3].value }}
+          </strong>
+
+        </div>
+
+      </div>
+
+    </article>
+
+  </section>
+
+</div>
+
+
+============================================================
+FILE: frontend\dmfs-frontend\src\app\admin\admin.scss
+============================================================
+
+/* =========================================================
+   ADMIN DASHBOARD
+   SUPER ADMIN VISUAL SYSTEM
+   ========================================================= */
+
+:host {
+  display: block;
+  min-height: 100%;
+  background: #f7f7f5;
+  color: #111;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.page {
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 28px 32px 40px;
+}
+
+.page > * {
+  min-width: 0;
+}
+
+/* =========================================================
+   PAGE HEADER
+   ========================================================= */
+
+.page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.title-area {
+  min-width: 0;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  color: #888;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.page-header h2 {
+  margin: 0;
+  font-size: clamp(25px, 2.2vw, 32px);
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: -1px;
+}
+
+.description {
+  max-width: 700px;
+  margin: 7px 0 0;
+  color: #8d8d8d;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+/* =========================================================
+   QUICK ACTIONS
+   ========================================================= */
+
+.quick-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.action-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 13px;
+  border: 1px solid #d7d7d5;
+  border-radius: 999px;
+  background: #fff;
+  color: #111;
+  font-size: 9px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background .15s ease,
+    border-color .15s ease,
+    color .15s ease;
+}
+
+.action-pill:hover {
+  background: #111;
+  border-color: #111;
+  color: #fff;
+}
+
+.plus {
+  font-size: 15px;
+  line-height: 1;
+}
+
+/* =========================================================
+   ERROR
+   ========================================================= */
+
+.error-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 70px;
+  margin-bottom: 20px;
+  padding: 14px 18px;
+  border: 1px solid #e5e5e3;
+  border-radius: 10px;
+  background: #fff;
+  color: #777;
+  font-size: 10px;
+}
+
+/* =========================================================
+   STAT CARDS
+   ========================================================= */
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 30px;
+}
+
+.stat-card {
+  position: relative;
+  min-width: 0;
+  min-height: 128px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 17px;
+  background: #fff;
+  border: 1px solid #e5e5e3;
+  border-radius: 10px;
+}
+
+.stat-card::before {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 8px;
+  background: #f0f3f1;
+  color: #245a43;
+  font-size: 15px;
+  font-weight: 700;
+}
+.stat-card:nth-child(1)::before { content: '?'; }
+.stat-card:nth-child(2)::before { content: '?'; }
+.stat-card:nth-child(3)::before { content: '?'; }
+.stat-card:nth-child(4)::before { content: '?'; }
+
+.stat-label {
+  color: #777;
+  font-size: 9px;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: .2px;
+}
+
+.stat-number {
+  font-size: clamp(27px, 2.5vw, 35px);
+  line-height: 1;
+  font-weight: 700;
+}
+
+.stat-description {
+  color: #999;
+  font-size: 9px;
+  line-height: 1.35;
+}
+
+/* =========================================================
+   SECTION
+   ========================================================= */
+
+.section {
+  margin-bottom: 30px;
+}
+
+.section-heading {
+  margin-bottom: 11px;
+}
+
+.section-heading > div {
+  min-width: 0;
+}
+
+.section-heading h3,
+.card-header h3 {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.25;
+  font-weight: 650;
+}
+
+/* =========================================================
+   PROGRESS CARDS
+   ========================================================= */
+
+.progress-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.progress-card {
+  min-width: 0;
+  min-height: 295px;
+  padding: 18px;
+  background: #fff;
+  border: 1px solid #e5e5e3;
+  border-radius: 10px;
+}
+
+.progress-header,
+.card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.progress-header > div,
+.card-header > div {
+  min-width: 0;
+}
+
+.progress-header h4 {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+.progress-header p,
+.card-header p:last-child {
+  margin: 4px 0 0;
+  color: #999;
+  font-size: 9px;
+  line-height: 1.45;
+}
+
+/* =========================================================
+   VIEW BUTTON
+   ========================================================= */
+
+.view-button {
+  flex-shrink: 0;
+  padding: 6px 10px;
+  border: 1px solid #d8d8d6;
+  border-radius: 999px;
+  background: #fff;
+  color: #333;
+  font-size: 9px;
+  cursor: pointer;
+  transition:
+    background .15s ease,
+    border-color .15s ease,
+    color .15s ease;
+}
+
+.view-button:hover {
+  background: #111;
+  border-color: #111;
+  color: #fff;
+}
+
+/* =========================================================
+   CIRCULAR PROGRESS
+   ========================================================= */
+
+.circle-container {
+  position: relative;
+  width: 135px;
+  height: 135px;
+  margin: 17px auto 12px;
+}
+
+.progress-circle {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.circle-background,
+.circle-progress {
+  fill: none;
+  stroke-width: 8;
+}
+
+.circle-background {
+  stroke: #ededeb;
+}
+
+.circle-progress {
+  stroke: #111;
+  stroke-linecap: round;
+  stroke-dasharray: 301.59;
+  transition: stroke-dashoffset .4s ease;
+}
+
+.circle-value {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.circle-value strong {
+  font-size: 23px;
+  line-height: 1;
+}
+
+.circle-value span {
+  max-width: 75px;
+  margin-top: 5px;
+  color: #888;
+  font-size: 9px;
+  line-height: 1.25;
+  text-align: center;
+}
+
+.progress-labels {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 9px;
+  border-top: 1px solid #eee;
+}
+
+.progress-labels div {
+  min-width: 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 9px;
+}
+
+.progress-labels span {
+  color: #777;
+}
+
+.progress-labels strong {
+  flex-shrink: 0;
+}
+
+/* =========================================================
+   COMPANY PROFILE
+   ========================================================= */
+
+.company-status {
+  min-height: 165px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.status-mark {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  border: 1px solid #d5d5d3;
+  border-radius: 50%;
+  background: #eeeeec;
+  color: #111;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.company-status strong {
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.company-status span {
+  max-width: 220px;
+  margin-top: 5px;
+  color: #999;
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+/* =========================================================
+   LOWER OVERVIEW
+   ========================================================= */
+
+.lower-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(280px, .8fr);
+  gap: 12px;
+}
+
+.overview-card {
+  min-width: 0;
+  min-height: 260px;
+  padding: 19px;
+  background: #fff;
+  border: 1px solid #e5e5e3;
+  border-radius: 10px;
+}
+
+.card-header {
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eeeeec;
+}
+
+.company-overview {
+  padding-top: 7px;
+}
+
+.overview-row {
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid #eeeeec;
+}
+
+.overview-row:last-child {
+  border-bottom: 0;
+}
+
+.overview-row span {
+  color: #666;
+  font-size: 10px;
+}
+
+.overview-row strong {
+  flex-shrink: 0;
+  font-size: 17px;
+}
+
+.user-overview {
+  padding-top: 10px;
+}
+
+.user-total {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 11px 0 15px;
+}
+
+.user-total strong {
+  font-size: 38px;
+  line-height: 1;
+}
+
+.user-total span {
+  margin-top: 5px;
+  color: #888;
+  font-size: 9px;
+}
+
+.user-row {
+  min-height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid #eeeeec;
+}
+
+.user-row span {
+  color: #666;
+  font-size: 10px;
+}
+
+.user-row strong {
+  flex-shrink: 0;
+  font-size: 16px;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1200px) {
+  .page {
+    padding-left: 25px;
+    padding-right: 25px;
+  }
+
+  .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .progress-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .progress-card:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .lower-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 800px) {
+  .page {
+    padding: 23px 20px 34px;
+  }
+
+  .page-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .quick-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 600px) {
+  .page {
+    padding: 19px 14px 30px;
+  }
+
+  .page-header h2 {
+    font-size: 25px;
+  }
+
+  .quick-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .action-pill {
+    justify-content: center;
+  }
+
+  .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .stat-card {
+    min-height: 115px;
+    padding: 14px;
+  }
+
+  .stat-number {
+    font-size: 27px;
+  }
+
+  .progress-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .progress-card:last-child {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 390px) {
+  .stats {
+    grid-template-columns: 1fr;
+  }
+
+  .page {
+    padding-left: 11px;
+    padding-right: 11px;
+  }
+}
+
+
+============================================================
+FILE: frontend\dmfs-frontend\src\app\admin\admin-layout\admin-layout.ts
+============================================================
+
+import { Component, inject } from '@angular/core';
+import { Router, RouterOutlet } from '@angular/router';
+import {
+  AuthService,
+  LoginResponse
+} from '../../services/auth.service';
+
+interface AdminMenuItem {
+  label: string;
+  route: string;
+}
+
+@Component({
+  selector: 'app-admin-layout',
+  standalone: true,
+  imports: [RouterOutlet],
+  templateUrl: './admin-layout.html',
+  styleUrl: './admin-layout.scss'
+})
+export class AdminLayout {
+
+  private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
+
+  sidebarOpen = true;
+
+  user: LoginResponse | null =
+    this.authService.getCurrentUser();
+
+  menuItems: AdminMenuItem[] = [
+
+    {
+      label: 'Dashboard',
+      route: '/admin'
+    },
+
+    {
+      label: 'Staff',
+      route: '/admin/staff'
+    },
+
+    {
+      label: 'My Company',
+      route: '/admin/company'
+    },
+
+    {
+      label: 'Operations',
+      route: '/admin/operations'
+    },
+
+    {
+      label: 'Service Catalogue',
+      route: '/admin/operations/service-catalogue'
+    },
+
+    {
+      label: 'Reports',
+      route: '/admin/reports'
+    },
+
+    {
+      label: 'Settings',
+      route: '/admin/settings'
+    }
+
+  ];
+
+  toggleSidebar(): void {
+    this.sidebarOpen = !this.sidebarOpen;
+  }
+
+  navigate(route: string): void {
+    this.router.navigateByUrl(route);
+  }
+
+  isActive(route: string): boolean {
+
+    if (route === '/admin') {
+      return (
+        this.router.url === '/admin' ||
+        this.router.url === '/admin/'
+      );
+    }
+
+    return this.router.url.startsWith(route);
+  }
+
+  getInitials(): string {
+
+    if (!this.user) {
+      return 'AD';
+    }
+
+    const first =
+      this.user.firstName?.charAt(0) ?? '';
+
+    const last =
+      this.user.lastName?.charAt(0) ?? '';
+
+    return `${first}${last}`.toUpperCase();
+  }
+
+  logout(): void {
+
+    this.authService.logout().subscribe({
+      next: () => this.router.navigate(['/login']),
+      error: () => this.router.navigate(['/login'])
+    });
+  }
+}
+
+
+============================================================
+FILE: frontend\dmfs-frontend\src\app\admin\admin-layout\admin-layout.html
+============================================================
+
+<div
+  class="dashboard"
+  [class.sidebar-open]="sidebarOpen"
+>
+
+  <aside class="sidebar">
+
+    <div class="brand">
+      <div class="brand-mark">DM</div>
+
+      <div class="brand-text">
+        <strong>DMFS</strong>
+        <span>COMPANY ADMIN</span>
+      </div>
+    </div>
+
+    <nav class="navigation">
+
+      @for (
+        item of menuItems;
+        track item.route
+      ) {
+
+        <button
+          type="button"
+          class="nav-item"
+          [class.active]="isActive(item.route)"
+          (click)="navigate(item.route)"
+        >
+          <span class="nav-indicator"></span>
+          <span>{{ item.label }}</span>
+        </button>
+
+      }
+
+    </nav>
+
+    <div class="sidebar-bottom">
+
+      <button
+        type="button"
+        class="account"
+      >
+
+        <div class="account-avatar">
+          {{ getInitials() }}
+        </div>
+
+        <div class="account-details">
+
+          <strong>
+            {{ user?.firstName }} {{ user?.lastName }}
+          </strong>
+
+          <span>Company Admin Account</span>
+
+        </div>
+
+      </button>
+
+      <button
+        type="button"
+        class="logout"
+        (click)="logout()"
+      >
+
+        <span class="logout-circle">?</span>
+
+        <span class="logout-text">
+          Logout
+        </span>
+
+      </button>
+
+    </div>
+
+  </aside>
+
+  <main class="main-content">
+
+    <header class="topbar">
+
+      <div class="topbar-left">
+
+        @if (!sidebarOpen) {
+
+          <button
+            type="button"
+            class="open-menu-button"
+            (click)="toggleSidebar()"
+            aria-label="Open navigation"
+          >
+            ?
+          </button>
+
+        }
+
+      </div>
+
+      <div class="topbar-right">
+
+        <div class="top-user">
+
+          <div class="top-avatar">
+            {{ getInitials() }}
+          </div>
+
+          <div class="top-user-details">
+
+            <strong>
+              {{ user?.firstName }} {{ user?.lastName }}
+            </strong>
+
+            <span>ADMIN</span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </header>
+
+    <section class="page">
+
+      <router-outlet></router-outlet>
+
+    </section>
+
+  </main>
+
+</div>
+
+
+
+
+============================================================
+FILE: frontend\dmfs-frontend\src\app\admin\admin-layout\admin-layout.scss
+============================================================
+
+:host {
+  display: block;
+  min-height: 100vh;
+  background: #f7f7f5;
+  color: #111;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.dashboard {
+  min-height: 100vh;
+  background: #f7f7f5;
+}
+
+/* =========================
+   SIDEBAR
+   ========================= */
+
+.sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 1000;
+
+  width: 240px;
+  height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+
+  padding: 24px 16px 18px;
+
+  background: #fff;
+  border-right: 1px solid #e5e5e3;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 0 8px 24px;
+}
+
+.brand-mark {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 8px;
+  background: #111;
+  color: #fff;
+
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.brand-text {
+  min-width: 0;
+}
+
+.brand-text strong {
+  display: block;
+
+  font-size: 14px;
+  line-height: 1.2;
+  letter-spacing: -0.2px;
+}
+
+.brand-text span {
+  display: block;
+  margin-top: 4px;
+
+  color: #999;
+
+  font-size: 8px;
+  line-height: 1.2;
+  letter-spacing: 1px;
+}
+
+.navigation {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.nav-item {
+  position: relative;
+
+  width: 100%;
+  min-height: 42px;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 0 11px;
+
+  border: 0;
+  border-radius: 7px;
+
+  background: transparent;
+  color: #666;
+
+  text-align: left;
+  font-size: 11px;
+  font-weight: 500;
+
+  cursor: pointer;
+
+  transition:
+    background .15s ease,
+    color .15s ease;
+}
+
+.nav-item:hover {
+  background: #f1f1ef;
+  color: #111;
+}
+
+.nav-item.active {
+  background: #111;
+  color: #fff;
+}
+
+.nav-indicator {
+  width: 3px;
+  height: 16px;
+  flex: 0 0 3px;
+
+  border-radius: 3px;
+  background: transparent;
+}
+
+.nav-item.active .nav-indicator {
+  background: #fff;
+}
+
+/* =========================
+   SIDEBAR ACCOUNT
+   ========================= */
+
+.sidebar-bottom {
+  margin-top: auto;
+  padding-top: 16px;
+
+  border-top: 1px solid #eeeeec;
+}
+
+.account {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  padding: 4px 7px;
+
+  border: 0;
+  background: transparent;
+
+  text-align: left;
+}
+
+.account-avatar {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+  background: #eeeeec;
+  color: #111;
+
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.account-details {
+  min-width: 0;
+}
+
+.account-details strong {
+  display: block;
+
+  overflow: hidden;
+
+  font-size: 10px;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-details span {
+  display: block;
+  margin-top: 3px;
+
+  color: #999;
+
+  font-size: 8px;
+  line-height: 1.2;
+}
+
+.logout {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  margin-top: 12px;
+  padding: 8px;
+
+  border: 0;
+  border-radius: 7px;
+
+  background: transparent;
+  color: #555;
+
+  cursor: pointer;
+
+  transition:
+    background .15s ease,
+    color .15s ease;
+}
+
+.logout:hover {
+  background: #f1f1ef;
+  color: #111;
+}
+
+.logout-circle {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid #d5d5d3;
+  border-radius: 50%;
+
+  background: #fff;
+  color: #111;
+
+  font-size: 13px;
+}
+
+.logout-text {
+  font-size: 10px;
+  font-weight: 600;
+}
+
+/* =========================
+   MAIN CONTENT
+   ========================= */
+
+.main-content {
+  width: calc(100% - 240px);
+  min-height: 100vh;
+  margin-left: 240px;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard:not(.sidebar-open) .sidebar {
+  display: none;
+}
+
+.dashboard:not(.sidebar-open) .main-content {
+  width: 100%;
+  margin-left: 0;
+}
+
+/* =========================
+   TOPBAR
+   ========================= */
+
+.topbar {
+  width: 100%;
+  min-height: 68px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 12px 28px;
+
+  background: #fff;
+  border-bottom: 1px solid #e5e5e3;
+
+  flex-shrink: 0;
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+}
+
+.open-menu-button {
+  width: 36px;
+  height: 36px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid #d9d9d7;
+  border-radius: 8px;
+
+  background: #fff;
+  color: #111;
+
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.open-menu-button:hover {
+  background: #f1f1ef;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.top-user {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  padding-left: 15px;
+
+  border-left: 1px solid #e4e4e2;
+}
+
+.top-avatar {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+  background: #111;
+  color: #fff;
+
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.top-user-details strong {
+  display: block;
+
+  font-size: 10px;
+  line-height: 1.3;
+}
+
+.top-user-details span {
+  display: block;
+  margin-top: 2px;
+
+  color: #999;
+
+  font-size: 8px;
+}
+
+/* =========================
+   PAGE CONTENT
+   ========================= */
+
+.page {
+  width: 100%;
+  max-width: 1600px;
+
+  margin: 0 auto;
+  padding: 28px 32px 40px;
+}
+
+/* Prevent child pages from breaking the shell */
+.page > * {
+  min-width: 0;
+}
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+
+@media (max-width: 1100px) {
+
+  .sidebar {
+    width: 220px;
+  }
+
+  .main-content {
+    width: calc(100% - 220px);
+    margin-left: 220px;
+  }
+
+  .page {
+    padding: 26px 24px 36px;
+  }
+
+}
+
+@media (max-width: 800px) {
+
+  .sidebar {
+    width: 235px;
+
+    box-shadow: 8px 0 25px rgba(0, 0, 0, .06);
+  }
+
+  .main-content,
+  .dashboard:not(.sidebar-open) .main-content {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .dashboard.sidebar-open .main-content {
+    margin-left: 0;
+  }
+
+  .topbar {
+    min-height: 64px;
+    padding: 11px 20px;
+  }
+
+  .page {
+    padding: 24px 20px 34px;
+  }
+
+}
+
+@media (max-width: 600px) {
+
+  .sidebar {
+    width: min(235px, 82vw);
+  }
+
+  .topbar {
+    padding: 10px 14px;
+  }
+
+  .page {
+    padding: 20px 14px 30px;
+  }
+
+  .top-user-details {
+    display: none;
+  }
+
+}
+
+@media (max-width: 390px) {
+
+  .page {
+    padding-left: 11px;
+    padding-right: 11px;
+  }
+
+  .topbar {
+    padding-left: 11px;
+    padding-right: 11px;
+  }
+
+}
+
+
+
+
+============================================================
+FILE: frontend\dmfs-frontend\src\app\admin\staff\staff.ts
+============================================================
+
+import { Component, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import {
+  CreateStaffRequest,
+  StaffMember,
+  StaffRole,
+  StaffService,
+  UpdateStaffRequest
+} from './staff.service';
+
+@Component({
+  selector: 'app-staff',
+  standalone: true,
+  imports: [FormsModule],
+  templateUrl: './staff.html',
+  styleUrl: './staff.scss'
+})
+export class Staff {
+
+  private readonly staffService = inject(StaffService);
+
+  staff: StaffMember[] = [];
+
+  loading = signal(true);
+  saving = false;
+
+  errorMessage = '';
+  successMessage = '';
+
+  showForm = false;
+  editingStaff: StaffMember | null = null;
+
+  form = {
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    role: 'MANAGEMENT' as StaffRole
+  };
+
+  readonly roles: StaffRole[] = [
+    'MANAGEMENT',
+    'GEOLOGIST',
+    'DRONE_OPERATOR'
+  ];
+
+  constructor() {
+    this.loadStaff();
+  }
+
+  loadStaff(): void {
+    this.loading.set(true);
+    this.errorMessage = '';
+
+    this.staffService.getStaff().subscribe({
+      next: (staff) => {
+        console.log('STAFF LOADED:', staff);
+
+        this.staff = staff;
+        this.loading.set(false);
+      },
+
+      error: (error) => {
+        console.error('STAFF LOAD ERROR:', error);
+
+        this.loading.set(false);
+
+        this.errorMessage =
+          error?.error?.message ??
+          'Unable to load staff.';
+      }
+    });
+  }
+
+  openCreateForm(): void {
+    this.editingStaff = null;
+
+    this.form = {
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
+      role: 'MANAGEMENT'
+    };
+
+    this.errorMessage = '';
+    this.successMessage = '';
+    this.saving = false;
+    this.showForm = true;
+  }
+
+  openEditForm(member: StaffMember): void {
+    this.editingStaff = member;
+
+    this.form = {
+      firstName: member.firstName,
+      lastName: member.lastName,
+      email: member.email,
+      password: '',
+      role: member.role
+    };
+
+    this.errorMessage = '';
+    this.successMessage = '';
+    this.saving = false;
+    this.showForm = true;
+  }
+
+  closeForm(): void {
+    this.showForm = false;
+    this.editingStaff = null;
+    this.saving = false;
+  }
+
+  saveStaff(): void {
+
+    if (this.saving) {
+      return;
+    }
+
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    if (
+      !this.form.firstName.trim() ||
+      !this.form.lastName.trim() ||
+      !this.form.email.trim()
+    ) {
+      this.errorMessage =
+        'Please complete all required fields.';
+      return;
+    }
+
+    if (
+      !this.editingStaff &&
+      this.form.password.length < 8
+    ) {
+      this.errorMessage =
+        'Password must be at least 8 characters.';
+      return;
+    }
+
+    this.saving = true;
+
+    if (this.editingStaff) {
+
+      const request: UpdateStaffRequest = {
+        firstName: this.form.firstName.trim(),
+        lastName: this.form.lastName.trim(),
+        email: this.form.email.trim(),
+        role: this.form.role
+      };
+
+      this.staffService
+        .updateStaff(this.editingStaff.id, request)
+        .subscribe({
+
+          next: () => {
+            this.saving = false;
+            this.showForm = false;
+            this.editingStaff = null;
+
+            this.successMessage =
+              'Staff member updated successfully.';
+
+            this.loadStaff();
+          },
+
+          error: (error) => {
+            this.saving = false;
+
+            this.errorMessage =
+              error?.error?.message ??
+              'Unable to update staff member.';
+          }
+        });
+
+      return;
+    }
+
+    const request: CreateStaffRequest = {
+      firstName: this.form.firstName.trim(),
+      lastName: this.form.lastName.trim(),
+      email: this.form.email.trim(),
+      password: this.form.password,
+      role: this.form.role
+    };
+
+    this.staffService
+      .createStaff(request)
+      .subscribe({
+
+        next: () => {
+          this.saving = false;
+          this.showForm = false;
+          this.editingStaff = null;
+
+          this.successMessage =
+            'Staff member created successfully.';
+
+          this.loadStaff();
+        },
+
+        error: (error) => {
+          this.saving = false;
+
+          this.errorMessage =
+            error?.error?.message ??
+            'Unable to create staff member.';
+        }
+      });
+  }
+
+  toggleStatus(member: StaffMember): void {
+
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    const request$ = member.active
+      ? this.staffService.deactivateStaff(member.id)
+      : this.staffService.activateStaff(member.id);
+
+    request$.subscribe({
+
+      next: (updatedStaff) => {
+
+        this.staff = this.staff.map(item =>
+          item.id === updatedStaff.id
+            ? updatedStaff
+            : item
+        );
+
+        this.successMessage =
+          updatedStaff.active
+            ? 'Staff member activated.'
+            : 'Staff member deactivated.';
+      },
+
+      error: (error) => {
+
+        this.errorMessage =
+          error?.error?.message ??
+          'Unable to change staff status.';
+      }
+    });
+  }
+
+  getRoleLabel(role: StaffRole): string {
+
+    switch (role) {
+      case 'DRONE_OPERATOR':
+        return 'Drone Operator';
+
+      case 'GEOLOGIST':
+        return 'Geologist';
+
+      case 'MANAGEMENT':
+        return 'Management';
+
+      default:
+        return role;
+    }
+  }
+
+  getInitials(member: StaffMember): string {
+
+    const first =
+      member.firstName?.charAt(0) ?? '';
+
+    const last =
+      member.lastName?.charAt(0) ?? '';
+
+    return (first + last).toUpperCase();
+  }
+}
+
+
+============================================================
+FILE: frontend\dmfs-frontend\src\app\admin\staff\staff.html
+============================================================
+
+<div class="staff-page">
+
+  <header class="page-header">
+
+    <div>
+      <p class="eyebrow">STAFF MANAGEMENT</p>
+
+      <h1>Company Staff</h1>
+
+      <p class="description">
+        Manage the staff members working for your company.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="primary-button"
+      (click)="openCreateForm()"
+    >
+      Add Staff
+    </button>
+
+  </header>
+
+  @if (successMessage) {
+    <div class="message success">
+      {{ successMessage }}
+    </div>
+  }
+
+  @if (errorMessage && !showForm) {
+    <div class="message error">
+      {{ errorMessage }}
+    </div>
+  }
+
+  @if (loading()) {
+
+    <div class="state">
+      Loading staff...
+    </div>
+
+  } @else if (staff.length === 0) {
+
+    <div class="empty-state">
+
+      <h2>No staff members yet</h2>
+
+      <p>
+        Add your first Management, Geologist or Drone Operator.
+      </p>
+
+      <button
+        type="button"
+        class="primary-button"
+        (click)="openCreateForm()"
+      >
+        Add Staff
+      </button>
+
+    </div>
+
+  } @else {
+
+    <section class="staff-table">
+
+      <div class="table-header">
+
+        <span>Staff Member</span>
+        <span>Role</span>
+        <span>Status</span>
+        <span>Actions</span>
+
+      </div>
+
+      @for (member of staff; track member.id) {
+
+        <div class="table-row">
+
+          <div class="member">
+
+            <div class="avatar">
+              {{ getInitials(member) }}
+            </div>
+
+            <div>
+              <strong>
+                {{ member.firstName }} {{ member.lastName }}
+              </strong>
+
+              <span>
+                {{ member.email }}
+              </span>
+            </div>
+
+          </div>
+
+          <div class="role">
+            {{ getRoleLabel(member.role) }}
+          </div>
+
+          <div>
+
+            <span
+              class="status"
+              [class.active]="member.active"
+              [class.inactive]="!member.active"
+            >
+              {{ member.active ? 'Active' : 'Inactive' }}
+            </span>
+
+          </div>
+
+          <div class="actions">
+
+            <button
+              type="button"
+              class="secondary-button"
+              (click)="openEditForm(member)"
+            >
+              Edit
+            </button>
+
+            <button
+              type="button"
+              class="status-button"
+              [class.activate]="!member.active"
+              [class.deactivate]="member.active"
+              (click)="toggleStatus(member)"
+            >
+              {{ member.active ? 'Deactivate' : 'Activate' }}
+            </button>
+
+          </div>
+
+        </div>
+
+      }
+
+    </section>
+
+  }
+
+  @if (showForm) {
+
+    <div class="modal-backdrop">
+
+      <section class="modal">
+
+        <div class="modal-header">
+
+          <div>
+
+            <p class="eyebrow">
+              {{ editingStaff ? 'EDIT STAFF' : 'NEW STAFF' }}
+            </p>
+
+            <h2>
+              {{ editingStaff
+                ? 'Edit Staff Member'
+                : 'Add Staff Member'
+              }}
+            </h2>
+
+          </div>
+
+          <button
+            type="button"
+            class="close-button"
+            (click)="closeForm()"
+          >
+            ×
+          </button>
+
+        </div>
+
+        <div class="form-grid">
+
+          <label>
+            <span>First Name</span>
+
+            <input
+              type="text"
+              [(ngModel)]="form.firstName"
+              placeholder="First name"
+            >
+          </label>
+
+          <label>
+            <span>Last Name</span>
+
+            <input
+              type="text"
+              [(ngModel)]="form.lastName"
+              placeholder="Last name"
+            >
+          </label>
+
+          <label>
+            <span>Email</span>
+
+            <input
+              type="email"
+              [(ngModel)]="form.email"
+              placeholder="staff@company.com"
+            >
+          </label>
+
+          @if (!editingStaff) {
+
+            <label>
+              <span>Password</span>
+
+              <input
+                type="password"
+                [(ngModel)]="form.password"
+                placeholder="Minimum 8 characters"
+              >
+            </label>
+
+          }
+
+          <label class="full">
+            <span>Staff Role</span>
+
+            <select [(ngModel)]="form.role">
+
+              @for (role of roles; track role) {
+
+                <option [value]="role">
+                  {{ getRoleLabel(role) }}
+                </option>
+
+              }
+
+            </select>
+          </label>
+
+        </div>
+
+        @if (errorMessage) {
+
+          <div class="message error">
+            {{ errorMessage }}
+          </div>
+
+        }
+
+        <div class="modal-actions">
+
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="closeForm()"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="button"
+            class="primary-button"
+            [disabled]="saving"
+            (click)="saveStaff()"
+          >
+            {{ saving
+              ? 'Saving...'
+              : editingStaff
+                ? 'Save Changes'
+                : 'Create Staff'
+            }}
+          </button>
+
+        </div>
+
+      </section>
+
+    </div>
+
+  }
+
+</div>
+
+
+============================================================
+FILE: frontend\dmfs-frontend\src\app\admin\staff\staff.scss
+============================================================
+
+.staff-page {
+  min-height: 100%;
+  padding: 32px;
+  background: #f7f7f7;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: #777;
+}
+
+h1,
+h2,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 8px;
+  font-size: 32px;
+}
+
+.description {
+  margin-bottom: 0;
+  color: #666;
+}
+
+.primary-button,
+.secondary-button,
+.status-button {
+  border: 0;
+  border-radius: 8px;
+  padding: 11px 16px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.primary-button {
+  background: #111;
+  color: #fff;
+}
+
+.primary-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.secondary-button {
+  background: #eee;
+  color: #111;
+}
+
+.status-button {
+  border: 1px solid #ddd;
+  background: #fff;
+}
+
+.status-button.activate {
+  background: #111;
+  color: #fff;
+}
+
+.message {
+  margin-bottom: 20px;
+  padding: 13px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.message.success {
+  background: #e9f7ed;
+  color: #176b35;
+}
+
+.message.error {
+  background: #fbecec;
+  color: #9b2020;
+}
+
+.state,
+.empty-state {
+  padding: 60px 30px;
+  text-align: center;
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+}
+
+.empty-state h2 {
+  margin-bottom: 8px;
+}
+
+.empty-state p {
+  margin-bottom: 24px;
+  color: #666;
+}
+
+.staff-table {
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+}
+
+.table-header,
+.table-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 0.8fr 1.4fr;
+  align-items: center;
+  gap: 20px;
+  padding: 18px 22px;
+}
+
+.table-header {
+  background: #fafafa;
+  border-bottom: 1px solid #e5e5e5;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #777;
+}
+
+.table-row {
+  min-height: 76px;
+  border-bottom: 1px solid #eee;
+}
+
+.table-row:last-child {
+  border-bottom: 0;
+}
+
+.member {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.member > div:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.member span {
+  font-size: 13px;
+  color: #777;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #111;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.role {
+  font-size: 14px;
+}
+
+.status {
+  display: inline-flex;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.status.active {
+  background: #e9f7ed;
+  color: #176b35;
+}
+
+.status.inactive {
+  background: #eee;
+  color: #777;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.modal {
+  width: min(620px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 28px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+.modal-header h2 {
+  margin-bottom: 0;
+}
+
+.close-button {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: #eee;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.form-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.form-grid label.full {
+  grid-column: 1 / -1;
+}
+
+.form-grid span {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.form-grid input,
+.form-grid select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 13px;
+  border: 1px solid #d8d8d8;
+  border-radius: 8px;
+  background: #fff;
+  font: inherit;
+  outline: none;
+}
+
+.form-grid input:focus,
+.form-grid select:focus {
+  border-color: #111;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+@media (max-width: 900px) {
+
+  .table-header {
+    display: none;
+  }
+
+  .table-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .actions {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 600px) {
+
+  .staff-page {
+    padding: 20px;
+  }
+
+  .page-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-grid label.full {
+    grid-column: auto;
+  }
+
+  .table-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+============================================================
+FILE: frontend\dmfs-frontend\src\app\admin\staff\staff.service.ts
+============================================================
+
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+
+export type StaffRole =
+  | 'MANAGEMENT'
+  | 'GEOLOGIST'
+  | 'DRONE_OPERATOR';
+
+export interface StaffMember {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: StaffRole;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string | null;
+}
+
+export interface CreateStaffRequest {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  role: StaffRole;
+}
+
+export interface UpdateStaffRequest {
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: StaffRole;
+}
+
+@Injectable({
+  providedIn: 'root'
+})
+export class StaffService {
+
+  private readonly http = inject(HttpClient);
+
+  private readonly apiUrl = '/api/admin/staff';
+
+  getStaff(): Observable<StaffMember[]> {
+    return this.http.get<StaffMember[]>(
+      this.apiUrl,
+      {
+        withCredentials: true
+      }
+    );
+  }
+
+  createStaff(
+    request: CreateStaffRequest
+  ): Observable<StaffMember> {
+    return this.http.post<StaffMember>(
+      this.apiUrl,
+      request,
+      {
+        withCredentials: true
+      }
+    );
+  }
+
+  updateStaff(
+    id: number,
+    request: UpdateStaffRequest
+  ): Observable<StaffMember> {
+    return this.http.put<StaffMember>(
+      `${this.apiUrl}/${id}`,
+      request,
+      {
+        withCredentials: true
+      }
+    );
+  }
+
+  activateStaff(id: number): Observable<StaffMember> {
+    return this.http.patch<StaffMember>(
+      `${this.apiUrl}/${id}/activate`,
+      {},
+      {
+        withCredentials: true
+      }
+    );
+  }
+
+  deactivateStaff(id: number): Observable<StaffMember> {
+    return this.http.patch<StaffMember>(
+      `${this.apiUrl}/${id}/deactivate`,
+      {},
+      {
+        withCredentials: true
+      }
+    );
+  }
+}
+
+
+============================================================
+FILE: frontend\dmfs-frontend\src\app\admin\company\company.ts
+============================================================
+
+import {
+  Component,
+  OnInit,
+  inject,
+  signal
+} from '@angular/core';
+
+import { Router } from '@angular/router';
+
+import {
+  Company,
+  CompanyService
+} from './company.service';
+
+@Component({
+  selector: 'app-admin-company',
+  standalone: true,
+  templateUrl: './company.html',
+  styleUrl: './company.scss'
+})
+export class AdminCompany implements OnInit {
+
+  private readonly router = inject(Router);
+  private readonly companyService = inject(CompanyService);
+
+  company = signal<Company | null>(null);
+
+  loading = signal(true);
+
+  errorMessage = signal('');
+
+  ngOnInit(): void {
+    this.loadCompany();
+  }
+
+  loadCompany(): void {
+
+    this.loading.set(true);
+    this.errorMessage.set('');
+
+    this.companyService.getCompany().subscribe({
+
+      next: (company: Company) => {
+        console.log('MY COMPANY:', company);
+
+        this.company.set(company);
+        this.loading.set(false);
+      },
+
+      error: (error) => {
+        console.error(
+          'Unable to load company information:',
+          error
+        );
+
+        this.errorMessage.set(
+          'Unable to load company information.'
+        );
+
+        this.loading.set(false);
+      }
+
+    });
+  }
+
+  goBack(): void {
+    this.router.navigate(['/admin']);
+  }
+
+  openStaff(): void {
+    this.router.navigate(['/admin/staff']);
+  }
+}
+
+
+============================================================
+FILE: frontend\dmfs-frontend\src\app\admin\company\company.html
+============================================================
+
+<div class="page-shell">
+
+  <header class="page-header">
+
+    <div>
+      <p class="eyebrow">COMPANY ADMINISTRATION</p>
+      <h1>My Company</h1>
+      <p class="description">
+        View the subscriber company information associated with your account.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="secondary-button"
+      (click)="goBack()"
+    >
+      Back to Dashboard
+    </button>
+
+  </header>
+
+  @if (loading()) {
+
+    <section class="status-card">
+      <div>
+        <p class="eyebrow">COMPANY PROFILE</p>
+        <h2>Loading company information...</h2>
+      </div>
+    </section>
+
+  } @else if (errorMessage()) {
+
+    <section class="status-card">
+      <div>
+        <p class="eyebrow">COMPANY PROFILE</p>
+        <h2>Unable to load company</h2>
+        <p>{{ errorMessage() }}</p>
+      </div>
+
+      <button
+        type="button"
+        class="primary-button"
+        (click)="loadCompany()"
+      >
+        Try Again
+      </button>
+    </section>
+
+  } @else if (company(); as currentCompany) {
+
+    <section class="status-card">
+
+      <div>
+        <p class="eyebrow">ACCOUNT STATUS</p>
+        <h2>{{ currentCompany.name }}</h2>
+      </div>
+
+      <span class="status">
+        {{ currentCompany.status }}
+      </span>
+
+    </section>
+
+    <section class="information-grid">
+
+      <article class="card">
+
+        <p class="eyebrow">COMPANY INFORMATION</p>
+
+        <div class="field">
+          <span>Company Name</span>
+          <strong>{{ currentCompany.name || '�' }}</strong>
+        </div>
+
+        <div class="field">
+          <span>Registration Number</span>
+          <strong>{{ currentCompany.registrationNumber || '�' }}</strong>
+        </div>
+
+        <div class="field">
+          <span>TIN</span>
+          <strong>{{ currentCompany.tin || '�' }}</strong>
+        </div>
+
+      </article>
+
+      <article class="card">
+
+        <p class="eyebrow">CONTACT INFORMATION</p>
+
+        <div class="field">
+          <span>Email</span>
+          <strong>{{ currentCompany.email || '�' }}</strong>
+        </div>
+
+        <div class="field">
+          <span>Phone</span>
+          <strong>{{ currentCompany.phone || '�' }}</strong>
+        </div>
+
+      </article>
+
+      <article class="card full">
+
+        <p class="eyebrow">LOCATION</p>
+
+        <div class="location-grid">
+
+          <div class="field">
+            <span>Country</span>
+            <strong>{{ currentCompany.country || '�' }}</strong>
+          </div>
+
+          <div class="field">
+            <span>Region</span>
+            <strong>{{ currentCompany.region || '�' }}</strong>
+          </div>
+
+          <div class="field">
+            <span>City</span>
+            <strong>{{ currentCompany.city || '�' }}</strong>
+          </div>
+
+          <div class="field">
+            <span>Physical Address</span>
+            <strong>{{ currentCompany.physicalAddress || '�' }}</strong>
+          </div>
+
+        </div>
+
+      </article>
+
+    </section>
+
+    <section class="notice">
+
+      <div>
+        <strong>
+          Company information is managed by the platform administrator.
+        </strong>
+
+        <p>
+          Contact the platform administrator when registered company
+          information needs to be changed.
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="primary-button"
+        (click)="openStaff()"
+      >
+        Manage Staff
+      </button>
+
+    </section>
+
+  }
+
+</div>
+
+
+============================================================
+FILE: frontend\dmfs-frontend\src\app\admin\company\company.service.ts
+============================================================
+
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+
+export interface Company {
+  id: number;
+  name: string;
+  registrationNumber: string;
+  tin: string | null;
+  email: string | null;
+  phone: string | null;
+  country: string;
+  region: string;
+  city: string;
+  physicalAddress: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string | null;
+}
+
+@Injectable({
+  providedIn: 'root'
+})
+export class CompanyService {
+
+  private readonly http = inject(HttpClient);
+
+  private readonly apiUrl = '/api/admin/company';
+
+  getCompany(): Observable<Company> {
+    return this.http.get<Company>(
+      this.apiUrl,
+      {
+        withCredentials: true
+      }
+    );
+  }
+}
+
+
+============================================================
+FILE: frontend\dmfs-frontend\src\app\admin\operations\operations.ts
+============================================================
+
+import { Component, inject } from '@angular/core';
+import { Router } from '@angular/router';
+
+interface Operation {
+  id: string;
+  client: string;
+  service: string;
+  location: string;
+  assignedTeam: string;
+  status: 'PENDING' | 'ACTIVE' | 'COMPLETED';
+}
+
+@Component({
+  selector: 'app-admin-operations',
+  standalone: true,
+  templateUrl: './operations.html',
+  styleUrl: './operations.scss'
+})
+export class AdminOperations {
+
+  private readonly router = inject(Router);
+
+  operations: Operation[] = [];
+
+  filters = ['ALL', 'PENDING', 'ACTIVE', 'COMPLETED'];
+  selectedFilter = 'ALL';
+
+  get filteredOperations(): Operation[] {
+    if (this.selectedFilter === 'ALL') {
+      return this.operations;
+    }
+
+    return this.operations.filter(
+      operation => operation.status === this.selectedFilter
+    );
+  }
+
+  setFilter(filter: string): void {
+    this.selectedFilter = filter;
+  }
+
+  goBack(): void {
+    this.router.navigate(['/admin']);
+  }
+}
+
+
+============================================================
+FILE: frontend\dmfs-frontend\src\app\admin\operations\operations.html
+============================================================
+
+<div class="page-shell">
+
+  <header class="page-header">
+
+    <div>
+      <p class="eyebrow">COMPANY OPERATIONS</p>
+      <h1>Operations</h1>
+      <p class="description">
+        Monitor field operations performed by your company.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="secondary-button"
+      (click)="goBack()"
+    >
+      Back to Dashboard
+    </button>
+
+  </header>
+
+  <section class="summary-grid">
+
+    <article class="summary-card">
+      <span>Total Operations</span>
+      <strong>{{ operations.length }}</strong>
+    </article>
+
+    <article class="summary-card">
+      <span>Pending</span>
+      <strong>
+        {{ operations.filter(o => o.status === 'PENDING').length }}
+      </strong>
+    </article>
+
+    <article class="summary-card">
+      <span>Active</span>
+      <strong>
+        {{ operations.filter(o => o.status === 'ACTIVE').length }}
+      </strong>
+    </article>
+
+    <article class="summary-card">
+      <span>Completed</span>
+      <strong>
+        {{ operations.filter(o => o.status === 'COMPLETED').length }}
+      </strong>
+    </article>
+
+  </section>
+
+  <section class="panel">
+
+    <div class="filters">
+
+      @for (filter of filters; track filter) {
+
+        <button
+          type="button"
+          class="filter-button"
+          [class.active]="selectedFilter === filter"
+          (click)="setFilter(filter)"
+        >
+          {{ filter }}
+        </button>
+
+      }
+
+    </div>
+
+    @if (filteredOperations.length === 0) {
+
+      <div class="empty-state">
+
+        <div class="empty-icon">OP</div>
+
+        <h2>No operations available</h2>
+
+        <p>
+          Company operations will appear here when survey and field
+          activities are created.
+        </p>
+
+      </div>
+
+    } @else {
+
+      <div class="table">
+
+        <div class="table-header">
+          <span>Operation</span>
+          <span>Client</span>
+          <span>Service</span>
+          <span>Team</span>
+          <span>Status</span>
+        </div>
+
+        @for (operation of filteredOperations; track operation.id) {
+
+          <div class="table-row">
+
+            <strong>{{ operation.id }}</strong>
+
+            <span>{{ operation.client }}</span>
+
+            <span>{{ operation.service }}</span>
+
+            <span>{{ operation.assignedTeam }}</span>
+
+            <span
+              class="status"
+              [class.pending]="operation.status === 'PENDING'"
+              [class.active]="operation.status === 'ACTIVE'"
+              [class.completed]="operation.status === 'COMPLETED'"
+            >
+              {{ operation.status }}
+            </span>
+
+          </div>
+
+        }
+
+      </div>
+
+    }
+
+  </section>
+
+</div>
+
+
+============================================================
+FILE: frontend\dmfs-frontend\src\app\admin\operations\service-catalogue\service-catalogue.ts
+============================================================
+
+import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+
+import {
+  ServiceCatalogue,
+  ServiceCatalogueService
+} from '../../../services/service-catalogue.service';
+
+@Component({
+  selector: 'app-service-catalogue',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './service-catalogue.html',
+  styleUrl: './service-catalogue.scss'
+})
+export class ServiceCataloguePage implements OnInit {
+
+  readonly personnelRoles = [
+    { value: 'GEOLOGIST', label: 'Geologist' },
+    { value: 'DRONE_OPERATOR', label: 'Drone Operator' }
+  ];
+
+  private readonly router = inject(Router);
+
+  private readonly serviceCatalogueService =
+    inject(ServiceCatalogueService);
+
+  services: ServiceCatalogue[] = [];
+
+  loading = true;
+
+  errorMessage = '';
+
+  showForm = false;
+
+  editingId: number | null = null;
+
+  form = {
+    name: '',
+    category: '',
+    description: '',
+    status: 'ACTIVE' as 'ACTIVE' | 'INACTIVE',
+    unitOfMeasurement: '',
+    standardPrice: 0,
+    minimumArea: 0,
+    requiredEquipment: '',
+    requiredPersonnel: '',
+    estimatedDurationMinutes: 60
+  };
+
+  selectedPersonnelRoles: string[] = [];
+
+  ngOnInit(): void {
+    this.loadServices();
+  }
+
+  loadServices(): void {
+
+    this.loading = true;
+    this.errorMessage = '';
+
+    this.serviceCatalogueService.getServices().subscribe({
+
+      next: services => {
+
+        this.services = services;
+
+        this.loading = false;
+
+      },
+
+      error: () => {
+
+        this.errorMessage =
+          'Unable to load the service catalogue.';
+
+        this.loading = false;
+
+      }
+
+    });
+
+  }
+
+  openCreate(): void {
+
+    this.editingId = null;
+
+    this.form = {
+
+      name: '',
+      category: '',
+      description: '',
+      status: 'ACTIVE',
+      unitOfMeasurement: '',
+      standardPrice: 0,
+      minimumArea: 0,
+      requiredEquipment: '',
+      requiredPersonnel: '',
+      estimatedDurationMinutes: 60
+
+    };
+    this.selectedPersonnelRoles = [];
+
+    this.showForm = true;
+
+  }
+
+  openEdit(service: ServiceCatalogue): void {
+
+    this.editingId = service.id;
+
+    this.form = {
+
+      name: service.name,
+      category: service.category,
+      description: service.description,
+      status: service.status,
+      unitOfMeasurement: service.unitOfMeasurement,
+      standardPrice: service.standardPrice,
+      minimumArea: service.minimumArea,
+      requiredEquipment: service.requiredEquipment ?? '',
+      requiredPersonnel: service.requiredPersonnel ?? '',
+      estimatedDurationMinutes:
+        service.estimatedDurationMinutes
+
+    };
+    this.selectedPersonnelRoles = (service.requiredPersonnel ?? '').split(',').filter(Boolean);
+
+    this.showForm = true;
+
+  }
+
+  closeForm(): void {
+
+    this.showForm = false;
+
+    this.editingId = null;
+
+  }
+
+  save(): void {
+
+    if (!this.selectedPersonnelRoles.length) {
+      this.errorMessage = 'Select at least one required personnel role.';
+      return;
+    }
+    const payload = { ...this.form, requiredPersonnel: this.selectedPersonnelRoles.join(',') };
+
+    if (this.editingId === null) {
+
+      this.serviceCatalogueService
+        .createService(payload)
+        .subscribe({
+
+          next: () => {
+
+            this.closeForm();
+
+            this.loadServices();
+
+          },
+
+          error: () => {
+
+            this.errorMessage =
+              'Unable to create the service.';
+
+          }
+
+        });
+
+      return;
+
+    }
+
+    this.serviceCatalogueService
+      .updateService(this.editingId, payload)
+      .subscribe({
+
+        next: () => {
+
+          this.closeForm();
+
+          this.loadServices();
+
+        },
+
+        error: () => {
+
+          this.errorMessage =
+            'Unable to update the service.';
+
+        }
+
+      });
+
+  }
+
+  deactivate(service: ServiceCatalogue): void {
+
+    if (service.status === 'INACTIVE') {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Deactivate "${service.name}"?`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.serviceCatalogueService
+      .deactivateService(service.id)
+      .subscribe({
+
+        next: () => this.loadServices(),
+
+        error: () => {
+
+          this.errorMessage =
+            'Unable to deactivate the service.';
+
+        }
+
+      });
+
+  }
+
+  goBack(): void {
+    this.router.navigate(['/admin/operations']);
+  }
+
+  get activeCount(): number {
+
+    return this.services.filter(
+      service => service.status === 'ACTIVE'
+    ).length;
+
+  }
+
+  get inactiveCount(): number {
+
+    return this.services.filter(
+      service => service.status === 'INACTIVE'
+    ).length;
+
+  }
+
+}
+
+
+============================================================
+FILE: frontend\dmfs-frontend\src\app\admin\operations\service-catalogue\service-catalogue.html
+============================================================
+
+<div class="page-shell">
+
+  <header class="page-header">
+
+    <div>
+
+      <p class="eyebrow">
+        OPERATIONS
+      </p>
+
+      <h1>
+        Service Catalogue
+      </h1>
+
+      <p class="description">
+        Manage the services your company provides to clients.
+      </p>
+
+    </div>
+
+    <div class="header-actions">
+
+      <button
+        type="button"
+        class="secondary-button"
+        (click)="goBack()"
+      >
+        Back to Operations
+      </button>
+
+      <button
+        type="button"
+        class="primary-button"
+        (click)="openCreate()"
+      >
+        Add Service
+      </button>
+
+    </div>
+
+  </header>
+
+
+  <section class="summary-grid">
+
+    <article class="summary-card">
+
+      <span>
+        Total Services
+      </span>
+
+      <strong>
+        {{ services.length }}
+      </strong>
+
+    </article>
+
+
+    <article class="summary-card">
+
+      <span>
+        Active
+      </span>
+
+      <strong>
+        {{ activeCount }}
+      </strong>
+
+    </article>
+
+
+    <article class="summary-card">
+
+      <span>
+        Inactive
+      </span>
+
+      <strong>
+        {{ inactiveCount }}
+      </strong>
+
+    </article>
+
+  </section>
+
+
+  @if (errorMessage) {
+
+    <div class="error-message">
+      {{ errorMessage }}
+    </div>
+
+  }
+
+
+  <section class="panel">
+
+    <div class="panel-header">
+
+      <div>
+
+        <h2>
+          Available Services
+        </h2>
+
+        <p>
+          Services available for company service requests.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    @if (loading) {
+
+      <div class="empty-state">
+
+        <h2>
+          Loading services...
+        </h2>
+
+      </div>
+
+    }
+
+    @else if (services.length === 0) {
+
+      <div class="empty-state">
+
+        <div class="empty-icon">
+          SC
+        </div>
+
+        <h2>
+          No services available
+        </h2>
+
+        <p>
+          Add services to define what your company can provide
+          to clients.
+        </p>
+
+      </div>
+
+    }
+
+    @else {
+
+      <div class="table">
+
+        <div class="table-header">
+
+          <span>Service</span>
+          <span>Category</span>
+          <span>Unit</span>
+          <span>Price</span>
+          <span>Min. Area</span>
+          <span>Duration</span>
+          <span>Status</span>
+          <span>Actions</span>
+
+        </div>
+
+
+        @for (service of services; track service.id) {
+
+          <div class="table-row">
+
+            <div class="service-name">
+
+              <strong>
+                {{ service.name }}
+              </strong>
+
+              <span>
+                {{ service.description }}
+              </span>
+
+            </div>
+
+
+            <span>
+              {{ service.category }}
+            </span>
+
+
+            <span>
+              {{ service.unitOfMeasurement }}
+            </span>
+
+
+            <strong>
+              {{ service.standardPrice | number:'1.2-2' }}
+            </strong>
+
+
+            <span>
+              {{ service.minimumArea | number:'1.0-2' }}
+            </span>
+
+
+            <span>
+              {{ service.estimatedDurationMinutes }} min
+            </span>
+
+
+            <span
+              class="status"
+              [class.active]="service.status === 'ACTIVE'"
+              [class.inactive]="service.status === 'INACTIVE'"
+            >
+              {{ service.status }}
+            </span>
+
+
+            <div class="actions">
+
+              <button
+                type="button"
+                class="action-button"
+                (click)="openEdit(service)"
+              >
+                Edit
+              </button>
+
+
+              @if (service.status === 'ACTIVE') {
+
+                <button
+                  type="button"
+                  class="action-button danger"
+                  (click)="deactivate(service)"
+                >
+                  Deactivate
+                </button>
+
+              }
+
+            </div>
+
+          </div>
+
+        }
+
+      </div>
+
+    }
+
+  </section>
+
+
+  @if (showForm) {
+
+    <div class="modal-backdrop">
+
+      <section class="modal">
+
+        <header class="modal-header">
+
+          <div>
+
+            <p class="eyebrow">
+              SERVICE CATALOGUE
+            </p>
+
+            <h2>
+              {{
+                editingId === null
+                  ? 'Add Service'
+                  : 'Edit Service'
+              }}
+            </h2>
+
+          </div>
+
+
+          <button
+            type="button"
+            class="close-button"
+            (click)="closeForm()"
+          >
+            �
+          </button>
+
+        </header>
+
+
+        <form
+          class="form"
+          (ngSubmit)="save()"
+        >
+
+          <div class="form-grid">
+
+            <label>
+
+              <span>
+                Service Name
+              </span>
+
+              <input
+                type="text"
+                name="name"
+                [(ngModel)]="form.name"
+                required
+              >
+
+            </label>
+
+
+            <label>
+
+              <span>
+                Category
+              </span>
+
+              <input
+                type="text"
+                name="category"
+                [(ngModel)]="form.category"
+                placeholder="e.g. Survey"
+                required
+              >
+
+            </label>
+
+
+            <label>
+
+              <span>
+                Area unit (SI)
+              </span>
+
+              <input
+                type="text"
+                name="unitOfMeasurement"
+                [(ngModel)]="form.unitOfMeasurement"
+                placeholder="e.g. hectare (ha) or square metre (m²)"
+                required
+              >
+
+            </label>
+
+
+            <label>
+
+              <span>
+                Price per unit
+              </span>
+
+              <input
+                type="number"
+                name="standardPrice"
+                [(ngModel)]="form.standardPrice"
+                min="0"
+                step="0.01"
+                required
+              >
+
+            </label>
+
+
+            <label>
+
+              <span>
+                Minimum service area
+              </span>
+
+              <input
+                type="number"
+                name="minimumArea"
+                [(ngModel)]="form.minimumArea"
+                min="0"
+                step="0.01"
+                required
+              >
+
+            </label>
+
+
+            <label>
+
+              <span>
+                Estimated Duration (minutes)
+              </span>
+
+              <input
+                type="number"
+                name="estimatedDurationMinutes"
+                [(ngModel)]="form.estimatedDurationMinutes"
+                min="1"
+                required
+              >
+
+            </label>
+
+
+            <label>
+
+              <span>
+                Status
+              </span>
+
+              <select
+                name="status"
+                [(ngModel)]="form.status"
+              >
+
+                <option value="ACTIVE">
+                  ACTIVE
+                </option>
+
+                <option value="INACTIVE">
+                  INACTIVE
+                </option>
+
+              </select>
+
+            </label>
+
+          </div>
+
+
+          <label>
+
+            <span>
+              Description
+            </span>
+
+            <textarea
+              name="description"
+              [(ngModel)]="form.description"
+              rows="3"
+              required
+            ></textarea>
+
+          </label>
+
+
+          <label>
+
+            <span>
+              Required Equipment
+            </span>
+
+            <textarea
+              name="requiredEquipment"
+              [(ngModel)]="form.requiredEquipment"
+              rows="2"
+              placeholder="e.g. Drone, multispectral camera"
+            ></textarea>
+
+          </label>
+
+
+          <fieldset class="personnel-roles">
+            <legend>Required personnel roles *</legend>
+            @for (role of personnelRoles; track role.value) {
+              <label>
+                <input type="checkbox" [value]="role.value" [(ngModel)]="selectedPersonnelRoles" name="personnel-{{ role.value }}">
+                <span>{{ role.label }}</span>
+              </label>
+            }
+          </fieldset>
+
+
+          <div class="form-actions">
+
+            <button
+              type="button"
+              class="secondary-button"
+              (click)="closeForm()"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              class="primary-button"
+            >
+              {{
+                editingId === null
+                  ? 'Create Service'
+                  : 'Save Changes'
+              }}
+            </button>
+
+          </div>
+
+        </form>
+
+      </section>
+
+    </div>
+
+  }
+
+</div>
+
+
+============================================================
+FILE: frontend\dmfs-frontend\src\app\admin\reports\reports.ts
+============================================================
+
+import { Component, inject } from '@angular/core';
+import { Router } from '@angular/router';
+
+interface ReportType {
+  title: string;
+  description: string;
+  count: number;
+}
+
+@Component({
+  selector: 'app-admin-reports',
+  standalone: true,
+  templateUrl: './reports.html',
+  styleUrl: './reports.scss'
+})
+export class AdminReports {
+
+  private readonly router = inject(Router);
+
+  reports: ReportType[] = [
+    {
+      title: 'Operational Reports',
+      description: 'Summary of field operations and their status.',
+      count: 0
+    },
+    {
+      title: 'Survey Reports',
+      description: 'Survey and exploration activity reports.',
+      count: 0
+    },
+    {
+      title: 'Staff Activity',
+      description: 'Summary of staff activity within the company.',
+      count: 0
+    },
+    {
+      title: 'Company Activity',
+      description: 'Overall company activity and service history.',
+      count: 0
+    }
+  ];
+
+  goBack(): void {
+    this.router.navigate(['/admin']);
+  }
+}
+
+
+============================================================
+FILE: frontend\dmfs-frontend\src\app\admin\settings\settings.ts
+============================================================
+
+import { Component, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
+
+@Component({
+  selector: 'app-admin-settings',
+  standalone: true,
+  imports: [FormsModule],
+  templateUrl: './settings.html',
+  styleUrl: './settings.scss'
+})
+export class AdminSettings {
+
+  private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
+
+  user = this.authService.getCurrentUser();
+
+  notifications = true;
+  compactView = false;
+
+  saved = false;
+
+  savePreferences(): void {
+    this.saved = true;
+
+    setTimeout(() => {
+      this.saved = false;
+    }, 2500);
+  }
+
+  goBack(): void {
+    this.router.navigate(['/admin']);
+  }
+
+  logout(): void {
+    this.authService.logout().subscribe({
+      next: () => {
+        this.router.navigate(['/login']);
+      },
+      error: () => {
+        this.router.navigate(['/login']);
+      }
+    });
+  }
+}
+
+
+============================================================
+FILE: frontend\dmfs-frontend\src\app\services\auth.service.ts
+============================================================
+
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, tap } from 'rxjs';
+
+export interface LoginResponse {
+  token: null;
+  userId: number;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: string;
+}
+
+@Injectable({
+  providedIn: 'root'
+})
+export class AuthService {
+
+  private readonly http = inject(HttpClient);
+
+  private readonly apiUrl =
+    'http://localhost:8080/api/auth';
+
+  private readonly storageKey =
+    'dmfs_current_user';
+
+  private currentUser: LoginResponse | null =
+    this.loadStoredUser();
+
+  login(
+    email: string,
+    password: string
+  ): Observable<LoginResponse> {
+
+    return this.http.post<LoginResponse>(
+      `${this.apiUrl}/login`,
+      {
+        email: email,
+        password: password
+      },
+      {
+        withCredentials: true
+      }
+    ).pipe(
+      tap((user) => {
+        this.currentUser = user;
+
+        localStorage.setItem(
+          this.storageKey,
+          JSON.stringify(user)
+        );
+      })
+    );
+  }
+
+  getCurrentUser(): LoginResponse | null {
+    return this.currentUser;
+  }
+
+  logout(): Observable<void> {
+
+    return this.http.post<void>(
+      `${this.apiUrl}/logout`,
+      {},
+      {
+        withCredentials: true
+      }
+    ).pipe(
+      tap(() => {
+        this.clearSession();
+      })
+    );
+  }
+
+  isLoggedIn(): boolean {
+    return this.currentUser !== null;
+  }
+
+  hasRole(role: string): boolean {
+    return this.currentUser?.role === role;
+  }
+
+  clearSession(): void {
+
+    this.currentUser = null;
+
+    localStorage.removeItem(
+      this.storageKey
+    );
+  }
+
+  private loadStoredUser(): LoginResponse | null {
+
+    try {
+
+      const stored =
+        localStorage.getItem(this.storageKey);
+
+      if (!stored) {
+        return null;
+      }
+
+      return JSON.parse(stored) as LoginResponse;
+
+    } catch (error) {
+
+      console.error(
+        'Failed to restore stored user session:',
+        error
+      );
+
+      localStorage.removeItem(
+        this.storageKey
+      );
+
+      return null;
+    }
+  }
+}
+
+
+============================================================
+FILE: frontend\dmfs-frontend\src\app\services\service-request.service.ts
+============================================================
+
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+
+export interface ServiceRequest {
+  id: number;
+
+  client: {
+    id: number;
+    clientCode?: string;
+    type?: string;
+    companyName?: string;
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    phone?: string;
+    status?: string;
+  };
+
+  farm: {
+    id: number;
+    name?: string;
+    description?: string;
+    areaHectares?: number;
+  };
+
+  farmBlock: {
+    id: number;
+    name?: string;
+    description?: string;
+    areaHectares?: number;
+    centerLatitude?: number;
+    centerLongitude?: number;
+  };
+
+  serviceCatalogue: {
+    id: number;
+    name?: string;
+    category?: string;
+    description?: string;
+    status?: string;
+    unitOfMeasurement?: string;
+    standardPrice?: number;
+    minimumArea?: number;
+    estimatedDurationMinutes?: number;
+  };
+
+  requestedDate?: string;
+
+  notes?: string;
+
+  status: string;
+
+  createdAt?: string;
+
+  updatedAt?: string;
+}
+
+export interface CreateServiceRequestPayload {
+
+  client: {
+    id: number;
+  };
+
+  farm: {
+    id: number;
+  };
+
+  farmBlock: {
+    id: number;
+  };
+
+  serviceCatalogue: {
+    id: number;
+  };
+
+  requestedDate?: string;
+
+  notes?: string;
+
+  status?: string;
+}
+
+@Injectable({
+  providedIn: 'root'
+})
+export class ServiceRequestService {
+
+  private readonly http = inject(HttpClient);
+
+  private readonly apiUrl = '/api/service-requests';
+
+  getRequests(): Observable<ServiceRequest[]> {
+    return this.http.get<ServiceRequest[]>(
+      this.apiUrl,
+      {
+        withCredentials: true
+      }
+    );
+  }
+
+  getRequest(
+    id: number
+  ): Observable<ServiceRequest> {
+    return this.http.get<ServiceRequest>(
+      `${this.apiUrl}/${id}`,
+      {
+        withCredentials: true
+      }
+    );
+  }
+
+  createRequest(
+    request: CreateServiceRequestPayload
+  ): Observable<ServiceRequest> {
+    return this.http.post<ServiceRequest>(
+      this.apiUrl,
+      request,
+      {
+        withCredentials: true
+      }
+    );
+  }
+
+  updateRequest(
+    id: number,
+    request: CreateServiceRequestPayload
+  ): Observable<ServiceRequest> {
+    return this.http.put<ServiceRequest>(
+      `${this.apiUrl}/${id}`,
+      request,
+      {
+        withCredentials: true
+      }
+    );
+  }
+
+  updateStatus(
+    id: number,
+    status: string
+  ): Observable<void> {
+    return this.http.patch<void>(
+      `${this.apiUrl}/${id}/status`,
+      {},
+      {
+        params: {
+          status
+        },
+        withCredentials: true
+      }
+    );
+  }
+
+  deleteRequest(
+    id: number
+  ): Observable<void> {
+    return this.http.delete<void>(
+      `${this.apiUrl}/${id}`,
+      {
+        withCredentials: true
+      }
+    );
+  }
+}
+
+
+
+============================================================
+FILE: frontend\dmfs-frontend\src\app\app.routes.ts
+============================================================
+
+import { Routes } from '@angular/router';
+
+import { superAdminGuard } from './guards/super-admin.guard';
+import { roleGuard } from './guards/role.guard';
+import { RoleWorkspace } from './shared/role-workspace/role-workspace';
+
+import { FarmList } from './management/farms/farm-list';
+
+export const routes: Routes = [
+
+  // ==========================================================
+  // AUTH
+  // ==========================================================
+
+  {
+    path: '',
+    redirectTo: 'login',
+    pathMatch: 'full'
+  },
+
+  {
+    path: 'login',
+    loadComponent: () =>
+      import('./auth/login/login')
+        .then(m => m.Login)
+  },
+
+
+  // ==========================================================
+  // SUPER ADMIN
+  // ==========================================================
+
+  {
+    path: 'super-admin',
+    canActivate: [superAdminGuard],
+    loadComponent: () =>
+      import('./super-admin/super-admin')
+        .then(m => m.SuperAdmin)
+  },
+
+  {
+    path: 'super-admin/companies',
+    canActivate: [superAdminGuard],
+    loadComponent: () =>
+      import('./super-admin/companies/companies')
+        .then(m => m.Companies)
+  },
+
+  {
+    path: 'super-admin/companies/register',
+    canActivate: [superAdminGuard],
+    loadComponent: () =>
+      import('./super-admin/companies/register/register')
+        .then(m => m.RegisterCompany)
+  },
+
+  {
+    path: 'super-admin/companies/:id/edit',
+    canActivate: [superAdminGuard],
+    loadComponent: () =>
+      import('./super-admin/companies/edit/edit')
+        .then(m => m.EditCompany)
+  },
+
+  {
+    path: 'super-admin/companies/:id',
+    canActivate: [superAdminGuard],
+    loadComponent: () =>
+      import('./super-admin/companies/company-details/company-details')
+        .then(m => m.CompanyDetails)
+  },
+
+
+  // ==========================================================
+  // ADMIN
+  // ==========================================================
+
+  {
+    path: 'admin',
+    canActivate: [roleGuard(['ADMIN'])],
+    loadComponent: () =>
+      import('./admin/admin-layout/admin-layout')
+        .then(m => m.AdminLayout),
+
+    children: [
+
+      {
+        path: '',
+        loadComponent: () =>
+          import('./admin/admin')
+            .then(m => m.Admin)
+      },
+
+      {
+        path: 'staff',
+        loadComponent: () =>
+          import('./admin/staff/staff')
+            .then(m => m.Staff)
+      },
+
+      {
+        path: 'company',
+        loadComponent: () =>
+          import('./admin/company/company')
+            .then(m => m.AdminCompany)
+      },
+
+      {
+        path: 'operations',
+        loadComponent: () =>
+          import('./admin/operations/operations')
+            .then(m => m.AdminOperations)
+      },
+
+      {
+        path: 'operations/service-catalogue',
+        loadComponent: () =>
+          import('./admin/operations/service-catalogue/service-catalogue')
+            .then(m => m.ServiceCataloguePage)
+      },
+
+      {
+        path: 'reports',
+        loadComponent: () =>
+          import('./admin/reports/reports')
+            .then(m => m.AdminReports)
+      },
+
+      {
+        path: 'settings',
+        loadComponent: () =>
+          import('./admin/settings/settings')
+            .then(m => m.AdminSettings)
+      }
+
+    ]
+  },
+
+
+  // ==========================================================
+  // MANAGEMENT
+  // ==========================================================
+
+  {
+    path: 'management',
+    canActivate: [roleGuard(['MANAGEMENT'])],
+    loadComponent: () =>
+      import('./management/management')
+        .then(m => m.Management)
+  },
+
+  {
+    path: 'management/clients',
+    canActivate: [roleGuard(['MANAGEMENT'])],
+    loadComponent: () =>
+      import('./management/clients/client-list/client-list')
+        .then(m => m.ClientList)
+  },
+
+  {
+    path: 'management/clients/register',
+    canActivate: [roleGuard(['MANAGEMENT'])],
+    loadComponent: () =>
+      import('./management/clients/register-clients/register-clients')
+        .then(m => m.RegisterClients)
+  },
+
+  {
+    path: 'management/clients/:clientId/farms/:farmId',
+    canActivate: [roleGuard(['MANAGEMENT'])],
+    loadComponent: () =>
+      import('./management/clients/client-details/farm-details/farm-details')
+        .then(m => m.FarmDetails)
+  },
+
+  {
+    path: 'management/clients/:id',
+    canActivate: [roleGuard(['MANAGEMENT'])],
+    loadComponent: () =>
+      import('./management/clients/client-details/client-details')
+        .then(m => m.ClientDetails)
+  },
+
+
+  { path: 'management/farms', component: FarmList, canActivate: [roleGuard(['MANAGEMENT'])] },
+
+    {
+    path: 'management/service-requests',
+    canActivate: [roleGuard(['MANAGEMENT'])],
+    loadComponent: () =>
+      import('./management/service-requests/service-request-list/service-request-list')
+        .then(m => m.ServiceRequestList)
+  },
+
+  {
+    path: 'management/service-requests/new',
+    canActivate: [roleGuard(['MANAGEMENT'])],
+    loadComponent: () =>
+      import('./management/service-requests/create-service-request/create-service-request')
+        .then(m => m.CreateServiceRequest)
+  },
+
+  {
+    path: 'management/service-requests/:id',
+    canActivate: [roleGuard(['MANAGEMENT'])],
+    loadComponent: () =>
+      import('./management/service-requests/service-request-details/service-request-details')
+        .then(m => m.ServiceRequestDetails)
+  },
+
+
+  // ==========================================================
+  // DRONE OPERATOR
+  // ==========================================================
+
+  {
+    path: 'drone-operator',
+    canActivate: [roleGuard(['DRONE_OPERATOR'])],
+    component: RoleWorkspace,
+    data: {
+      role: 'DRONE_OPERATOR',
+      title: 'Drone Operations Dashboard',
+      subtitle: 'Manage assigned field operations, drones and survey activities.',
+      menuItems: [
+        {
+          label: 'Dashboard',
+          description: 'Overview of your operational workload.',
+          icon: '�',
+          route: '/drone-operator'
+        },
+        {
+          label: 'Operations',
+          description: 'View and manage assigned field operations.',
+          icon: 'O',
+          route: '/drone-operator/operations'
+        },
+        {
+          label: 'Drones',
+          description: 'View available and assigned drones.',
+          icon: 'D',
+          route: '/drone-operator/drones'
+        },
+        {
+          label: 'Surveys',
+          description: 'Manage survey execution and status.',
+          icon: 'S',
+          route: '/drone-operator/surveys'
+        },
+        {
+          label: 'Survey Data',
+          description: 'Upload and manage collected survey data.',
+          icon: '?',
+          route: '/drone-operator/survey-data'
+        }
+      ]
+    }
+  },
+
+  {
+    path: 'drone-operator/operations',
+    canActivate: [roleGuard(['DRONE_OPERATOR'])],
+    loadComponent: () => import('./drone-operator/operations/operations').then(m => m.OperationsComponent)
+  },
+  {
+    path: 'drone-operator/surveys',
+    canActivate: [roleGuard(['DRONE_OPERATOR'])],
+    loadComponent: () => import('./drone-operator/surveys/surveys').then(m => m.SurveysComponent)
+  },
+  {
+    path: 'drone-operator/survey-data',
+    canActivate: [roleGuard(['DRONE_OPERATOR'])],
+    loadComponent: () => import('./drone-operator/survey-data/survey-data').then(m => m.SurveyDataComponent)
+  },
+
+  {
+    path: 'drone-operator/operations',
+    canActivate: [roleGuard(['DRONE_OPERATOR'])],
+    component: RoleWorkspace,
+    data: {
+      role: 'DRONE_OPERATOR',
+      title: 'Field Operations',
+      subtitle: 'Review and manage assigned operational work.',
+      menuItems: [
+        {
+          label: 'Dashboard',
+          description: 'Return to your dashboard.',
+          icon: '�',
+          route: '/drone-operator'
+        },
+        {
+          label: 'Operations',
+          description: 'Assigned field operations.',
+          icon: 'O',
+          route: '/drone-operator/operations'
+        },
+        {
+          label: 'Drones',
+          description: 'Available drones.',
+          icon: 'D',
+          route: '/drone-operator/drones'
+        },
+        {
+          label: 'Surveys',
+          description: 'Survey execution.',
+          icon: 'S',
+          route: '/drone-operator/surveys'
+        }
+      ]
+    }
+  },
+
+  {
+    path: 'drone-operator/drones',
+    canActivate: [roleGuard(['DRONE_OPERATOR'])],
+    component: RoleWorkspace,
+    data: {
+      role: 'DRONE_OPERATOR',
+      title: 'Drone Management',
+      subtitle: 'View and manage drones assigned to field operations.',
+      menuItems: [
+        {
+          label: 'Dashboard',
+          description: 'Return to dashboard.',
+          icon: '�',
+          route: '/drone-operator'
+        },
+        {
+          label: 'Operations',
+          description: 'Assigned operations.',
+          icon: 'O',
+          route: '/drone-operator/operations'
+        },
+        {
+          label: 'Drones',
+          description: 'Manage operational drones.',
+          icon: 'D',
+          route: '/drone-operator/drones'
+        },
+        {
+          label: 'Surveys',
+          description: 'Manage surveys.',
+          icon: 'S',
+          route: '/drone-operator/surveys'
+        }
+      ]
+    }
+  },
+
+  {
+    path: 'drone-operator/surveys',
+    canActivate: [roleGuard(['DRONE_OPERATOR'])],
+    component: RoleWorkspace,
+    data: {
+      role: 'DRONE_OPERATOR',
+      title: 'Survey Operations',
+      subtitle: 'Execute surveys and update field survey progress.',
+      menuItems: [
+        {
+          label: 'Dashboard',
+          description: 'Return to dashboard.',
+          icon: '�',
+          route: '/drone-operator'
+        },
+        {
+          label: 'Operations',
+          description: 'Assigned operations.',
+          icon: 'O',
+          route: '/drone-operator/operations'
+        },
+        {
+          label: 'Drones',
+          description: 'Operational drones.',
+          icon: 'D',
+          route: '/drone-operator/drones'
+        },
+        {
+          label: 'Surveys',
+          description: 'Execute surveys.',
+          icon: 'S',
+          route: '/drone-operator/surveys'
+        },
+        {
+          label: 'Survey Data',
+          description: 'Manage collected data.',
+          icon: '?',
+          route: '/drone-operator/survey-data'
+        }
+      ]
+    }
+  },
+
+  {
+    path: 'drone-operator/survey-data',
+    canActivate: [roleGuard(['DRONE_OPERATOR'])],
+    component: RoleWorkspace,
+    data: {
+      role: 'DRONE_OPERATOR',
+      title: 'Survey Data',
+      subtitle: 'Upload and manage data collected during field operations.',
+      menuItems: [
+        {
+          label: 'Dashboard',
+          description: 'Return to dashboard.',
+          icon: '�',
+          route: '/drone-operator'
+        },
+        {
+          label: 'Operations',
+          description: 'Assigned operations.',
+          icon: 'O',
+          route: '/drone-operator/operations'
+        },
+        {
+          label: 'Surveys',
+          description: 'Survey execution.',
+          icon: 'S',
+          route: '/drone-operator/surveys'
+        },
+        {
+          label: 'Survey Data',
+          description: 'Collected survey data.',
+          icon: '?',
+          route: '/drone-operator/survey-data'
+        }
+      ]
+    }
+  },
+
+  {
+  path: 'geologist',
+  canActivate: [roleGuard(['GEOLOGIST'])],
+  loadChildren: () =>
+    import('./geologist/geologist.routes')
+      .then(m => m.GEOLOGIST_ROUTES)
+  },
+  
+
+
+  // ==========================================================
+  // FALLBACK
+  // ==========================================================
+
+  {
+    path: '**',
+    redirectTo: 'login'
+  }
+
+];
+
+
+
+============================================================
+FILE: frontend\dmfs-frontend\src\app\guards\role.guard.ts
+============================================================
+
+import { inject } from '@angular/core';
+import { CanActivateFn, Router } from '@angular/router';
+import { AuthService } from '../services/auth.service';
+
+export const roleGuard = (
+  allowedRoles: string[]
+): CanActivateFn => {
+
+  return () => {
+
+    const authService = inject(AuthService);
+    const router = inject(Router);
+
+    const user = authService.getCurrentUser();
+
+    if (!user) {
+      return router.createUrlTree(['/login']);
+    }
+
+    if (allowedRoles.includes(user.role)) {
+      return true;
+    }
+
+    switch (user.role) {
+
+      case 'SUPER_ADMIN':
+        return router.createUrlTree(['/super-admin']);
+
+      case 'ADMIN':
+        return router.createUrlTree(['/admin']);
+
+      case 'MANAGEMENT':
+        return router.createUrlTree(['/management']);
+
+      case 'DRONE_OPERATOR':
+        return router.createUrlTree(['/drone-operator']);
+
+      case 'GEOLOGIST':
+        return router.createUrlTree(['/geologist']);
+
+      default:
+        return router.createUrlTree(['/login']);
+    }
+  };
+};
+
+
+============================================================
+FILE: frontend\dmfs-frontend\src\app\guards\super-admin.guard.ts
+============================================================
+
+import { CanActivateFn } from '@angular/router';
+import { roleGuard } from './role.guard';
+
+export const superAdminGuard: CanActivateFn =
+  roleGuard(['SUPER_ADMIN']);
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\admin\company\controller\AdminCompanyController.java
+============================================================
+
+package com.dmfs.admin.company.controller;
+
+import com.dmfs.admin.company.service.AdminCompanyService;
+import com.dmfs.company.dto.CompanyResponse;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api/admin/company")
+@PreAuthorize("hasRole('ADMIN')")
+public class AdminCompanyController {
+
+    private final AdminCompanyService adminCompanyService;
+
+    public AdminCompanyController(
+            AdminCompanyService adminCompanyService
+    ) {
+        this.adminCompanyService = adminCompanyService;
+    }
+
+    @GetMapping
+    public CompanyResponse getCompany() {
+        return adminCompanyService.getCurrentAdminCompany();
+    }
+}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\admin\company\service\AdminCompanyService.java
+============================================================
+
+package com.dmfs.admin.company.service;
+
+import com.dmfs.auth.entity.Role;
+import com.dmfs.auth.entity.User;
+import com.dmfs.auth.repository.UserRepository;
+import com.dmfs.company.dto.CompanyResponse;
+import com.dmfs.company.entity.SubscriberCompany;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+public class AdminCompanyService {
+
+    private final UserRepository userRepository;
+
+    public AdminCompanyService(
+            UserRepository userRepository
+    ) {
+        this.userRepository = userRepository;
+    }
+
+    @Transactional(readOnly = true)
+    public CompanyResponse getCurrentAdminCompany() {
+
+        Authentication authentication =
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication();
+
+        if (authentication == null
+                || authentication.getName() == null) {
+
+            throw new RuntimeException(
+                    "Authenticated user not found"
+            );
+        }
+
+        User admin = userRepository
+                .findByEmail(
+                        authentication.getName()
+                )
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Authenticated user not found"
+                        )
+                );
+
+        if (admin.getRole() != Role.ADMIN) {
+            throw new RuntimeException(
+                    "Only company administrators can access company information"
+            );
+        }
+
+        if (admin.getCompany() == null) {
+            throw new RuntimeException(
+                    "Administrator is not assigned to a company"
+            );
+        }
+
+        SubscriberCompany company =
+                admin.getCompany();
+
+        return new CompanyResponse(
+                company.getId(),
+                company.getName(),
+                company.getRegistrationNumber(),
+                company.getTin(),
+                company.getEmail(),
+                company.getPhone(),
+                company.getCountry(),
+                company.getRegion(),
+                company.getCity(),
+                company.getPhysicalAddress(),
+                company.getStatus(),
+                company.getCreatedAt(),
+                company.getUpdatedAt()
+        );
+    }
+}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\auth\entity\User.java
+============================================================
+
+package com.dmfs.auth.entity;
+
+import com.dmfs.company.entity.SubscriberCompany;
+import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "users")
+public class User {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, unique = true, length = 100)
+    private String email;
+
+    @Column(nullable = false)
+    private String password;
+
+    @Column(nullable = false, length = 100)
+    private String firstName;
+
+    @Column(nullable = false, length = 100)
+    private String lastName;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
+    private Role role;
+
+    @Column(nullable = false)
+    private boolean active = true;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id")
+    private SubscriberCompany company;
+
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    public SubscriberCompany getCompany() {
+        return company;
+    }
+
+    public void setCompany(SubscriberCompany company) {
+        this.company = company;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\auth\entity\Role.java
+============================================================
+
+package com.dmfs.auth.entity;
+
+public enum Role {
+
+    SUPER_ADMIN,
+    ADMIN,
+    MANAGEMENT,
+    CUSTOMER,
+    DRONE_OPERATOR,
+    GEOLOGIST
+}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\auth\security\SecurityConfig.java
+============================================================
+
+package com.dmfs.auth.security;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+
+@Configuration
+@EnableMethodSecurity
+public class SecurityConfig {
+
+    @Value("${app.jwt.secret}")
+    private String jwtSecret;
+
+
+    // =========================================================
+    // PASSWORD ENCODER
+    // =========================================================
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+
+    // =========================================================
+    // JWT DECODER
+    // =========================================================
+
+    @Bean
+    public JwtDecoder jwtDecoder() {
+
+        SecretKeySpec key = new SecretKeySpec(
+                jwtSecret.getBytes(StandardCharsets.UTF_8),
+                "HmacSHA256"
+        );
+
+        return NimbusJwtDecoder
+                .withSecretKey(key)
+                .macAlgorithm(
+                        org.springframework.security.oauth2.jose.jws.MacAlgorithm.HS256
+                )
+                .build();
+    }
+
+
+    // =========================================================
+    // CORS CONFIGURATION
+    // =========================================================
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+
+        CorsConfiguration configuration = new CorsConfiguration();
+
+        // Angular development server
+        configuration.setAllowedOrigins(
+                List.of(
+                        "http://localhost:4200",
+                        "http://127.0.0.1:4200"
+                )
+        );
+
+        // HTTP methods Angular can use
+        configuration.setAllowedMethods(
+                List.of(
+                        "GET",
+                        "POST",
+                        "PUT",
+                        "DELETE",
+                        "PATCH",
+                        "OPTIONS"
+                )
+        );
+
+        // Allow request headers
+        configuration.setAllowedHeaders(
+                List.of("*")
+        );
+
+        // IMPORTANT:
+        // Required because Angular uses withCredentials: true
+        // and the backend sends the JWT as a cookie.
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source =
+                new UrlBasedCorsConfigurationSource();
+
+        source.registerCorsConfiguration(
+                "/**",
+                configuration
+        );
+
+        return source;
+    }
+
+
+    // =========================================================
+    // JWT COOKIE RESOLVER
+    // =========================================================
+
+    /*
+     * Read JWT from the HttpOnly access_token cookie.
+     */
+    @Bean
+    public BearerTokenResolver bearerTokenResolver() {
+        return new CookieBearerTokenResolver();
+    }
+
+
+    // =========================================================
+    // SECURITY FILTER CHAIN
+    // =========================================================
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http
+    ) throws Exception {
+
+        http
+
+                // -------------------------------------------------
+                // ENABLE CORS
+                // -------------------------------------------------
+                .cors(cors -> {})
+
+                // -------------------------------------------------
+                // CSRF
+                // -------------------------------------------------
+                // Disabled because this is a stateless JWT API.
+                .csrf(csrf -> csrf.disable())
+
+                // -------------------------------------------------
+                // SESSION MANAGEMENT
+                // -------------------------------------------------
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(
+                                SessionCreationPolicy.STATELESS
+                        )
+                )
+
+                // -------------------------------------------------
+                // AUTHORIZATION
+                // -------------------------------------------------
+                .authorizeHttpRequests(auth -> auth
+
+                        // Login and logout don't require authentication
+                        .requestMatchers("/api/auth/**").permitAll()
+
+                        // Health check
+                        .requestMatchers("/api/v1/health").permitAll()
+
+                        // Actuator health
+                        .requestMatchers("/actuator/health").permitAll()
+
+                        // Everything else requires authentication
+                        .anyRequest().authenticated()
+                )
+
+                // -------------------------------------------------
+                // JWT RESOURCE SERVER
+                // -------------------------------------------------
+                .oauth2ResourceServer(oauth2 ->
+                        oauth2
+
+                                // Read JWT from access_token cookie
+                                .bearerTokenResolver(
+                                        bearerTokenResolver()
+                                )
+
+                                // Validate JWT
+                                .jwt(jwt ->
+                                        jwt.jwtAuthenticationConverter(
+                                                jwtAuthenticationConverter()
+                                        )
+                                )
+                );
+
+        return http.build();
+    }
+
+
+    // =========================================================
+    // JWT AUTHENTICATION CONVERTER
+    // =========================================================
+        @Bean
+        public JwtAuthenticationConverter jwtAuthenticationConverter() {
+        
+            JwtGrantedAuthoritiesConverter authoritiesConverter =
+                    new JwtGrantedAuthoritiesConverter();
+        
+            authoritiesConverter.setAuthoritiesClaimName("role");
+            authoritiesConverter.setAuthorityPrefix("ROLE_");
+        
+            JwtAuthenticationConverter converter =
+                    new JwtAuthenticationConverter();
+        
+            converter.setJwtGrantedAuthoritiesConverter(authoritiesConverter);
+        
+            return converter;
+        }
+}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\auth\service\AuthService.java
+============================================================
+
+package com.dmfs.auth.service;
+
+import com.dmfs.auth.dto.LoginRequest;
+import com.dmfs.auth.dto.LoginResponse;
+import com.dmfs.auth.entity.User;
+import com.dmfs.auth.repository.UserRepository;
+import com.dmfs.auth.security.JwtService;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+@Service
+public class AuthService {
+
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
+
+    public AuthService(
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder,
+            JwtService jwtService
+    ) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
+    }
+
+    public LoginResponse login(LoginRequest request) {
+
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() ->
+                        new RuntimeException("Invalid email or password")
+                );
+
+        if (!user.isActive()) {
+            throw new RuntimeException("User account is inactive");
+        }
+
+        if (!passwordEncoder.matches(
+                request.getPassword(),
+                user.getPassword()
+        )) {
+            throw new RuntimeException("Invalid email or password");
+        }
+
+        String token = jwtService.generateToken(user);
+
+        return new LoginResponse(
+                token,
+                user.getId(),
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getRole().name()
+        );
+    }
+}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\company\entity\SubscriberCompany.java
+============================================================
+
+package com.dmfs.company.entity;
+
+import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "subscriber_companies")
+public class SubscriberCompany {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, length = 150)
+    private String name;
+
+    @Column(name = "registration_number", nullable = false, unique = true, length = 100)
+    private String registrationNumber;
+
+    @Column(length = 100)
+    private String tin;
+
+    @Column(length = 100)
+    private String email;
+
+    @Column(length = 30)
+    private String phone;
+
+    @Column(nullable = false, length = 100)
+    private String country;
+
+    @Column(nullable = false, length = 100)
+    private String region;
+
+    @Column(nullable = false, length = 100)
+    private String city;
+
+    @Column(name = "physical_address", nullable = false, length = 255)
+    private String physicalAddress;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
+    private CompanyStatus status = CompanyStatus.ACTIVE;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getRegistrationNumber() {
+        return registrationNumber;
+    }
+
+    public void setRegistrationNumber(String registrationNumber) {
+        this.registrationNumber = registrationNumber;
+    }
+
+    public String getTin() {
+        return tin;
+    }
+
+    public void setTin(String tin) {
+        this.tin = tin;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getPhysicalAddress() {
+        return physicalAddress;
+    }
+
+    public void setPhysicalAddress(String physicalAddress) {
+        this.physicalAddress = physicalAddress;
+    }
+
+    public CompanyStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(CompanyStatus status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\company\service\SubscriberCompanyService.java
+============================================================
+
+package com.dmfs.company.service;
+
+import com.dmfs.auth.entity.Role;
+import com.dmfs.auth.entity.User;
+import com.dmfs.auth.repository.UserRepository;
+import com.dmfs.company.dto.ChangeCompanyStatusRequest;
+import com.dmfs.company.dto.CompanyResponse;
+import com.dmfs.company.dto.CreateCompanyRequest;
+import com.dmfs.company.dto.UpdateCompanyRequest;
+import com.dmfs.company.entity.CompanyStatus;
+import com.dmfs.company.entity.SubscriberCompany;
+import com.dmfs.company.repository.SubscriberCompanyRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+public class SubscriberCompanyService {
+
+    private final SubscriberCompanyRepository companyRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    public SubscriberCompanyService(
+            SubscriberCompanyRepository companyRepository,
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder
+    ) {
+        this.companyRepository = companyRepository;
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    @Transactional
+    public CompanyResponse create(CreateCompanyRequest request) {
+
+        if (companyRepository.existsByRegistrationNumber(
+                request.getRegistrationNumber()
+        )) {
+            throw new RuntimeException(
+                    "Company registration number already exists"
+            );
+        }
+
+        if (request.getInitialAdmin() == null) {
+            throw new RuntimeException(
+                    "Initial company admin information is required"
+            );
+        }
+
+        if (userRepository.existsByEmail(
+                request.getInitialAdmin().getEmail()
+        )) {
+            throw new RuntimeException(
+                    "Admin email already exists"
+            );
+        }
+
+        SubscriberCompany company = new SubscriberCompany();
+
+        company.setName(request.getName());
+        company.setRegistrationNumber(
+                request.getRegistrationNumber()
+        );
+        company.setTin(request.getTin());
+        company.setEmail(request.getEmail());
+        company.setPhone(request.getPhone());
+        company.setCountry(request.getCountry());
+        company.setRegion(request.getRegion());
+        company.setCity(request.getCity());
+        company.setPhysicalAddress(request.getPhysicalAddress());
+        company.setStatus(CompanyStatus.ACTIVE);
+
+        company = companyRepository.save(company);
+
+        User admin = new User();
+
+        admin.setEmail(
+                request.getInitialAdmin().getEmail()
+        );
+
+        admin.setPassword(
+                passwordEncoder.encode(
+                        request.getInitialAdmin().getPassword()
+                )
+        );
+
+        admin.setFirstName(
+                request.getInitialAdmin().getFirstName()
+        );
+
+        admin.setLastName(
+                request.getInitialAdmin().getLastName()
+        );
+
+        admin.setRole(Role.ADMIN);
+        admin.setActive(true);
+        admin.setCompany(company);
+
+        userRepository.save(admin);
+
+        return toResponse(company);
+    }
+
+    @Transactional(readOnly = true)
+    public List<CompanyResponse> getAll() {
+        return companyRepository.findAll()
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public CompanyResponse getById(Long id) {
+
+        SubscriberCompany company =
+                companyRepository.findById(id)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Subscriber company not found"
+                                )
+                        );
+
+        return toResponse(company);
+    }
+
+    @Transactional
+    public CompanyResponse update(
+            Long id,
+            UpdateCompanyRequest request
+    ) {
+
+        SubscriberCompany company =
+                companyRepository.findById(id)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Subscriber company not found"
+                                )
+                        );
+
+        if (!company.getRegistrationNumber()
+                .equals(request.getRegistrationNumber())
+                && companyRepository.existsByRegistrationNumber(
+                        request.getRegistrationNumber()
+                )) {
+
+            throw new RuntimeException(
+                    "Company registration number already exists"
+            );
+        }
+
+        company.setName(request.getName());
+        company.setRegistrationNumber(
+                request.getRegistrationNumber()
+        );
+        company.setTin(request.getTin());
+        company.setEmail(request.getEmail());
+        company.setPhone(request.getPhone());
+        company.setCountry(request.getCountry());
+        company.setRegion(request.getRegion());
+        company.setCity(request.getCity());
+        company.setPhysicalAddress(
+                request.getPhysicalAddress()
+        );
+
+        company = companyRepository.save(company);
+
+        return toResponse(company);
+    }
+
+    @Transactional
+    public CompanyResponse changeStatus(
+            Long id,
+            ChangeCompanyStatusRequest request
+    ) {
+
+        SubscriberCompany company =
+                companyRepository.findById(id)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Subscriber company not found"
+                                )
+                        );
+
+        company.setStatus(request.getStatus());
+
+        company = companyRepository.save(company);
+
+        return toResponse(company);
+    }
+
+    @Transactional
+    public CompanyResponse activate(Long id) {
+        return setStatus(id, CompanyStatus.ACTIVE);
+    }
+
+    @Transactional
+    public CompanyResponse suspend(Long id) {
+        return setStatus(id, CompanyStatus.SUSPENDED);
+    }
+
+    @Transactional
+    public CompanyResponse expire(Long id) {
+        return setStatus(id, CompanyStatus.EXPIRED);
+    }
+
+    private CompanyResponse setStatus(
+            Long id,
+            CompanyStatus status
+    ) {
+
+        SubscriberCompany company =
+                companyRepository.findById(id)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Subscriber company not found"
+                                )
+                        );
+
+        company.setStatus(status);
+
+        company = companyRepository.save(company);
+
+        return toResponse(company);
+    }
+
+    private CompanyResponse toResponse(
+            SubscriberCompany company
+    ) {
+
+        return new CompanyResponse(
+                company.getId(),
+                company.getName(),
+                company.getRegistrationNumber(),
+                company.getTin(),
+                company.getEmail(),
+                company.getPhone(),
+                company.getCountry(),
+                company.getRegion(),
+                company.getCity(),
+                company.getPhysicalAddress(),
+                company.getStatus(),
+                company.getCreatedAt(),
+                company.getUpdatedAt()
+        );
+    }
+}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\company\controller\SubscriberCompanyController.java
+============================================================
+
+package com.dmfs.company.controller;
+
+import com.dmfs.company.dto.ChangeCompanyStatusRequest;
+import com.dmfs.company.dto.CompanyResponse;
+import com.dmfs.company.dto.CreateCompanyRequest;
+import com.dmfs.company.dto.UpdateCompanyRequest;
+import com.dmfs.company.service.SubscriberCompanyService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/super-admin/companies")
+@PreAuthorize("hasRole('SUPER_ADMIN')")
+public class SubscriberCompanyController {
+
+    private final SubscriberCompanyService companyService;
+
+    public SubscriberCompanyController(
+            SubscriberCompanyService companyService
+    ) {
+        this.companyService = companyService;
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public CompanyResponse create(
+            @Valid @RequestBody CreateCompanyRequest request
+    ) {
+        return companyService.create(request);
+    }
+
+    @GetMapping
+    public List<CompanyResponse> getAll() {
+        return companyService.getAll();
+    }
+
+    @GetMapping("/{id}")
+    public CompanyResponse getById(
+            @PathVariable Long id
+    ) {
+        return companyService.getById(id);
+    }
+
+    @PutMapping("/{id}")
+    public CompanyResponse update(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateCompanyRequest request
+    ) {
+        return companyService.update(id, request);
+    }
+
+    @PatchMapping("/{id}/status")
+    public CompanyResponse changeStatus(
+            @PathVariable Long id,
+            @Valid @RequestBody ChangeCompanyStatusRequest request
+    ) {
+        return companyService.changeStatus(id, request);
+    }
+
+    @PatchMapping("/{id}/activate")
+    public CompanyResponse activate(
+            @PathVariable Long id
+    ) {
+        return companyService.activate(id);
+    }
+
+    @PatchMapping("/{id}/suspend")
+    public CompanyResponse suspend(
+            @PathVariable Long id
+    ) {
+        return companyService.suspend(id);
+    }
+
+    @PatchMapping("/{id}/expire")
+    public CompanyResponse expire(
+            @PathVariable Long id
+    ) {
+        return companyService.expire(id);
+    }
+}

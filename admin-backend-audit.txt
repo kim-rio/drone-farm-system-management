@@ -1,0 +1,3860 @@
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\admin\company\controller\AdminCompanyController.java
+============================================================
+
+package com.dmfs.admin.company.controller;
+
+import com.dmfs.admin.company.service.AdminCompanyService;
+import com.dmfs.company.dto.CompanyResponse;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api/admin/company")
+@PreAuthorize("hasRole('ADMIN')")
+public class AdminCompanyController {
+
+    private final AdminCompanyService adminCompanyService;
+
+    public AdminCompanyController(
+            AdminCompanyService adminCompanyService
+    ) {
+        this.adminCompanyService = adminCompanyService;
+    }
+
+    @GetMapping
+    public CompanyResponse getCompany() {
+        return adminCompanyService.getCurrentAdminCompany();
+    }
+}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\admin\company\service\AdminCompanyService.java
+============================================================
+
+package com.dmfs.admin.company.service;
+
+import com.dmfs.auth.entity.Role;
+import com.dmfs.auth.entity.User;
+import com.dmfs.auth.repository.UserRepository;
+import com.dmfs.company.dto.CompanyResponse;
+import com.dmfs.company.entity.SubscriberCompany;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+public class AdminCompanyService {
+
+    private final UserRepository userRepository;
+
+    public AdminCompanyService(
+            UserRepository userRepository
+    ) {
+        this.userRepository = userRepository;
+    }
+
+    @Transactional(readOnly = true)
+    public CompanyResponse getCurrentAdminCompany() {
+
+        Authentication authentication =
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication();
+
+        if (authentication == null
+                || authentication.getName() == null) {
+
+            throw new RuntimeException(
+                    "Authenticated user not found"
+            );
+        }
+
+        User admin = userRepository
+                .findByEmail(
+                        authentication.getName()
+                )
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Authenticated user not found"
+                        )
+                );
+
+        if (admin.getRole() != Role.ADMIN) {
+            throw new RuntimeException(
+                    "Only company administrators can access company information"
+            );
+        }
+
+        if (admin.getCompany() == null) {
+            throw new RuntimeException(
+                    "Administrator is not assigned to a company"
+            );
+        }
+
+        SubscriberCompany company =
+                admin.getCompany();
+
+        return new CompanyResponse(
+                company.getId(),
+                company.getName(),
+                company.getRegistrationNumber(),
+                company.getTin(),
+                company.getEmail(),
+                company.getPhone(),
+                company.getCountry(),
+                company.getRegion(),
+                company.getCity(),
+                company.getPhysicalAddress(),
+                company.getStatus(),
+                company.getCreatedAt(),
+                company.getUpdatedAt()
+        );
+    }
+}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\auth\service\AuthService.java
+============================================================
+
+package com.dmfs.auth.service;
+
+import com.dmfs.auth.dto.LoginRequest;
+import com.dmfs.auth.dto.LoginResponse;
+import com.dmfs.auth.entity.User;
+import com.dmfs.auth.repository.UserRepository;
+import com.dmfs.auth.security.JwtService;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+@Service
+public class AuthService {
+
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
+
+    public AuthService(
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder,
+            JwtService jwtService
+    ) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
+    }
+
+    public LoginResponse login(LoginRequest request) {
+
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() ->
+                        new RuntimeException("Invalid email or password")
+                );
+
+        if (!user.isActive()) {
+            throw new RuntimeException("User account is inactive");
+        }
+
+        if (!passwordEncoder.matches(
+                request.getPassword(),
+                user.getPassword()
+        )) {
+            throw new RuntimeException("Invalid email or password");
+        }
+
+        String token = jwtService.generateToken(user);
+
+        return new LoginResponse(
+                token,
+                user.getId(),
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getRole().name()
+        );
+    }
+}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\client\service\ClientService.java
+============================================================
+
+package com.dmfs.client.service;
+
+import com.dmfs.auth.entity.Role;
+import com.dmfs.auth.entity.User;
+import com.dmfs.auth.repository.UserRepository;
+import com.dmfs.client.entity.Client;
+import com.dmfs.client.entity.ClientCompany;
+import com.dmfs.client.entity.ClientIndividual;
+import com.dmfs.client.entity.ClientStatus;
+import com.dmfs.client.entity.ClientType;
+import com.dmfs.client.repository.ClientRepository;
+import com.dmfs.company.entity.SubscriberCompany;
+import com.dmfs.company.repository.SubscriberCompanyRepository;
+import com.dmfs.farm.entity.Farm;
+import com.dmfs.farm.service.FarmService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+public class ClientService {
+
+    private final ClientRepository clientRepository;
+    private final UserRepository userRepository;
+    private final SubscriberCompanyRepository companyRepository;
+    private final FarmService farmService;
+
+    public ClientService(
+            ClientRepository clientRepository,
+            UserRepository userRepository,
+            SubscriberCompanyRepository companyRepository,
+            FarmService farmService
+    ) {
+        this.clientRepository = clientRepository;
+        this.userRepository = userRepository;
+        this.companyRepository = companyRepository;
+        this.farmService = farmService;
+    }
+
+    @Transactional
+    public Client create(
+            String clientCode,
+            ClientType type,
+            String companyName,
+            String registrationNumber,
+            String firstName,
+            String lastName,
+            String email,
+            String phone,
+            String address,
+            String tin
+    ) {
+
+        User staff = getCurrentStaff();
+        SubscriberCompany company = requireCompany(staff);
+
+        if (clientRepository.existsByClientCodeAndCompany(
+                clientCode,
+                company
+        )) {
+            throw new RuntimeException("Client code already exists");
+        }
+
+        validateClientData(
+                type,
+                companyName,
+                firstName,
+                lastName,
+                email,
+                phone
+        );
+
+        Client client = new Client();
+
+        client.setClientCode(clientCode);
+        client.setType(type);
+        client.setStatus(ClientStatus.ACTIVE);
+        client.setCompany(company);
+        client.setRegisteredBy(staff);
+
+        attachProfile(
+                client,
+                type,
+                companyName,
+                registrationNumber,
+                firstName,
+                lastName,
+                email,
+                phone,
+                address,
+                tin
+        );
+
+        return clientRepository.save(client);
+    }
+
+    @Transactional
+    public Client createWithInitialFarm(String clientCode, ClientType type, String companyName,
+            String registrationNumber, String firstName, String lastName, String email, String phone,
+            String address, String tin, String farmName, String farmDescription, Double latitude,
+            Double longitude, Double areaHectares) {
+        Client client = create(clientCode, type, companyName, registrationNumber, firstName, lastName,
+                email, phone, address, tin);
+        farmService.createFarm(client.getId(), farmName, farmDescription, latitude, longitude, areaHectares);
+        return client;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Client> findAll() {
+
+        User staff = getCurrentStaff();
+
+        SubscriberCompany company = requireCompany(staff);
+
+        return clientRepository.findByCompanyOrderByCreatedAtDesc(company);
+    }
+
+    @Transactional(readOnly = true)
+    public Client findById(Long id) {
+
+        User staff = getCurrentStaff();
+
+        SubscriberCompany company = requireCompany(staff);
+
+        return clientRepository.findByIdAndCompany(id, company)
+                .orElseThrow(() ->
+                        new RuntimeException("Client not found")
+                );
+    }
+
+    @Transactional
+    public Client update(
+            Long id,
+            ClientType type,
+            String companyName,
+            String registrationNumber,
+            String firstName,
+            String lastName,
+            String email,
+            String phone,
+            String address,
+            String tin,
+            ClientStatus status
+    ) {
+
+        Client client = findById(id);
+
+        validateClientData(
+                type,
+                companyName,
+                firstName,
+                lastName,
+                email,
+                phone
+        );
+
+        client.setType(type);
+        client.setStatus(status);
+
+        attachProfile(
+                client,
+                type,
+                companyName,
+                registrationNumber,
+                firstName,
+                lastName,
+                email,
+                phone,
+                address,
+                tin
+        );
+
+        return clientRepository.save(client);
+    }
+
+    @Transactional
+    public void delete(Long id) {
+
+        Client client = findById(id);
+
+        clientRepository.delete(client);
+    }
+
+    private void attachProfile(
+            Client client,
+            ClientType type,
+            String companyName,
+            String registrationNumber,
+            String firstName,
+            String lastName,
+            String email,
+            String phone,
+            String address,
+            String tin
+    ) {
+
+        if (type == ClientType.COMPANY) {
+
+            ClientIndividual oldIndividual =
+                    client.getIndividualProfile();
+
+            if (oldIndividual != null) {
+                client.setIndividualProfile(null);
+            }
+
+            ClientCompany profile =
+                    client.getCompanyProfile();
+
+            if (profile == null) {
+                profile = new ClientCompany();
+                profile.setClient(client);
+            }
+
+            profile.setCompanyName(
+                    requireValue(
+                            companyName,
+                            "Company name is required"
+                    )
+            );
+
+            profile.setRegistrationNumber(
+                    clean(registrationNumber)
+            );
+
+            profile.setTin(clean(tin));
+
+            profile.setEmail(
+                    requireValue(
+                            email,
+                            "Company email is required"
+                    )
+            );
+
+            profile.setPhone(
+                    requireValue(
+                            phone,
+                            "Company phone is required"
+                    )
+            );
+
+            profile.setAddress(clean(address));
+
+            client.setCompanyProfile(profile);
+
+        } else if (type == ClientType.INDIVIDUAL) {
+
+            ClientCompany oldCompany =
+                    client.getCompanyProfile();
+
+            if (oldCompany != null) {
+                client.setCompanyProfile(null);
+            }
+
+            ClientIndividual profile =
+                    client.getIndividualProfile();
+
+            if (profile == null) {
+                profile = new ClientIndividual();
+                profile.setClient(client);
+            }
+
+            profile.setFirstName(
+                    requireValue(
+                            firstName,
+                            "First name is required"
+                    )
+            );
+
+            profile.setLastName(
+                    requireValue(
+                            lastName,
+                            "Last name is required"
+                    )
+            );
+
+            profile.setEmail(
+                    requireValue(
+                            email,
+                            "Individual email is required"
+                    )
+            );
+
+            profile.setPhone(
+                    requireValue(
+                            phone,
+                            "Individual phone is required"
+                    )
+            );
+
+            profile.setAddress(clean(address));
+
+            client.setIndividualProfile(profile);
+
+        } else {
+            throw new RuntimeException(
+                    "Unsupported client type"
+            );
+        }
+    }
+
+    private void validateClientData(
+            ClientType type,
+            String companyName,
+            String firstName,
+            String lastName,
+            String email,
+            String phone
+    ) {
+
+        if (type == null) {
+            throw new RuntimeException(
+                    "Client type is required"
+            );
+        }
+
+        if (type == ClientType.COMPANY) {
+
+            requireValue(
+                    companyName,
+                    "Company name is required"
+            );
+
+            requireValue(
+                    email,
+                    "Company email is required"
+            );
+
+            requireValue(
+                    phone,
+                    "Company phone is required"
+            );
+
+        } else if (type == ClientType.INDIVIDUAL) {
+
+            requireValue(
+                    firstName,
+                    "First name is required"
+            );
+
+            requireValue(
+                    lastName,
+                    "Last name is required"
+            );
+
+            requireValue(
+                    email,
+                    "Individual email is required"
+            );
+
+            requireValue(
+                    phone,
+                    "Individual phone is required"
+            );
+        }
+    }
+
+    private String requireValue(
+            String value,
+            String message
+    ) {
+
+        if (value == null || value.trim().isEmpty()) {
+            throw new RuntimeException(message);
+        }
+
+        return value.trim();
+    }
+
+    private String clean(String value) {
+
+        if (value == null || value.trim().isEmpty()) {
+            return null;
+        }
+
+        return value.trim();
+    }
+
+    private User getCurrentStaff() {
+
+        Authentication authentication =
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication();
+
+        if (authentication == null
+                || !authentication.isAuthenticated()) {
+
+            throw new RuntimeException(
+                    "User is not authenticated"
+            );
+        }
+
+        String email = authentication.getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Authenticated user not found"
+                        )
+                );
+
+        if (user.getRole() != Role.ADMIN
+                && user.getRole() != Role.MANAGEMENT
+                && user.getRole() != Role.GEOLOGIST
+                && user.getRole() != Role.DRONE_OPERATOR) {
+
+            throw new RuntimeException(
+                    "Only company staff can manage clients"
+            );
+        }
+
+        return user;
+    }
+
+    private SubscriberCompany requireCompany(User user) {
+
+        if (user.getCompany() == null) {
+            throw new RuntimeException(
+                    "User is not linked to a subscriber company"
+            );
+        }
+
+        return user.getCompany();
+    }
+}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\company\service\SubscriberCompanyService.java
+============================================================
+
+package com.dmfs.company.service;
+
+import com.dmfs.auth.entity.Role;
+import com.dmfs.auth.entity.User;
+import com.dmfs.auth.repository.UserRepository;
+import com.dmfs.company.dto.ChangeCompanyStatusRequest;
+import com.dmfs.company.dto.CompanyResponse;
+import com.dmfs.company.dto.CreateCompanyRequest;
+import com.dmfs.company.dto.UpdateCompanyRequest;
+import com.dmfs.company.entity.CompanyStatus;
+import com.dmfs.company.entity.SubscriberCompany;
+import com.dmfs.company.repository.SubscriberCompanyRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+public class SubscriberCompanyService {
+
+    private final SubscriberCompanyRepository companyRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    public SubscriberCompanyService(
+            SubscriberCompanyRepository companyRepository,
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder
+    ) {
+        this.companyRepository = companyRepository;
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    @Transactional
+    public CompanyResponse create(CreateCompanyRequest request) {
+
+        if (companyRepository.existsByRegistrationNumber(
+                request.getRegistrationNumber()
+        )) {
+            throw new RuntimeException(
+                    "Company registration number already exists"
+            );
+        }
+
+        if (request.getInitialAdmin() == null) {
+            throw new RuntimeException(
+                    "Initial company admin information is required"
+            );
+        }
+
+        if (userRepository.existsByEmail(
+                request.getInitialAdmin().getEmail()
+        )) {
+            throw new RuntimeException(
+                    "Admin email already exists"
+            );
+        }
+
+        SubscriberCompany company = new SubscriberCompany();
+
+        company.setName(request.getName());
+        company.setRegistrationNumber(
+                request.getRegistrationNumber()
+        );
+        company.setTin(request.getTin());
+        company.setEmail(request.getEmail());
+        company.setPhone(request.getPhone());
+        company.setCountry(request.getCountry());
+        company.setRegion(request.getRegion());
+        company.setCity(request.getCity());
+        company.setPhysicalAddress(request.getPhysicalAddress());
+        company.setStatus(CompanyStatus.ACTIVE);
+
+        company = companyRepository.save(company);
+
+        User admin = new User();
+
+        admin.setEmail(
+                request.getInitialAdmin().getEmail()
+        );
+
+        admin.setPassword(
+                passwordEncoder.encode(
+                        request.getInitialAdmin().getPassword()
+                )
+        );
+
+        admin.setFirstName(
+                request.getInitialAdmin().getFirstName()
+        );
+
+        admin.setLastName(
+                request.getInitialAdmin().getLastName()
+        );
+
+        admin.setRole(Role.ADMIN);
+        admin.setActive(true);
+        admin.setCompany(company);
+
+        userRepository.save(admin);
+
+        return toResponse(company);
+    }
+
+    @Transactional(readOnly = true)
+    public List<CompanyResponse> getAll() {
+        return companyRepository.findAll()
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public CompanyResponse getById(Long id) {
+
+        SubscriberCompany company =
+                companyRepository.findById(id)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Subscriber company not found"
+                                )
+                        );
+
+        return toResponse(company);
+    }
+
+    @Transactional
+    public CompanyResponse update(
+            Long id,
+            UpdateCompanyRequest request
+    ) {
+
+        SubscriberCompany company =
+                companyRepository.findById(id)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Subscriber company not found"
+                                )
+                        );
+
+        if (!company.getRegistrationNumber()
+                .equals(request.getRegistrationNumber())
+                && companyRepository.existsByRegistrationNumber(
+                        request.getRegistrationNumber()
+                )) {
+
+            throw new RuntimeException(
+                    "Company registration number already exists"
+            );
+        }
+
+        company.setName(request.getName());
+        company.setRegistrationNumber(
+                request.getRegistrationNumber()
+        );
+        company.setTin(request.getTin());
+        company.setEmail(request.getEmail());
+        company.setPhone(request.getPhone());
+        company.setCountry(request.getCountry());
+        company.setRegion(request.getRegion());
+        company.setCity(request.getCity());
+        company.setPhysicalAddress(
+                request.getPhysicalAddress()
+        );
+
+        company = companyRepository.save(company);
+
+        return toResponse(company);
+    }
+
+    @Transactional
+    public CompanyResponse changeStatus(
+            Long id,
+            ChangeCompanyStatusRequest request
+    ) {
+
+        SubscriberCompany company =
+                companyRepository.findById(id)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Subscriber company not found"
+                                )
+                        );
+
+        company.setStatus(request.getStatus());
+
+        company = companyRepository.save(company);
+
+        return toResponse(company);
+    }
+
+    @Transactional
+    public CompanyResponse activate(Long id) {
+        return setStatus(id, CompanyStatus.ACTIVE);
+    }
+
+    @Transactional
+    public CompanyResponse suspend(Long id) {
+        return setStatus(id, CompanyStatus.SUSPENDED);
+    }
+
+    @Transactional
+    public CompanyResponse expire(Long id) {
+        return setStatus(id, CompanyStatus.EXPIRED);
+    }
+
+    private CompanyResponse setStatus(
+            Long id,
+            CompanyStatus status
+    ) {
+
+        SubscriberCompany company =
+                companyRepository.findById(id)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Subscriber company not found"
+                                )
+                        );
+
+        company.setStatus(status);
+
+        company = companyRepository.save(company);
+
+        return toResponse(company);
+    }
+
+    private CompanyResponse toResponse(
+            SubscriberCompany company
+    ) {
+
+        return new CompanyResponse(
+                company.getId(),
+                company.getName(),
+                company.getRegistrationNumber(),
+                company.getTin(),
+                company.getEmail(),
+                company.getPhone(),
+                company.getCountry(),
+                company.getRegion(),
+                company.getCity(),
+                company.getPhysicalAddress(),
+                company.getStatus(),
+                company.getCreatedAt(),
+                company.getUpdatedAt()
+        );
+    }
+}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\drone\service\DroneService.java
+============================================================
+
+package com.dmfs.drone.service;
+
+import com.dmfs.drone.dto.DroneRequest;
+import com.dmfs.drone.dto.DroneResponse;
+import com.dmfs.drone.dto.DroneStatusRequest;
+import com.dmfs.drone.entity.Drone;
+import com.dmfs.drone.entity.DroneStatus;
+import com.dmfs.drone.repository.DroneRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+public class DroneService {
+
+    private final DroneRepository droneRepository;
+
+    public DroneService(DroneRepository droneRepository) {
+        this.droneRepository = droneRepository;
+    }
+
+    @Transactional
+    public DroneResponse createDrone(DroneRequest request) {
+
+        if (droneRepository.existsBySerialNumber(request.getSerialNumber())) {
+            throw new IllegalArgumentException(
+                    "Drone with serial number already exists"
+            );
+        }
+
+        Drone drone = new Drone();
+
+        drone.setName(request.getName());
+        drone.setSerialNumber(request.getSerialNumber());
+        drone.setModel(request.getModel());
+        drone.setManufacturer(request.getManufacturer());
+        drone.setDroneType(request.getDroneType());
+        drone.setPurchaseDate(request.getPurchaseDate());
+        drone.setStatus(DroneStatus.AVAILABLE);
+
+        Drone savedDrone = droneRepository.save(drone);
+
+        return toResponse(savedDrone);
+    }
+
+    @Transactional(readOnly = true)
+    public List<DroneResponse> getAllDrones() {
+
+        return droneRepository.findAll()
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public DroneResponse getDroneById(Long id) {
+
+        Drone drone = droneRepository.findById(id)
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Drone not found with id: " + id
+                        )
+                );
+
+        return toResponse(drone);
+    }
+
+    @Transactional
+    public DroneResponse updateDrone(
+            Long id,
+            DroneRequest request
+    ) {
+
+        Drone drone = droneRepository.findById(id)
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Drone not found with id: " + id
+                        )
+                );
+
+        if (!drone.getSerialNumber().equals(request.getSerialNumber())
+                && droneRepository.existsBySerialNumber(
+                        request.getSerialNumber())) {
+
+            throw new IllegalArgumentException(
+                    "Drone with serial number already exists"
+            );
+        }
+
+        drone.setName(request.getName());
+        drone.setSerialNumber(request.getSerialNumber());
+        drone.setModel(request.getModel());
+        drone.setManufacturer(request.getManufacturer());
+        drone.setDroneType(request.getDroneType());
+        drone.setPurchaseDate(request.getPurchaseDate());
+
+        return toResponse(droneRepository.save(drone));
+    }
+
+    @Transactional
+    public DroneResponse updateDroneStatus(
+            Long id,
+            DroneStatusRequest request
+    ) {
+
+        Drone drone = droneRepository.findById(id)
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Drone not found with id: " + id
+                        )
+                );
+
+        drone.setStatus(request.getStatus());
+
+        return toResponse(droneRepository.save(drone));
+    }
+
+    @Transactional
+    public void deleteDrone(Long id) {
+
+        Drone drone = droneRepository.findById(id)
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Drone not found with id: " + id
+                        )
+                );
+
+        droneRepository.delete(drone);
+    }
+
+    private DroneResponse toResponse(Drone drone) {
+
+        DroneResponse response = new DroneResponse();
+
+        response.setId(drone.getId());
+        response.setName(drone.getName());
+        response.setSerialNumber(drone.getSerialNumber());
+        response.setModel(drone.getModel());
+        response.setManufacturer(drone.getManufacturer());
+        response.setDroneType(drone.getDroneType());
+        response.setStatus(drone.getStatus());
+        response.setPurchaseDate(drone.getPurchaseDate());
+        response.setCreatedAt(drone.getCreatedAt());
+        response.setUpdatedAt(drone.getUpdatedAt());
+
+        return response;
+    }
+}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\farm\service\BlockService.java
+============================================================
+
+package com.dmfs.farm.service;
+
+import com.dmfs.farm.entity.Block;
+import com.dmfs.farm.entity.Farm;
+import com.dmfs.farm.repository.BlockRepository;
+import com.dmfs.farm.repository.FarmRepository;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class BlockService {
+
+    private final BlockRepository blockRepository;
+    private final FarmRepository farmRepository;
+
+    public BlockService(
+            BlockRepository blockRepository,
+            FarmRepository farmRepository
+    ) {
+        this.blockRepository = blockRepository;
+        this.farmRepository = farmRepository;
+    }
+
+    public Block createBlock(
+            Long farmId,
+            String name,
+            String description,
+            Double areaHectares,
+            Double centerLatitude,
+            Double centerLongitude
+    ) {
+        Farm farm = farmRepository.findById(farmId)
+                .orElseThrow(() ->
+                        new RuntimeException("Farm not found")
+                );
+
+        Block block = new Block();
+
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("Block name is required");
+        }
+        if (areaHectares == null || areaHectares <= 0) {
+            throw new IllegalArgumentException("Block area must be greater than zero");
+        }
+        if (farm.getAreaHectares() != null) {
+            double allocated = blockRepository.findByFarmId(farmId).stream()
+                    .map(Block::getAreaHectares).filter(java.util.Objects::nonNull)
+                    .mapToDouble(Double::doubleValue).sum();
+            if (allocated + areaHectares > farm.getAreaHectares()) {
+                throw new IllegalArgumentException("Block area exceeds the farm's unallocated area");
+            }
+        }
+
+        block.setName(name);
+        block.setDescription(description);
+        block.setAreaHectares(areaHectares);
+        block.setCenterLatitude(centerLatitude);
+        block.setCenterLongitude(centerLongitude);
+        block.setFarm(farm);
+
+        return blockRepository.save(block);
+    }
+
+    public List<Block> getFarmBlocks(Long farmId) {
+        return blockRepository.findByFarmId(farmId);
+    }
+
+    public Block getBlock(Long id) {
+        return blockRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Block not found")
+                );
+    }
+
+    public void deleteBlock(Long id) {
+        if (!blockRepository.existsById(id)) {
+            throw new RuntimeException("Block not found");
+        }
+
+        blockRepository.deleteById(id);
+    }
+}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\farm\service\FarmService.java
+============================================================
+
+package com.dmfs.farm.service;
+
+import com.dmfs.client.entity.Client;
+import com.dmfs.client.repository.ClientRepository;
+import com.dmfs.farm.entity.Farm;
+import com.dmfs.farm.repository.FarmRepository;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.PrecisionModel;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class FarmService {
+
+    private final FarmRepository farmRepository;
+    private final ClientRepository clientRepository;
+
+    private final GeometryFactory geometryFactory =
+            new GeometryFactory(
+                    new PrecisionModel(),
+                    4326
+            );
+
+    public FarmService(
+            FarmRepository farmRepository,
+            ClientRepository clientRepository
+    ) {
+        this.farmRepository = farmRepository;
+        this.clientRepository = clientRepository;
+    }
+
+    public Farm createFarm(
+            Long customerId,
+            String name,
+            String description,
+            Double latitude,
+            Double longitude,
+            Double areaHectares
+    ) {
+
+        Client customer =
+                clientRepository.findById(customerId)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Client not found"
+                                )
+                        );
+
+        if (latitude == null || longitude == null) {
+            throw new IllegalArgumentException(
+                    "Latitude and longitude are required"
+            );
+        }
+
+        if (latitude < -90 || latitude > 90) {
+            throw new IllegalArgumentException(
+                    "Latitude must be between -90 and 90"
+            );
+        }
+
+        if (longitude < -180 || longitude > 180) {
+            throw new IllegalArgumentException(
+                    "Longitude must be between -180 and 180"
+            );
+        }
+
+        Farm farm = new Farm();
+
+        farm.setName(name);
+        farm.setDescription(description);
+        farm.setAreaHectares(areaHectares);
+        farm.setCustomer(customer);
+
+        /*
+         * IMPORTANT:
+         * JTS Coordinate is X = longitude
+         * and Y = latitude.
+         */
+        Point location = geometryFactory.createPoint(
+                new Coordinate(longitude, latitude)
+        );
+
+        location.setSRID(4326);
+
+        farm.setLocation(location);
+
+        return farmRepository.save(farm);
+    }
+
+    public List<Farm> getCustomerFarms(
+            Long customerId
+    ) {
+
+        return farmRepository.findByCustomerId(customerId);
+    }
+
+    public Farm getFarm(Long id) {
+
+        return farmRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Farm not found"
+                        )
+                );
+    }
+
+    public void deleteFarm(Long id) {
+
+        if (!farmRepository.existsById(id)) {
+
+            throw new RuntimeException(
+                    "Farm not found"
+            );
+        }
+
+        farmRepository.deleteById(id);
+    }
+}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\geologist\controller\GeologistController.java
+============================================================
+
+package com.dmfs.geologist.controller;
+
+import com.dmfs.geologist.dto.*;
+import com.dmfs.geologist.service.GeologistService;
+import com.dmfs.geologist.entity.MagneticAnomalyMap;
+import com.dmfs.geologist.repository.MagneticAnomalyMapRepository;
+import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.*;
+import java.io.*;
+import java.nio.file.*;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/geologist")
+@PreAuthorize("hasRole('GEOLOGIST')")
+public class GeologistController {
+    private final GeologistService service;
+    private final MagneticAnomalyMapRepository maps;
+    public GeologistController(GeologistService service, MagneticAnomalyMapRepository maps) { this.service = service; this.maps = maps; }
+
+    @GetMapping("/dashboard") public DashboardResponse dashboard() { return service.dashboard(); }
+    @GetMapping("/surveys") public List<SurveyResponse> surveys() { return service.surveyHistory(); }
+    @GetMapping("/maps") public List<MapResponse> maps(@RequestParam(required = false) String status) { return service.mapQueue(status); }
+    @PostMapping("/maps/{mapId}/review") public MapResponse review(@PathVariable Long mapId, @Valid @RequestBody ReviewRequest request, Authentication authentication) { return service.reviewMap(mapId, request, authentication.getName()); }
+    @GetMapping("/reports") public List<ReportResponse> reports() { return service.reportList(); }
+    @GetMapping("/maps/{mapId}/file")
+    public ResponseEntity<InputStreamResource> mapFile(@PathVariable Long mapId) throws IOException {
+        MagneticAnomalyMap map = maps.findById(mapId).orElseThrow(() -> new IllegalArgumentException("Anomaly map not found: " + mapId));
+        Path path = Paths.get(map.getFilePath());
+        if (!Files.isRegularFile(path)) throw new IllegalArgumentException("Anomaly map file is unavailable");
+        return ResponseEntity.ok().contentType(MediaType.parseMediaType(map.getFileType())).body(new InputStreamResource(Files.newInputStream(path)));
+    }
+}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\geologist\controller\MagneticProcessingController.java
+============================================================
+
+package com.dmfs.geologist.controller;
+
+import com.dmfs.auth.entity.User;
+import com.dmfs.auth.repository.UserRepository;
+import com.dmfs.geologist.dto.ProcessingResponse;
+import com.dmfs.geologist.service.MagneticProcessingService;
+import org.springframework.http.*;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+@RestController
+@RequestMapping("/api/drone-operator/surveys")
+@PreAuthorize("hasRole('DRONE_OPERATOR')")
+public class MagneticProcessingController {
+    private final MagneticProcessingService processor; private final UserRepository users;
+    public MagneticProcessingController(MagneticProcessingService processor, UserRepository users) { this.processor=processor; this.users=users; }
+    @PostMapping(path="/{surveyId}/magnetic-data", consumes=MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ProcessingResponse> upload(@PathVariable Long surveyId, @RequestParam("file") MultipartFile file, Authentication authentication) {
+        User user=users.findByEmail(authentication.getName()).orElseThrow(()->new AccessDeniedException("Authenticated operator was not found"));
+        return ResponseEntity.status(HttpStatus.CREATED).body(processor.uploadAndProcess(surveyId,file,user));
+    }
+}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\geologist\dto\DashboardResponse.java
+============================================================
+
+package com.dmfs.geologist.dto;
+public record DashboardResponse(long pendingMapReviews, long completedSurveys, long approvedMaps, long aiReportsReady) {}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\geologist\dto\MapResponse.java
+============================================================
+
+package com.dmfs.geologist.dto;
+import java.time.OffsetDateTime;
+public record MapResponse(Long id, Long surveyId, String surveyCode, String surveyName, String companyName, String mapName, String filePath, int anomalyCount, String decision, String reviewComment, OffsetDateTime generatedAt, OffsetDateTime reviewedAt) {}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\geologist\dto\ProcessingResponse.java
+============================================================
+
+package com.dmfs.geologist.dto;
+public record ProcessingResponse(Long surveyDataId, Long processedDataId, Long anomalyMapId, long recordsProcessed, int anomaliesDetected) {}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\geologist\dto\ReportResponse.java
+============================================================
+
+package com.dmfs.geologist.dto;
+import java.time.OffsetDateTime;
+public record ReportResponse(Long id, Long surveyId, String surveyCode, String reportName, String filePath, String fileType, Long fileSize, OffsetDateTime generatedAt) {}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\geologist\dto\ReviewRequest.java
+============================================================
+
+package com.dmfs.geologist.dto;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+public record ReviewRequest(@NotBlank @Pattern(regexp = "(?i)APPROVED|REJECTED|REPROCESSED", message = "Decision must be APPROVED, REJECTED, or REPROCESSED") String decision, String comment) {}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\geologist\dto\SurveyResponse.java
+============================================================
+
+package com.dmfs.geologist.dto;
+import java.time.OffsetDateTime;
+public record SurveyResponse(Long id, String surveyCode, String surveyName, String companyName, String status, OffsetDateTime startedAt, OffsetDateTime endedAt) {}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\geologist\entity\AiAnalysis.java
+============================================================
+
+package com.dmfs.geologist.entity;
+
+import jakarta.persistence.*;
+import java.time.OffsetDateTime;
+
+@Entity @Table(name = "ai_analysis")
+public class AiAnalysis {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
+    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "survey_id", nullable = false) private Survey survey;
+    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "magnetic_anomaly_map_id", nullable = false) private MagneticAnomalyMap map;
+    @Column(name = "analysis_result", columnDefinition = "TEXT") private String analysisResult;
+    @Column(name = "created_at") private OffsetDateTime createdAt;
+    public Long getId() { return id; } public Survey getSurvey() { return survey; } public void setSurvey(Survey v) { survey=v; }
+    public MagneticAnomalyMap getMap() { return map; } public void setMap(MagneticAnomalyMap v) { map=v; }
+    public String getAnalysisResult() { return analysisResult; } public void setAnalysisResult(String v) { analysisResult=v; }
+    public OffsetDateTime getCreatedAt() { return createdAt; } public void setCreatedAt(OffsetDateTime v) { createdAt=v; }
+}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\geologist\entity\MagneticAnomalyMap.java
+============================================================
+
+package com.dmfs.geologist.entity;
+
+import jakarta.persistence.*;
+import java.time.OffsetDateTime;
+
+@Entity @Table(name = "magnetic_anomaly_map")
+public class MagneticAnomalyMap {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
+    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "survey_id", nullable = false) private Survey survey;
+    @Column(name = "processed_magnetic_data_id", nullable = false) private Long processedMagneticDataId;
+    @Column(name = "map_name", nullable = false) private String mapName;
+    @Column(name = "file_path", nullable = false) private String filePath;
+    @Column(name = "file_type") private String fileType;
+    @Column(name = "file_size") private Long fileSize;
+    @Column(name = "anomaly_count", nullable = false) private Integer anomalyCount = 0;
+    @Column(name = "generated_at") private OffsetDateTime generatedAt;
+    public Long getId() { return id; }
+    public Survey getSurvey() { return survey; } public void setSurvey(Survey v) { survey = v; }
+    public Long getProcessedMagneticDataId() { return processedMagneticDataId; } public void setProcessedMagneticDataId(Long v) { processedMagneticDataId = v; }
+    public String getMapName() { return mapName; } public void setMapName(String v) { mapName = v; }
+    public String getFilePath() { return filePath; } public void setFilePath(String v) { filePath = v; }
+    public String getFileType() { return fileType; } public void setFileType(String v) { fileType = v; }
+    public Long getFileSize() { return fileSize; } public void setFileSize(Long v) { fileSize = v; }
+    public Integer getAnomalyCount() { return anomalyCount; } public void setAnomalyCount(Integer v) { anomalyCount = v; }
+    public OffsetDateTime getGeneratedAt() { return generatedAt; } public void setGeneratedAt(OffsetDateTime v) { generatedAt = v; }
+}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\geologist\entity\MapReview.java
+============================================================
+
+package com.dmfs.geologist.entity;
+
+import com.dmfs.auth.entity.User;
+import jakarta.persistence.*;
+import java.time.OffsetDateTime;
+
+@Entity @Table(name = "map_review")
+public class MapReview {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
+    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "magnetic_anomaly_map_id", nullable = false) private MagneticAnomalyMap map;
+    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "geologist_id", nullable = false) private User geologist;
+    @Column(nullable = false) private String decision = "PENDING";
+    @Column(columnDefinition = "TEXT") private String comment;
+    @Column(name = "reviewed_at") private OffsetDateTime reviewedAt;
+    public Long getId() { return id; }
+    public MagneticAnomalyMap getMap() { return map; } public void setMap(MagneticAnomalyMap v) { map = v; }
+    public User getGeologist() { return geologist; } public void setGeologist(User v) { geologist = v; }
+    public String getDecision() { return decision; } public void setDecision(String v) { decision = v; }
+    public String getComment() { return comment; } public void setComment(String v) { comment = v; }
+    public OffsetDateTime getReviewedAt() { return reviewedAt; } public void setReviewedAt(OffsetDateTime v) { reviewedAt = v; }
+}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\geologist\entity\ProcessedMagneticData.java
+============================================================
+
+package com.dmfs.geologist.entity;
+
+import jakarta.persistence.*;
+import java.time.OffsetDateTime;
+
+@Entity @Table(name = "processed_magnetic_data")
+public class ProcessedMagneticData {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
+    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "survey_id", nullable = false) private Survey survey;
+    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "survey_data_id", nullable = false) private SurveyData surveyData;
+    @Column(name = "file_name", nullable = false) private String fileName;
+    @Column(name = "file_path", nullable = false) private String filePath;
+    @Column(name = "file_type") private String fileType;
+    @Column(name = "file_size") private Long fileSize;
+    @Column(name = "record_count") private Long recordCount;
+    @Column(name = "processed_at") private OffsetDateTime processedAt;
+    public Long getId(){return id;} public Survey getSurvey(){return survey;} public void setSurvey(Survey v){survey=v;} public SurveyData getSurveyData(){return surveyData;} public void setSurveyData(SurveyData v){surveyData=v;}
+    public String getFileName(){return fileName;} public void setFileName(String v){fileName=v;} public String getFilePath(){return filePath;} public void setFilePath(String v){filePath=v;}
+    public String getFileType(){return fileType;} public void setFileType(String v){fileType=v;} public Long getFileSize(){return fileSize;} public void setFileSize(Long v){fileSize=v;}
+    public Long getRecordCount(){return recordCount;} public void setRecordCount(Long v){recordCount=v;} public OffsetDateTime getProcessedAt(){return processedAt;} public void setProcessedAt(OffsetDateTime v){processedAt=v;}
+}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\geologist\entity\Report.java
+============================================================
+
+package com.dmfs.geologist.entity;
+
+import jakarta.persistence.*;
+import java.time.OffsetDateTime;
+
+@Entity @Table(name = "report")
+public class Report {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
+    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "survey_id", nullable = false) private Survey survey;
+    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "ai_analysis_id", nullable = false) private AiAnalysis analysis;
+    @Column(name = "report_name", nullable = false) private String reportName;
+    @Column(name = "file_path", nullable = false) private String filePath;
+    @Column(name = "file_type") private String fileType;
+    @Column(name = "file_size") private Long fileSize;
+    @Column(name = "generated_at") private OffsetDateTime generatedAt;
+    public Long getId() { return id; } public Survey getSurvey() { return survey; } public void setSurvey(Survey v) { survey=v; }
+    public AiAnalysis getAnalysis() { return analysis; } public void setAnalysis(AiAnalysis v) { analysis=v; }
+    public String getReportName() { return reportName; } public void setReportName(String v) { reportName=v; }
+    public String getFilePath() { return filePath; } public void setFilePath(String v) { filePath=v; }
+    public String getFileType() { return fileType; } public void setFileType(String v) { fileType=v; }
+    public Long getFileSize() { return fileSize; } public void setFileSize(Long v) { fileSize=v; }
+    public OffsetDateTime getGeneratedAt() { return generatedAt; } public void setGeneratedAt(OffsetDateTime v) { generatedAt=v; }
+}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\geologist\entity\Survey.java
+============================================================
+
+package com.dmfs.geologist.entity;
+
+import com.dmfs.auth.entity.User;
+import com.dmfs.company.entity.SubscriberCompany;
+import com.dmfs.service.entity.ServiceRequest;
+import jakarta.persistence.*;
+import java.time.OffsetDateTime;
+
+@Entity
+@Table(name = "survey")
+public class Survey {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
+    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "company_id", nullable = false) private SubscriberCompany company;
+    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "service_request_id", nullable = false) private ServiceRequest serviceRequest;
+    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "operator_id", nullable = false) private User operator;
+    @Column(name = "survey_code", nullable = false) private String surveyCode;
+    @Column(name = "survey_name") private String surveyName;
+    @Column(columnDefinition = "TEXT") private String description;
+    @Column(name = "started_at", nullable = false) private OffsetDateTime startedAt;
+    @Column(name = "ended_at") private OffsetDateTime endedAt;
+    @Column(name = "completed_at") private OffsetDateTime completedAt;
+    @Column(name = "equipment_used", columnDefinition = "TEXT") private String equipmentUsed;
+    @Column(nullable = false) private String status = "DRAFT";
+    public Long getId() { return id; }
+    public SubscriberCompany getCompany() { return company; } public void setCompany(SubscriberCompany v) { company = v; }
+    public ServiceRequest getServiceRequest() { return serviceRequest; } public void setServiceRequest(ServiceRequest v) { serviceRequest = v; }
+    public User getOperator() { return operator; } public void setOperator(User v) { operator = v; }
+    public String getSurveyCode() { return surveyCode; } public void setSurveyCode(String v) { surveyCode = v; }
+    public String getSurveyName() { return surveyName; } public void setSurveyName(String v) { surveyName = v; }
+    public String getDescription() { return description; } public void setDescription(String v) { description = v; }
+    public OffsetDateTime getStartedAt() { return startedAt; } public void setStartedAt(OffsetDateTime v) { startedAt = v; }
+    public OffsetDateTime getEndedAt() { return endedAt; } public void setEndedAt(OffsetDateTime v) { endedAt = v; }
+    public OffsetDateTime getCompletedAt() { return completedAt; } public void setCompletedAt(OffsetDateTime v) { completedAt = v; }
+    public String getEquipmentUsed() { return equipmentUsed; } public void setEquipmentUsed(String v) { equipmentUsed = v; }
+    public String getStatus() { return status; } public void setStatus(String v) { status = v; }
+}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\geologist\entity\SurveyData.java
+============================================================
+
+package com.dmfs.geologist.entity;
+
+import jakarta.persistence.*;
+import java.time.OffsetDateTime;
+
+@Entity @Table(name = "survey_data")
+public class SurveyData {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
+    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "survey_id", nullable = false) private Survey survey;
+    @Column(name = "company_id", nullable = false) private Long companyId;
+    @Column(name = "file_name", nullable = false) private String fileName;
+    @Column(name = "file_path", nullable = false) private String filePath;
+    @Column(name = "file_type") private String fileType;
+    @Column(name = "file_size") private Long fileSize;
+    @Column(name = "record_count") private Long recordCount;
+    @Column(name = "uploaded_by", nullable = false) private Long uploadedBy;
+    @Column(name = "uploaded_at") private OffsetDateTime uploadedAt;
+    public Long getId(){return id;} public Survey getSurvey(){return survey;} public void setSurvey(Survey v){survey=v;}
+    public Long getCompanyId(){return companyId;} public void setCompanyId(Long v){companyId=v;} public String getFileName(){return fileName;} public void setFileName(String v){fileName=v;}
+    public String getFilePath(){return filePath;} public void setFilePath(String v){filePath=v;} public String getFileType(){return fileType;} public void setFileType(String v){fileType=v;}
+    public Long getFileSize(){return fileSize;} public void setFileSize(Long v){fileSize=v;} public Long getRecordCount(){return recordCount;} public void setRecordCount(Long v){recordCount=v;}
+    public Long getUploadedBy(){return uploadedBy;} public void setUploadedBy(Long v){uploadedBy=v;} public OffsetDateTime getUploadedAt(){return uploadedAt;} public void setUploadedAt(OffsetDateTime v){uploadedAt=v;}
+}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\geologist\repository\MagneticAnomalyMapRepository.java
+============================================================
+
+package com.dmfs.geologist.repository;
+
+import com.dmfs.geologist.entity.MagneticAnomalyMap;
+import org.springframework.data.jpa.repository.*;
+import java.util.List;
+
+public interface MagneticAnomalyMapRepository extends JpaRepository<MagneticAnomalyMap, Long> {
+    @Query("select m from MagneticAnomalyMap m join fetch m.survey s join fetch s.company order by m.generatedAt desc")
+    List<MagneticAnomalyMap> findAllWithSurvey();
+}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\geologist\repository\MapReviewRepository.java
+============================================================
+
+package com.dmfs.geologist.repository;
+
+import com.dmfs.geologist.entity.MapReview;
+import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.Optional;
+
+public interface MapReviewRepository extends JpaRepository<MapReview, Long> {
+    Optional<MapReview> findFirstByMapIdOrderByReviewedAtDesc(Long mapId);
+    long countByDecisionIgnoreCase(String decision);
+}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\geologist\repository\ProcessedMagneticDataRepository.java
+============================================================
+
+package com.dmfs.geologist.repository;
+import com.dmfs.geologist.entity.ProcessedMagneticData;
+import org.springframework.data.jpa.repository.JpaRepository;
+public interface ProcessedMagneticDataRepository extends JpaRepository<ProcessedMagneticData, Long> {}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\geologist\repository\ReportRepository.java
+============================================================
+
+package com.dmfs.geologist.repository;
+
+import com.dmfs.geologist.entity.Report;
+import org.springframework.data.jpa.repository.*;
+import java.util.List;
+
+public interface ReportRepository extends JpaRepository<Report, Long> {
+    @Query("select r from Report r join fetch r.survey order by r.generatedAt desc")
+    List<Report> findAllWithSurvey();
+}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\geologist\repository\SurveyDataRepository.java
+============================================================
+
+package com.dmfs.geologist.repository;
+import com.dmfs.geologist.entity.SurveyData;
+import org.springframework.data.jpa.repository.JpaRepository;
+public interface SurveyDataRepository extends JpaRepository<SurveyData, Long> {}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\geologist\repository\SurveyRepository.java
+============================================================
+
+package com.dmfs.geologist.repository;
+
+import com.dmfs.geologist.entity.Survey;
+import org.springframework.data.jpa.repository.*;
+import org.springframework.data.repository.query.Param;
+import java.util.List;
+import java.time.OffsetDateTime;
+
+public interface SurveyRepository extends JpaRepository<Survey, Long> {
+    @Query("select s from Survey s join fetch s.company order by s.startedAt desc")
+    List<Survey> findAllWithCompany();
+    long countByStatusIgnoreCase(String status);
+    List<Survey> findByOperatorIdOrderByStartedAtDesc(Long operatorId);
+    @Modifying
+    @Query(value = "update survey set equipment_used = :equipment, completed_at = :completedAt, ended_at = :completedAt, completed_bounds = ST_MakeEnvelope(:minLongitude, :minLatitude, :maxLongitude, :maxLatitude, 4326) where id = :surveyId", nativeQuery = true)
+    void completeWithBounds(@Param("surveyId") Long surveyId, @Param("equipment") String equipment, @Param("completedAt") OffsetDateTime completedAt, @Param("minLatitude") double minLatitude, @Param("minLongitude") double minLongitude, @Param("maxLatitude") double maxLatitude, @Param("maxLongitude") double maxLongitude);
+}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\geologist\service\GeologistService.java
+============================================================
+
+package com.dmfs.geologist.service;
+
+import com.dmfs.auth.entity.User;
+import com.dmfs.auth.repository.UserRepository;
+import com.dmfs.geologist.dto.*;
+import com.dmfs.geologist.entity.*;
+import com.dmfs.geologist.repository.*;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Locale;
+
+@Service
+public class GeologistService {
+    private final SurveyRepository surveys;
+    private final MagneticAnomalyMapRepository maps;
+    private final MapReviewRepository reviews;
+    private final ReportRepository reports;
+    private final UserRepository users;
+
+    public GeologistService(SurveyRepository surveys, MagneticAnomalyMapRepository maps, MapReviewRepository reviews, ReportRepository reports, UserRepository users) {
+        this.surveys = surveys; this.maps = maps; this.reviews = reviews; this.reports = reports; this.users = users;
+    }
+
+    @Transactional(readOnly = true)
+    public DashboardResponse dashboard() {
+        return new DashboardResponse(reviews.countByDecisionIgnoreCase("PENDING"), surveys.countByStatusIgnoreCase("COMPLETED"), reviews.countByDecisionIgnoreCase("APPROVED"), reports.count());
+    }
+
+    @Transactional(readOnly = true)
+    public List<SurveyResponse> surveyHistory() {
+        return surveys.findAllWithCompany().stream().map(s -> new SurveyResponse(s.getId(), s.getSurveyCode(), s.getSurveyName(), s.getCompany().getName(), s.getStatus(), s.getStartedAt(), s.getEndedAt())).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<MapResponse> mapQueue(String status) {
+        return maps.findAllWithSurvey().stream().map(this::toMapResponse)
+                .filter(map -> status == null || status.isBlank() || "ALL".equalsIgnoreCase(status) || map.decision().equalsIgnoreCase(status))
+                .toList();
+    }
+
+    @Transactional
+    public MapResponse reviewMap(Long mapId, ReviewRequest request, String userEmail) {
+        MagneticAnomalyMap map = maps.findById(mapId).orElseThrow(() -> new IllegalArgumentException("Anomaly map not found: " + mapId));
+        User geologist = users.findByEmail(userEmail).orElseThrow(() -> new AccessDeniedException("Authenticated geologist was not found"));
+        MapReview review = reviews.findFirstByMapIdOrderByReviewedAtDesc(mapId).orElseGet(MapReview::new);
+        review.setMap(map); review.setGeologist(geologist);
+        review.setDecision(request.decision().toUpperCase(Locale.ROOT));
+        review.setComment(request.comment()); review.setReviewedAt(OffsetDateTime.now());
+        reviews.save(review);
+        return toMapResponse(map);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReportResponse> reportList() {
+        return reports.findAllWithSurvey().stream().map(r -> new ReportResponse(r.getId(), r.getSurvey().getId(), r.getSurvey().getSurveyCode(), r.getReportName(), r.getFilePath(), r.getFileType(), r.getFileSize(), r.getGeneratedAt())).toList();
+    }
+
+    private MapResponse toMapResponse(MagneticAnomalyMap map) {
+        MapReview review = reviews.findFirstByMapIdOrderByReviewedAtDesc(map.getId()).orElse(null);
+        Survey survey = map.getSurvey();
+        return new MapResponse(map.getId(), survey.getId(), survey.getSurveyCode(), survey.getSurveyName(), survey.getCompany().getName(), map.getMapName(), map.getFilePath(), map.getAnomalyCount(), review == null ? "PENDING" : review.getDecision(), review == null ? null : review.getComment(), map.getGeneratedAt(), review == null ? null : review.getReviewedAt());
+    }
+}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\geologist\service\MagneticProcessingService.java
+============================================================
+
+package com.dmfs.geologist.service;
+
+import com.dmfs.auth.entity.User;
+import com.dmfs.geologist.dto.ProcessingResponse;
+import com.dmfs.geologist.entity.*;
+import com.dmfs.geologist.repository.*;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
+import java.time.OffsetDateTime;
+import java.util.*;
+
+@Service
+public class MagneticProcessingService {
+    private final SurveyRepository surveys; private final SurveyDataRepository surveyData; private final ProcessedMagneticDataRepository processedData; private final MagneticAnomalyMapRepository maps;
+    private final Path storageRoot;
+    public MagneticProcessingService(SurveyRepository surveys, SurveyDataRepository surveyData, ProcessedMagneticDataRepository processedData, MagneticAnomalyMapRepository maps, @Value("${app.storage.path:uploads}") String storagePath) {
+        this.surveys=surveys; this.surveyData=surveyData; this.processedData=processedData; this.maps=maps; this.storageRoot=Paths.get(storagePath).toAbsolutePath().normalize();
+    }
+
+    @Transactional
+    public ProcessingResponse uploadAndProcess(Long surveyId, MultipartFile file, User operator) {
+        if (file.isEmpty()) throw new IllegalArgumentException("A non-empty CSV file is required");
+        if (!Objects.requireNonNullElse(file.getOriginalFilename(), "").toLowerCase(Locale.ROOT).endsWith(".csv")) throw new IllegalArgumentException("Raw magnetic data must be supplied as a CSV file");
+        Survey survey = surveys.findById(surveyId).orElseThrow(() -> new IllegalArgumentException("Survey not found: " + surveyId));
+        if (!survey.getOperator().getId().equals(operator.getId())) throw new IllegalArgumentException("This survey is not assigned to the authenticated drone operator");
+        try {
+            Path surveyFolder = storageRoot.resolve("surveys").resolve(String.valueOf(surveyId)); Files.createDirectories(surveyFolder);
+            String token = UUID.randomUUID().toString(); Path rawFile = surveyFolder.resolve("raw-" + token + ".csv"); file.transferTo(rawFile);
+            List<Sample> samples = parseCsv(rawFile);
+            if (samples.size() < 3) throw new IllegalArgumentException("CSV needs at least three numeric measurements with latitude, longitude, and magnetic field columns");
+            SurveyData raw = new SurveyData(); raw.setSurvey(survey); raw.setCompanyId(survey.getCompany().getId()); raw.setFileName(file.getOriginalFilename()); raw.setFilePath(rawFile.toString()); raw.setFileType(file.getContentType()); raw.setFileSize(Files.size(rawFile)); raw.setRecordCount((long)samples.size()); raw.setUploadedBy(operator.getId()); raw.setUploadedAt(OffsetDateTime.now()); surveyData.save(raw);
+            double mean=samples.stream().mapToDouble(Sample::magnetic).average().orElseThrow(); double deviation=Math.sqrt(samples.stream().mapToDouble(s -> Math.pow(s.magnetic()-mean, 2)).average().orElse(0));
+            List<Sample> anomalies=samples.stream().filter(s -> deviation > 0 && Math.abs((s.magnetic()-mean)/deviation) >= 2.0).toList();
+            Path processedFile=surveyFolder.resolve("processed-"+token+".csv"); writeProcessedCsv(processedFile, samples, mean, deviation);
+            ProcessedMagneticData processed=new ProcessedMagneticData(); processed.setSurvey(survey); processed.setSurveyData(raw); processed.setFileName("processed-"+file.getOriginalFilename()); processed.setFilePath(processedFile.toString()); processed.setFileType("text/csv"); processed.setFileSize(Files.size(processedFile)); processed.setRecordCount((long)samples.size()); processed.setProcessedAt(OffsetDateTime.now()); processedData.save(processed);
+            Path mapFile=surveyFolder.resolve("anomaly-map-"+token+".svg"); writeSvgMap(mapFile, samples, anomalies);
+            MagneticAnomalyMap map=new MagneticAnomalyMap(); map.setSurvey(survey); map.setProcessedMagneticDataId(processed.getId()); map.setMapName(survey.getSurveyCode()+" anomaly map"); map.setFilePath(mapFile.toString()); map.setFileType("image/svg+xml"); map.setFileSize(Files.size(mapFile)); map.setAnomalyCount(anomalies.size()); map.setGeneratedAt(OffsetDateTime.now()); maps.save(map);
+            survey.setStatus("COMPLETED");
+            return new ProcessingResponse(raw.getId(), processed.getId(), map.getId(), samples.size(), anomalies.size());
+        } catch (IOException e) { throw new IllegalStateException("Could not store or process the magnetic data", e); }
+    }
+    private List<Sample> parseCsv(Path file) throws IOException {
+        List<Sample> results=new ArrayList<>(); try (BufferedReader reader=Files.newBufferedReader(file, StandardCharsets.UTF_8)) { String header=reader.readLine(); if(header==null) return results; String[] names=header.toLowerCase(Locale.ROOT).replace(" ","").split(","); int lat=indexOf(names,"latitude","lat"), lon=indexOf(names,"longitude","lon","lng"), mag=indexOf(names,"magnetic","magneticfield","field","mag"); if(lat<0||lon<0||mag<0) throw new IllegalArgumentException("CSV header must include latitude, longitude, and magnetic columns"); String line; while((line=reader.readLine())!=null){String[] row=line.split(",",-1); if(row.length>Math.max(lat,Math.max(lon,mag))) try { results.add(new Sample(Double.parseDouble(row[lat].trim()),Double.parseDouble(row[lon].trim()),Double.parseDouble(row[mag].trim()))); } catch(NumberFormatException ignored) { } } } return results;
+    }
+    private int indexOf(String[] values, String... options){ for(int i=0;i<values.length;i++) for(String option:options) if(values[i].equals(option)) return i; return -1; }
+    private void writeProcessedCsv(Path path,List<Sample> samples,double mean,double sd)throws IOException { try(BufferedWriter out=Files.newBufferedWriter(path)){out.write("latitude,longitude,magnetic,z_score,is_anomaly\n"); for(Sample s:samples){double z=sd==0?0:(s.magnetic-mean)/sd;out.write("%f,%f,%f,%f,%s%n".formatted(s.latitude,s.longitude,s.magnetic,z,Math.abs(z)>=2));}} }
+    private void writeSvgMap(Path path,List<Sample> samples,List<Sample> anomalies)throws IOException { double minLat=samples.stream().mapToDouble(Sample::latitude).min().orElse(0),maxLat=samples.stream().mapToDouble(Sample::latitude).max().orElse(1),minLon=samples.stream().mapToDouble(Sample::longitude).min().orElse(0),maxLon=samples.stream().mapToDouble(Sample::longitude).max().orElse(1); StringBuilder svg=new StringBuilder("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"900\" height=\"600\" viewBox=\"0 0 900 600\"><rect width=\"900\" height=\"600\" fill=\"#102b35\"/><text x=\"28\" y=\"42\" fill=\"white\" font-family=\"sans-serif\" font-size=\"22\">Magnetic Anomaly Map</text>"); for(Sample s:samples){double x=50+800*(s.longitude-minLon)/Math.max(maxLon-minLon,.000001), y=550-460*(s.latitude-minLat)/Math.max(maxLat-minLat,.000001); boolean anomaly=anomalies.contains(s); svg.append("<circle cx=\"").append(x).append("\" cy=\"").append(y).append("\" r=\"").append(anomaly?7:3).append("\" fill=\"").append(anomaly?"#ef6c3c":"#5dc5b8").append("\"/>");} svg.append("<text x=\"28\" y=\"580\" fill=\"#ef6c3c\" font-family=\"sans-serif\">Red: anomaly (|z-score| ≥ 2)</text></svg>"); Files.writeString(path,svg,StandardCharsets.UTF_8); }
+    private record Sample(double latitude,double longitude,double magnetic) {}
+}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\operations\service\DroneOperatorService.java
+============================================================
+
+package com.dmfs.operations.service;
+import com.dmfs.auth.entity.User;
+import com.dmfs.auth.repository.UserRepository;
+import com.dmfs.client.entity.*;
+import com.dmfs.geologist.entity.Survey;
+import com.dmfs.geologist.repository.SurveyRepository;
+import com.dmfs.operations.dto.*;
+import com.dmfs.operations.entity.ManagementNotification;
+import com.dmfs.operations.repository.ManagementNotificationRepository;
+import com.dmfs.service.entity.ServiceRequest;
+import com.dmfs.service.repository.ServiceRequestRepository;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import java.time.OffsetDateTime;
+import java.util.List;
+
+@Service
+public class DroneOperatorService {
+ private final ServiceRequestRepository requests; private final SurveyRepository surveys; private final UserRepository users; private final ManagementNotificationRepository notifications;
+ public DroneOperatorService(ServiceRequestRepository requests, SurveyRepository surveys, UserRepository users, ManagementNotificationRepository notifications){this.requests=requests;this.surveys=surveys;this.users=users;this.notifications=notifications;}
+ @Transactional(readOnly=true) public List<OperationResponse> operations(String email){User u=user(email); return requests.findByStatusIgnoreCaseOrOperatorIdOrderByCreatedAtDesc("PENDING",u.getId()).stream().filter(r -> java.util.Arrays.asList(r.getServiceCatalogue().getRequiredPersonnel().split(",")).contains("DRONE_OPERATOR")).filter(r -> r.getOperator()==null || r.getOperator().getId().equals(u.getId())).map(this::operation).toList();}
+ @Transactional public OperationalSurveyResponse accept(Long requestId,String email){User u=user(email); ServiceRequest r=request(requestId); if(!"PENDING".equalsIgnoreCase(r.getStatus())) throw new IllegalArgumentException("This operation is no longer available"); if(r.getOperator()!=null && !r.getOperator().getId().equals(u.getId())) throw new IllegalArgumentException("This operation is assigned to another operator"); if(u.getCompany()==null) throw new IllegalArgumentException("Drone operator has no company assignment"); if(surveys.findByOperatorIdOrderByStartedAtDesc(u.getId()).stream().anyMatch(s -> "SCHEDULED".equalsIgnoreCase(s.getStatus()) || "IN_PROGRESS".equalsIgnoreCase(s.getStatus()))) throw new IllegalArgumentException("You have active work; complete it before accepting another operation"); r.setOperator(u);r.setStatus("ACCEPTED"); Survey s=new Survey();s.setCompany(u.getCompany());s.setServiceRequest(r);s.setOperator(u);s.setSurveyCode("SUR-"+System.currentTimeMillis());s.setSurveyName(r.getServiceCatalogue().getName());s.setDescription(r.getNotes());s.setStatus("SCHEDULED");surveys.save(s); notifyManagement(u,"OPERATION_ACCEPTED", "Drone operator accepted service request #"+r.getId()+"; survey "+s.getSurveyCode()+" is scheduled.");return survey(s);}
+ @Transactional public void reject(Long requestId,RejectOperationRequest body,String email){User u=user(email);ServiceRequest r=request(requestId);if(!"PENDING".equalsIgnoreCase(r.getStatus())) throw new IllegalArgumentException("This operation is no longer available");r.setOperator(u);r.setStatus("REJECTED");r.setOperatorDecisionReason(body.reason().trim());notifyManagement(u,"OPERATION_REJECTED","Drone operator rejected service request #"+r.getId()+": "+body.reason().trim());}
+ @Transactional(readOnly=true) public List<OperationalSurveyResponse> surveys(String email){return surveys.findByOperatorIdOrderByStartedAtDesc(user(email).getId()).stream().map(this::survey).toList();}
+ @Transactional public OperationalSurveyResponse start(Long surveyId,String email){Survey s=assignedSurvey(surveyId,email);if(!"SCHEDULED".equalsIgnoreCase(s.getStatus())) throw new IllegalArgumentException("Only scheduled surveys can be started");s.setStatus("IN_PROGRESS");s.setStartedAt(OffsetDateTime.now());s.getServiceRequest().setStatus("IN_PROGRESS");notifyManagement(s.getOperator(),"SURVEY_STARTED","Survey "+s.getSurveyCode()+" has started.");return survey(s);}
+ @Transactional public OperationalSurveyResponse complete(Long surveyId,CompleteSurveyRequest body,String email){if(body.minLatitude()>body.maxLatitude()||body.minLongitude()>body.maxLongitude())throw new IllegalArgumentException("Minimum coordinates must be less than maximum coordinates");Survey s=assignedSurvey(surveyId,email);if(!"IN_PROGRESS".equalsIgnoreCase(s.getStatus()))throw new IllegalArgumentException("Only in-progress surveys can be completed");OffsetDateTime now=OffsetDateTime.now();surveys.completeWithBounds(s.getId(),body.equipmentUsed().trim(),now,body.minLatitude(),body.minLongitude(),body.maxLatitude(),body.maxLongitude());s.setStatus("COMPLETED");s.setEquipmentUsed(body.equipmentUsed().trim());s.setCompletedAt(now);s.setEndedAt(now);s.getServiceRequest().setStatus("COMPLETED");notifyManagement(s.getOperator(),"SURVEY_COMPLETED","Survey "+s.getSurveyCode()+" completed. Equipment: "+body.equipmentUsed().trim());return survey(s);}
+ private User user(String email){return users.findByEmail(email).orElseThrow(()->new AccessDeniedException("Authenticated operator was not found"));}
+ private ServiceRequest request(Long id){return requests.findById(id).orElseThrow(()->new IllegalArgumentException("Service request not found: "+id));}
+ private Survey assignedSurvey(Long id,String email){Survey s=surveys.findById(id).orElseThrow(()->new IllegalArgumentException("Survey not found: "+id));if(!s.getOperator().getId().equals(user(email).getId()))throw new AccessDeniedException("This survey is not assigned to you");return s;}
+ private void notifyManagement(User operator,String type,String message){if(operator.getCompany()==null)return;ManagementNotification n=new ManagementNotification();n.setCompany(operator.getCompany());n.setNotificationType(type);n.setMessage(message);n.setCreatedAt(OffsetDateTime.now());notifications.save(n);}
+ private OperationResponse operation(ServiceRequest r){return new OperationResponse(r.getId(),clientName(r.getCustomer()),r.getFarm().getName(),r.getFarmBlock().getName(),r.getServiceCatalogue().getName(),r.getRequestedDate(),r.getNotes(),r.getStatus(),r.getOperatorDecisionReason());}
+ private OperationalSurveyResponse survey(Survey s){ServiceRequest r=s.getServiceRequest();return new OperationalSurveyResponse(s.getId(),s.getSurveyCode(),s.getSurveyName(),clientName(r.getCustomer()),r.getFarm().getName(),r.getFarmBlock().getName(),s.getStatus(),s.getStartedAt(),s.getCompletedAt(),s.getEquipmentUsed());}
+ private String clientName(Client c){if(c.getCompanyProfile()!=null && c.getCompanyProfile().getCompanyName()!=null)return c.getCompanyProfile().getCompanyName(); if(c.getIndividualProfile()!=null)return c.getIndividualProfile().getFirstName()+" "+c.getIndividualProfile().getLastName();return c.getClientCode();}
+}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\service\controller\ServiceCatalogueController.java
+============================================================
+
+package com.dmfs.service.controller;
+
+import java.util.List;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.dmfs.service.entity.ServiceCatalogue;
+import com.dmfs.service.service.ServiceCatalogueService;
+
+@RestController
+@RequestMapping("/api/service-catalogue")
+public class ServiceCatalogueController {
+
+    private final ServiceCatalogueService serviceCatalogueService;
+
+    public ServiceCatalogueController(
+            ServiceCatalogueService serviceCatalogueService
+    ) {
+        this.serviceCatalogueService = serviceCatalogueService;
+    }
+
+    @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGEMENT', 'GEOLOGIST', 'DRONE_OPERATOR')")
+    public List<ServiceCatalogue> getAllServices() {
+        return serviceCatalogueService.getAllServices();
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGEMENT', 'GEOLOGIST', 'DRONE_OPERATOR')")
+    public ServiceCatalogue getServiceById(
+            @PathVariable Long id
+    ) {
+        return serviceCatalogueService.getServiceById(id);
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('ADMIN')")
+    public ServiceCatalogue createService(
+            @RequestBody ServiceCatalogue service
+    ) {
+        return serviceCatalogueService.createService(service);
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ServiceCatalogue updateService(
+            @PathVariable Long id,
+            @RequestBody ServiceCatalogue service
+    ) {
+        return serviceCatalogueService.updateService(id, service);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ADMIN')")
+    public void deactivateService(
+            @PathVariable Long id
+    ) {
+        serviceCatalogueService.deactivateService(id);
+    }
+}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\service\controller\ServiceRequestController.java
+============================================================
+
+package com.dmfs.service.controller;
+
+import java.util.List;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.dmfs.service.dto.ServiceRequestResponse;
+import com.dmfs.service.entity.ServiceRequest;
+import com.dmfs.service.service.ServiceRequestMapper;
+import com.dmfs.service.service.ServiceRequestService;
+
+@RestController
+@RequestMapping("/api/service-requests")
+public class ServiceRequestController {
+
+    private final ServiceRequestService serviceRequestService;
+
+
+    public ServiceRequestController(
+            ServiceRequestService serviceRequestService
+    ) {
+        this.serviceRequestService =
+                serviceRequestService;
+    }
+
+
+    @GetMapping
+    public List<ServiceRequestResponse>
+    getAllServiceRequests() {
+
+        return serviceRequestService
+                .getAllServiceRequests()
+                .stream()
+                .map(ServiceRequestMapper::toResponse)
+                .toList();
+    }
+
+
+    @GetMapping("/{id}")
+    public ServiceRequestResponse
+    getServiceRequestById(
+            @PathVariable Long id
+    ) {
+
+        ServiceRequest request =
+                serviceRequestService
+                        .getServiceRequestById(id);
+
+        return ServiceRequestMapper
+                .toResponse(request);
+    }
+
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public ServiceRequest createServiceRequest(
+            @RequestBody ServiceRequest serviceRequest
+    ) {
+
+        return serviceRequestService
+                .createServiceRequest(serviceRequest);
+    }
+
+
+    @PutMapping("/{id}")
+    public ServiceRequest updateServiceRequest(
+            @PathVariable Long id,
+            @RequestBody ServiceRequest serviceRequest
+    ) {
+
+        return serviceRequestService
+                .updateServiceRequest(
+                        id,
+                        serviceRequest
+                );
+    }
+
+
+    @PatchMapping("/{id}/status")
+    public void updateStatus(
+            @PathVariable Long id,
+            @RequestParam String status
+    ) {
+
+        serviceRequestService
+                .updateStatus(id, status);
+    }
+
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteServiceRequest(
+            @PathVariable Long id
+    ) {
+
+        serviceRequestService
+                .getServiceRequestById(id);
+
+        serviceRequestService
+                .deleteServiceRequest(id);
+    }
+}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\service\dto\ServiceRequestResponse.java
+============================================================
+
+package com.dmfs.service.dto;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public class ServiceRequestResponse {
+
+    private Long id;
+
+    private CustomerInfo customer;
+
+    private FarmInfo farm;
+
+    private BlockInfo farmBlock;
+
+    private ServiceCatalogueInfo serviceCatalogue;
+
+    private LocalDate requestedDate;
+
+    private String notes;
+
+    private String status;
+
+    private String operatorDecisionReason;
+
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
+
+
+    public ServiceRequestResponse() {
+    }
+
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+
+    @JsonProperty("client")
+    public CustomerInfo getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(CustomerInfo customer) {
+        this.customer = customer;
+    }
+
+
+    public FarmInfo getFarm() {
+        return farm;
+    }
+
+    public void setFarm(FarmInfo farm) {
+        this.farm = farm;
+    }
+
+
+    public BlockInfo getFarmBlock() {
+        return farmBlock;
+    }
+
+    public void setFarmBlock(BlockInfo farmBlock) {
+        this.farmBlock = farmBlock;
+    }
+
+
+    public ServiceCatalogueInfo getServiceCatalogue() {
+        return serviceCatalogue;
+    }
+
+    public void setServiceCatalogue(
+            ServiceCatalogueInfo serviceCatalogue
+    ) {
+        this.serviceCatalogue = serviceCatalogue;
+    }
+
+
+    public LocalDate getRequestedDate() {
+        return requestedDate;
+    }
+
+    public void setRequestedDate(
+            LocalDate requestedDate
+    ) {
+        this.requestedDate = requestedDate;
+    }
+
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getOperatorDecisionReason() { return operatorDecisionReason; }
+    public void setOperatorDecisionReason(String operatorDecisionReason) { this.operatorDecisionReason = operatorDecisionReason; }
+
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(
+            LocalDateTime createdAt
+    ) {
+        this.createdAt = createdAt;
+    }
+
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(
+            LocalDateTime updatedAt
+    ) {
+        this.updatedAt = updatedAt;
+    }
+
+
+    /* ==============================
+       CUSTOMER
+       ============================== */
+
+    public static class CustomerInfo {
+
+        private Long id;
+
+        private String customerCode;
+
+        private String type;
+
+        private String companyName;
+
+        private String firstName;
+
+        private String lastName;
+
+        private String email;
+
+        private String phone;
+
+        private String status;
+
+
+        public CustomerInfo() {
+        }
+
+
+        public Long getId() {
+            return id;
+        }
+
+        public void setId(Long id) {
+            this.id = id;
+        }
+
+
+        public String getCustomerCode() {
+            return customerCode;
+        }
+
+        public void setCustomerCode(
+                String customerCode
+        ) {
+            this.customerCode = customerCode;
+        }
+
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+
+        public String getCompanyName() {
+            return companyName;
+        }
+
+        public void setCompanyName(
+                String companyName
+        ) {
+            this.companyName = companyName;
+        }
+
+
+        public String getFirstName() {
+            return firstName;
+        }
+
+        public void setFirstName(
+                String firstName
+        ) {
+            this.firstName = firstName;
+        }
+
+
+        public String getLastName() {
+            return lastName;
+        }
+
+        public void setLastName(
+                String lastName
+        ) {
+            this.lastName = lastName;
+        }
+
+
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
+        }
+
+
+        public String getPhone() {
+            return phone;
+        }
+
+        public void setPhone(String phone) {
+            this.phone = phone;
+        }
+
+
+        public String getStatus() {
+            return status;
+        }
+
+        public void setStatus(String status) {
+            this.status = status;
+        }
+    }
+
+
+    /* ==============================
+       FARM
+       ============================== */
+
+    public static class FarmInfo {
+
+        private Long id;
+
+        private String name;
+
+        private String description;
+
+        private Double areaHectares;
+
+
+        public FarmInfo() {
+        }
+
+
+        public Long getId() {
+            return id;
+        }
+
+        public void setId(Long id) {
+            this.id = id;
+        }
+
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+
+        public String getDescription() {
+            return description;
+        }
+
+        public void setDescription(
+                String description
+        ) {
+            this.description = description;
+        }
+
+
+        public Double getAreaHectares() {
+            return areaHectares;
+        }
+
+        public void setAreaHectares(
+                Double areaHectares
+        ) {
+            this.areaHectares = areaHectares;
+        }
+    }
+
+
+    /* ==============================
+       BLOCK
+       ============================== */
+
+    public static class BlockInfo {
+
+        private Long id;
+
+        private String name;
+
+        private String description;
+
+        private Double areaHectares;
+
+        private Double centerLatitude;
+
+        private Double centerLongitude;
+
+
+        public BlockInfo() {
+        }
+
+
+        public Long getId() {
+            return id;
+        }
+
+        public void setId(Long id) {
+            this.id = id;
+        }
+
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+
+        public String getDescription() {
+            return description;
+        }
+
+        public void setDescription(
+                String description
+        ) {
+            this.description = description;
+        }
+
+
+        public Double getAreaHectares() {
+            return areaHectares;
+        }
+
+        public void setAreaHectares(
+                Double areaHectares
+        ) {
+            this.areaHectares = areaHectares;
+        }
+
+
+        public Double getCenterLatitude() {
+            return centerLatitude;
+        }
+
+        public void setCenterLatitude(
+                Double centerLatitude
+        ) {
+            this.centerLatitude = centerLatitude;
+        }
+
+
+        public Double getCenterLongitude() {
+            return centerLongitude;
+        }
+
+        public void setCenterLongitude(
+                Double centerLongitude
+        ) {
+            this.centerLongitude = centerLongitude;
+        }
+    }
+
+
+    /* ==============================
+       SERVICE CATALOGUE
+       ============================== */
+
+    public static class ServiceCatalogueInfo {
+
+        private Long id;
+
+        private String name;
+
+        private String category;
+
+        private String description;
+
+        private String status;
+
+        private String unitOfMeasurement;
+
+        private BigDecimal standardPrice;
+
+        private BigDecimal minimumArea;
+
+        private Integer estimatedDurationMinutes;
+
+
+        public ServiceCatalogueInfo() {
+        }
+
+
+        public Long getId() {
+            return id;
+        }
+
+        public void setId(Long id) {
+            this.id = id;
+        }
+
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+
+        public String getCategory() {
+            return category;
+        }
+
+        public void setCategory(String category) {
+            this.category = category;
+        }
+
+
+        public String getDescription() {
+            return description;
+        }
+
+        public void setDescription(
+                String description
+        ) {
+            this.description = description;
+        }
+
+
+        public String getStatus() {
+            return status;
+        }
+
+        public void setStatus(String status) {
+            this.status = status;
+        }
+
+
+        public String getUnitOfMeasurement() {
+            return unitOfMeasurement;
+        }
+
+        public void setUnitOfMeasurement(
+                String unitOfMeasurement
+        ) {
+            this.unitOfMeasurement =
+                    unitOfMeasurement;
+        }
+
+
+        public BigDecimal getStandardPrice() {
+            return standardPrice;
+        }
+
+        public void setStandardPrice(
+                BigDecimal standardPrice
+        ) {
+            this.standardPrice =
+                    standardPrice;
+        }
+
+
+        public BigDecimal getMinimumArea() {
+            return minimumArea;
+        }
+
+        public void setMinimumArea(
+                BigDecimal minimumArea
+        ) {
+            this.minimumArea =
+                    minimumArea;
+        }
+
+
+        public Integer getEstimatedDurationMinutes() {
+            return estimatedDurationMinutes;
+        }
+
+        public void setEstimatedDurationMinutes(
+                Integer estimatedDurationMinutes
+        ) {
+            this.estimatedDurationMinutes =
+                    estimatedDurationMinutes;
+        }
+    }
+}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\service\entity\ServiceCatalogue.java
+============================================================
+
+package com.dmfs.service.entity;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "service_catalogue")
+public class ServiceCatalogue {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, length = 150)
+    private String name;
+
+    @Column(nullable = false, length = 50)
+    private String category;
+
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String description;
+
+    @Column(nullable = false, length = 30)
+    private String status = "ACTIVE";
+
+    @Column(name = "unit_of_measurement", nullable = false, length = 30)
+    private String unitOfMeasurement;
+
+    @Column(name = "standard_price", nullable = false, precision = 12, scale = 2)
+    private BigDecimal standardPrice;
+
+    @Column(name = "minimum_area", nullable = false, precision = 12, scale = 2)
+    private BigDecimal minimumArea;
+
+    @Column(name = "required_equipment", columnDefinition = "TEXT")
+    private String requiredEquipment;
+
+    @Column(name = "required_personnel", columnDefinition = "TEXT")
+    private String requiredPersonnel;
+
+    @Column(name = "estimated_duration_minutes", nullable = false)
+    private Integer estimatedDurationMinutes;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getUnitOfMeasurement() {
+        return unitOfMeasurement;
+    }
+
+    public void setUnitOfMeasurement(String unitOfMeasurement) {
+        this.unitOfMeasurement = unitOfMeasurement;
+    }
+
+    public BigDecimal getStandardPrice() {
+        return standardPrice;
+    }
+
+    public void setStandardPrice(BigDecimal standardPrice) {
+        this.standardPrice = standardPrice;
+    }
+
+    public BigDecimal getMinimumArea() {
+        return minimumArea;
+    }
+
+    public void setMinimumArea(BigDecimal minimumArea) {
+        this.minimumArea = minimumArea;
+    }
+
+    public String getRequiredEquipment() {
+        return requiredEquipment;
+    }
+
+    public void setRequiredEquipment(String requiredEquipment) {
+        this.requiredEquipment = requiredEquipment;
+    }
+
+    public String getRequiredPersonnel() {
+        return requiredPersonnel;
+    }
+
+    public void setRequiredPersonnel(String requiredPersonnel) {
+        this.requiredPersonnel = requiredPersonnel;
+    }
+
+    public Integer getEstimatedDurationMinutes() {
+        return estimatedDurationMinutes;
+    }
+
+    public void setEstimatedDurationMinutes(Integer estimatedDurationMinutes) {
+        this.estimatedDurationMinutes = estimatedDurationMinutes;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\service\entity\ServiceRequest.java
+============================================================
+
+package com.dmfs.service.entity;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+import com.dmfs.client.entity.Client;
+import com.dmfs.farm.entity.Block;
+import com.dmfs.farm.entity.Farm;
+import com.dmfs.auth.entity.User;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+@Entity
+@Table(name = "service_request")
+public class ServiceRequest {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "customer_id", nullable = false)
+    private Client customer;
+
+    @ManyToOne
+    @JoinColumn(name = "farm_id", nullable = false)
+    private Farm farm;
+
+    @ManyToOne
+    @JoinColumn(name = "farm_block_id", nullable = false)
+    private Block farmBlock;
+
+    @ManyToOne
+    @JoinColumn(name = "service_catalogue_id", nullable = false)
+    private ServiceCatalogue serviceCatalogue;
+
+    @Column(name = "requested_date", nullable = false)
+    private LocalDate requestedDate;
+
+    @Column(columnDefinition = "TEXT")
+    private String notes;
+
+    @Column(nullable = false, length = 30)
+    private String status = "PENDING";
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "operator_id")
+    private User operator;
+
+    @Column(name = "operator_decision_reason", columnDefinition = "TEXT")
+    private String operatorDecisionReason;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    @JsonProperty("client")
+    public Client getCustomer() {
+        return customer;
+    }
+
+    @JsonAlias("client")
+    public void setCustomer(Client customer) {
+        this.customer = customer;
+    }
+
+    public Farm getFarm() {
+        return farm;
+    }
+
+    public void setFarm(Farm farm) {
+        this.farm = farm;
+    }
+
+    public Block getFarmBlock() {
+        return farmBlock;
+    }
+
+    public void setFarmBlock(Block farmBlock) {
+        this.farmBlock = farmBlock;
+    }
+
+    public ServiceCatalogue getServiceCatalogue() {
+        return serviceCatalogue;
+    }
+
+    public void setServiceCatalogue(ServiceCatalogue serviceCatalogue) {
+        this.serviceCatalogue = serviceCatalogue;
+    }
+
+    public LocalDate getRequestedDate() {
+        return requestedDate;
+    }
+
+    public void setRequestedDate(LocalDate requestedDate) {
+        this.requestedDate = requestedDate;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+    public User getOperator() { return operator; }
+    public void setOperator(User operator) { this.operator = operator; }
+    public String getOperatorDecisionReason() { return operatorDecisionReason; }
+    public void setOperatorDecisionReason(String operatorDecisionReason) { this.operatorDecisionReason = operatorDecisionReason; }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\service\repository\ServiceCatalogueRepository.java
+============================================================
+
+package com.dmfs.service.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.dmfs.service.entity.ServiceCatalogue;
+
+public interface ServiceCatalogueRepository
+        extends JpaRepository<ServiceCatalogue, Long> {
+    boolean existsByNameIgnoreCase(String name);
+    boolean existsByNameIgnoreCaseAndIdNot(String name, Long id);
+}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\service\repository\ServiceRequestRepository.java
+============================================================
+
+package com.dmfs.service.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.dmfs.service.entity.ServiceRequest;
+import java.util.List;
+
+public interface ServiceRequestRepository
+        extends JpaRepository<ServiceRequest, Long> {
+    List<ServiceRequest> findByStatusIgnoreCaseOrOperatorIdOrderByCreatedAtDesc(String status, Long operatorId);
+}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\service\service\ServiceCatalogueService.java
+============================================================
+
+package com.dmfs.service.service;
+
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import com.dmfs.service.entity.ServiceCatalogue;
+import com.dmfs.service.repository.ServiceCatalogueRepository;
+
+@Service
+public class ServiceCatalogueService {
+
+    private final ServiceCatalogueRepository serviceCatalogueRepository;
+
+    public ServiceCatalogueService(
+            ServiceCatalogueRepository serviceCatalogueRepository
+    ) {
+        this.serviceCatalogueRepository = serviceCatalogueRepository;
+    }
+
+    public List<ServiceCatalogue> getAllServices() {
+        return serviceCatalogueRepository.findAll();
+    }
+
+    public ServiceCatalogue getServiceById(Long id) {
+        return serviceCatalogueRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Service not found with id: " + id)
+                );
+    }
+
+    public ServiceCatalogue createService(ServiceCatalogue service) {
+        validatePersonnelRole(service);
+        if (serviceCatalogueRepository.existsByNameIgnoreCase(service.getName())) {
+            throw new IllegalArgumentException("A service with this name already exists");
+        }
+        return serviceCatalogueRepository.save(service);
+    }
+
+    public ServiceCatalogue updateService(
+            Long id,
+            ServiceCatalogue updatedService
+    ) {
+        ServiceCatalogue existingService = getServiceById(id);
+
+        validatePersonnelRole(updatedService);
+        if (serviceCatalogueRepository.existsByNameIgnoreCaseAndIdNot(updatedService.getName(), id)) {
+            throw new IllegalArgumentException("A service with this name already exists");
+        }
+
+        existingService.setName(updatedService.getName());
+        existingService.setCategory(updatedService.getCategory());
+        existingService.setDescription(updatedService.getDescription());
+        existingService.setStatus(updatedService.getStatus());
+        existingService.setUnitOfMeasurement(
+                updatedService.getUnitOfMeasurement()
+        );
+        existingService.setStandardPrice(
+                updatedService.getStandardPrice()
+        );
+        existingService.setMinimumArea(
+                updatedService.getMinimumArea()
+        );
+        existingService.setRequiredEquipment(
+                updatedService.getRequiredEquipment()
+        );
+        existingService.setRequiredPersonnel(
+                updatedService.getRequiredPersonnel()
+        );
+        existingService.setEstimatedDurationMinutes(
+                updatedService.getEstimatedDurationMinutes()
+        );
+
+        return serviceCatalogueRepository.save(existingService);
+    }
+
+    public void deactivateService(Long id) {
+        ServiceCatalogue service = getServiceById(id);
+        service.setStatus("INACTIVE");
+        serviceCatalogueRepository.save(service);
+    }
+
+    private void validatePersonnelRole(ServiceCatalogue service) {
+        String role = service.getRequiredPersonnel();
+        if (role == null || role.isBlank() || java.util.Arrays.stream(role.split(","))
+                .anyMatch(value -> !"GEOLOGIST".equals(value) && !"DRONE_OPERATOR".equals(value))) {
+            throw new IllegalArgumentException(
+                    "Required personnel must be GEOLOGIST or DRONE_OPERATOR");
+        }
+    }
+}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\service\service\ServiceRequestMapper.java
+============================================================
+
+package com.dmfs.service.service;
+
+import com.dmfs.client.entity.Client;
+import com.dmfs.client.entity.ClientCompany;
+import com.dmfs.client.entity.ClientIndividual;
+import com.dmfs.farm.entity.Block;
+import com.dmfs.farm.entity.Farm;
+import com.dmfs.service.dto.ServiceRequestResponse;
+import com.dmfs.service.entity.ServiceCatalogue;
+import com.dmfs.service.entity.ServiceRequest;
+
+public class ServiceRequestMapper {
+
+    private ServiceRequestMapper() {
+    }
+
+    public static ServiceRequestResponse toResponse(
+            ServiceRequest request
+    ) {
+
+        ServiceRequestResponse response =
+                new ServiceRequestResponse();
+
+        response.setId(request.getId());
+
+        response.setRequestedDate(
+                request.getRequestedDate()
+        );
+
+        response.setNotes(
+                request.getNotes()
+        );
+
+        response.setStatus(
+                request.getStatus()
+        );
+        response.setOperatorDecisionReason(request.getOperatorDecisionReason());
+
+        response.setCreatedAt(
+                request.getCreatedAt()
+        );
+
+        response.setUpdatedAt(
+                request.getUpdatedAt()
+        );
+
+
+        /* ==============================
+           CLIENT
+           ============================== */
+
+        Client client =
+                request.getCustomer();
+
+        if (client != null) {
+
+            ServiceRequestResponse.CustomerInfo
+                    customerInfo =
+                    new ServiceRequestResponse.CustomerInfo();
+
+            customerInfo.setId(
+                    client.getId()
+            );
+
+            customerInfo.setCustomerCode(
+                    client.getClientCode()
+            );
+
+            customerInfo.setType(
+                    client.getType() != null
+                            ? client.getType().name()
+                            : null
+            );
+
+            ClientCompany companyProfile =
+                    client.getCompanyProfile();
+
+            ClientIndividual individualProfile =
+                    client.getIndividualProfile();
+
+            if (client.getType() != null
+                    && client.getType().name().equals("COMPANY")) {
+
+                if (companyProfile != null) {
+
+                    customerInfo.setCompanyName(
+                            companyProfile.getCompanyName()
+                    );
+
+                    customerInfo.setEmail(
+                            companyProfile.getEmail()
+                    );
+
+                    customerInfo.setPhone(
+                            companyProfile.getPhone()
+                    );
+                }
+
+            } else if (individualProfile != null) {
+
+                customerInfo.setFirstName(
+                        individualProfile.getFirstName()
+                );
+
+                customerInfo.setLastName(
+                        individualProfile.getLastName()
+                );
+
+                customerInfo.setEmail(
+                        individualProfile.getEmail()
+                );
+
+                customerInfo.setPhone(
+                        individualProfile.getPhone()
+                );
+            }
+
+            customerInfo.setStatus(
+                    client.getStatus() != null
+                            ? client.getStatus().name()
+                            : null
+            );
+
+            response.setCustomer(
+                    customerInfo
+            );
+        }
+
+
+        /* ==============================
+           FARM
+           ============================== */
+
+        Farm farm =
+                request.getFarm();
+
+        if (farm != null) {
+
+            ServiceRequestResponse.FarmInfo
+                    farmInfo =
+                    new ServiceRequestResponse.FarmInfo();
+
+            farmInfo.setId(
+                    farm.getId()
+            );
+
+            farmInfo.setName(
+                    farm.getName()
+            );
+
+            farmInfo.setDescription(
+                    farm.getDescription()
+            );
+
+            farmInfo.setAreaHectares(
+                    farm.getAreaHectares()
+            );
+
+            // IMPORTANT:
+            // farm.location is intentionally NOT mapped.
+
+            response.setFarm(
+                    farmInfo
+            );
+        }
+
+
+        /* ==============================
+           BLOCK
+           ============================== */
+
+        Block block =
+                request.getFarmBlock();
+
+        if (block != null) {
+
+            ServiceRequestResponse.BlockInfo
+                    blockInfo =
+                    new ServiceRequestResponse.BlockInfo();
+
+            blockInfo.setId(
+                    block.getId()
+            );
+
+            blockInfo.setName(
+                    block.getName()
+            );
+
+            blockInfo.setDescription(
+                    block.getDescription()
+            );
+
+            blockInfo.setAreaHectares(
+                    block.getAreaHectares()
+            );
+
+            blockInfo.setCenterLatitude(
+                    block.getCenterLatitude()
+            );
+
+            blockInfo.setCenterLongitude(
+                    block.getCenterLongitude()
+            );
+
+            response.setFarmBlock(
+                    blockInfo
+            );
+        }
+
+
+        /* ==============================
+           SERVICE CATALOGUE
+           ============================== */
+
+        ServiceCatalogue catalogue =
+                request.getServiceCatalogue();
+
+        if (catalogue != null) {
+
+            ServiceRequestResponse
+                    .ServiceCatalogueInfo
+                    catalogueInfo =
+                    new ServiceRequestResponse
+                            .ServiceCatalogueInfo();
+
+            catalogueInfo.setId(
+                    catalogue.getId()
+            );
+
+            catalogueInfo.setName(
+                    catalogue.getName()
+            );
+
+            catalogueInfo.setCategory(
+                    catalogue.getCategory()
+            );
+
+            catalogueInfo.setDescription(
+                    catalogue.getDescription()
+            );
+
+            catalogueInfo.setStatus(
+                    catalogue.getStatus()
+            );
+
+            catalogueInfo.setUnitOfMeasurement(
+                    catalogue.getUnitOfMeasurement()
+            );
+
+            catalogueInfo.setStandardPrice(
+                    catalogue.getStandardPrice()
+            );
+
+            catalogueInfo.setMinimumArea(
+                    catalogue.getMinimumArea()
+            );
+
+            catalogueInfo.setEstimatedDurationMinutes(
+                    catalogue.getEstimatedDurationMinutes()
+            );
+
+            response.setServiceCatalogue(
+                    catalogueInfo
+            );
+        }
+
+
+        return response;
+    }
+}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\service\service\ServiceRequestService.java
+============================================================
+
+package com.dmfs.service.service;
+
+import java.util.List;
+import java.math.BigDecimal;
+
+import org.springframework.stereotype.Service;
+
+import com.dmfs.farm.entity.Block;
+import com.dmfs.farm.entity.Farm;
+import com.dmfs.farm.repository.BlockRepository;
+import com.dmfs.farm.repository.FarmRepository;
+import com.dmfs.service.entity.ServiceRequest;
+import com.dmfs.service.repository.ServiceCatalogueRepository;
+import com.dmfs.service.repository.ServiceRequestRepository;
+
+@Service
+public class ServiceRequestService {
+
+    private final ServiceRequestRepository serviceRequestRepository;
+    private final FarmRepository farmRepository;
+    private final BlockRepository blockRepository;
+    private final ServiceCatalogueRepository serviceCatalogueRepository;
+
+    public ServiceRequestService(
+            ServiceRequestRepository serviceRequestRepository,
+            FarmRepository farmRepository,
+            BlockRepository blockRepository,
+            ServiceCatalogueRepository serviceCatalogueRepository
+    ) {
+        this.serviceRequestRepository = serviceRequestRepository;
+        this.farmRepository = farmRepository;
+        this.blockRepository = blockRepository;
+        this.serviceCatalogueRepository = serviceCatalogueRepository;
+    }
+
+    public List<ServiceRequest> getAllServiceRequests() {
+        return serviceRequestRepository.findAll();
+    }
+
+    public ServiceRequest getServiceRequestById(Long id) {
+        return serviceRequestRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Service request not found with id: " + id
+                        )
+                );
+    }
+
+    public ServiceRequest createServiceRequest(
+            ServiceRequest serviceRequest
+    ) {
+        // The server is the source of truth for when a request was made.
+        serviceRequest.setRequestedDate(java.time.LocalDate.now());
+        validateRelationships(serviceRequest);
+
+        return serviceRequestRepository.save(serviceRequest);
+    }
+
+    public ServiceRequest updateServiceRequest(
+            Long id,
+            ServiceRequest updatedServiceRequest
+    ) {
+        ServiceRequest existingServiceRequest =
+                getServiceRequestById(id);
+
+        validateRelationships(updatedServiceRequest);
+
+        existingServiceRequest.setCustomer(
+                updatedServiceRequest.getCustomer()
+        );
+
+        existingServiceRequest.setFarm(
+                updatedServiceRequest.getFarm()
+        );
+
+        existingServiceRequest.setFarmBlock(
+                updatedServiceRequest.getFarmBlock()
+        );
+
+        existingServiceRequest.setServiceCatalogue(
+                updatedServiceRequest.getServiceCatalogue()
+        );
+
+        existingServiceRequest.setRequestedDate(
+                updatedServiceRequest.getRequestedDate()
+        );
+
+        existingServiceRequest.setNotes(
+                updatedServiceRequest.getNotes()
+        );
+
+        existingServiceRequest.setStatus(
+                updatedServiceRequest.getStatus()
+        );
+
+        return serviceRequestRepository.save(existingServiceRequest);
+    }
+
+    private void validateRelationships(
+            ServiceRequest serviceRequest
+    ) {
+
+        if (serviceRequest.getCustomer() == null) {
+            throw new RuntimeException(
+                    "Customer is required"
+            );
+        }
+
+        if (serviceRequest.getFarm() == null) {
+            throw new RuntimeException(
+                    "Farm is required"
+            );
+        }
+
+        if (serviceRequest.getFarmBlock() == null) {
+            throw new RuntimeException(
+                    "Farm block is required"
+            );
+        }
+
+        if (serviceRequest.getServiceCatalogue() == null) {
+            throw new RuntimeException(
+                    "Service catalogue is required"
+            );
+        }
+
+        Farm farm = farmRepository.findById(
+                serviceRequest.getFarm().getId()
+        ).orElseThrow(() ->
+                new RuntimeException(
+                        "Farm not found"
+                )
+        );
+
+        Block block = blockRepository.findById(
+                serviceRequest.getFarmBlock().getId()
+        ).orElseThrow(() ->
+                new RuntimeException(
+                        "Farm block not found"
+                )
+        );
+
+        var catalogue = serviceCatalogueRepository.findById(
+                serviceRequest.getServiceCatalogue().getId()
+        ).orElseThrow(() ->
+                new RuntimeException(
+                        "Service catalogue not found"
+                )
+        );
+
+        if (!"ACTIVE".equalsIgnoreCase(catalogue.getStatus())) {
+            throw new IllegalArgumentException("The selected service is inactive");
+        }
+        if (block.getAreaHectares() == null) {
+            throw new IllegalArgumentException("The selected block must have an area before a service can be requested");
+        }
+        BigDecimal requestedArea = BigDecimal.valueOf(block.getAreaHectares());
+        if (requestedArea.compareTo(catalogue.getMinimumArea()) < 0) {
+            throw new IllegalArgumentException("Block area is below this service's minimum area of "
+                    + catalogue.getMinimumArea() + " " + catalogue.getUnitOfMeasurement());
+        }
+
+        if (!farm.getCustomer().getId()
+                .equals(serviceRequest.getCustomer().getId())) {
+
+            throw new RuntimeException(
+                    "Farm does not belong to the selected customer"
+            );
+        }
+
+        if (!block.getFarm().getId()
+                .equals(farm.getId())) {
+
+            throw new RuntimeException(
+                    "Farm block does not belong to the selected farm"
+            );
+        }
+    }
+
+    public void updateStatus(Long id, String status) {
+        ServiceRequest serviceRequest =
+                getServiceRequestById(id);
+
+        serviceRequest.setStatus(status);
+
+        serviceRequestRepository.save(serviceRequest);
+    }
+
+    public void deleteServiceRequest(Long id) {
+        ServiceRequest serviceRequest =
+                getServiceRequestById(id);
+
+        serviceRequestRepository.delete(serviceRequest);
+    }
+}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\staff\service\StaffService.java
+============================================================
+
+package com.dmfs.staff.service;
+
+import com.dmfs.auth.entity.Role;
+import com.dmfs.auth.entity.User;
+import com.dmfs.auth.repository.UserRepository;
+import com.dmfs.company.entity.SubscriberCompany;
+import com.dmfs.staff.dto.CreateStaffRequest;
+import com.dmfs.staff.dto.StaffResponse;
+import com.dmfs.staff.dto.StaffRole;
+import com.dmfs.staff.dto.UpdateStaffRequest;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+public class StaffService {
+
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    public StaffService(
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder
+    ) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    @Transactional(readOnly = true)
+    public List<StaffResponse> getStaff() {
+
+        SubscriberCompany company = getCurrentAdminCompany();
+
+        List<Role> staffRoles = List.of(
+                Role.MANAGEMENT,
+                Role.GEOLOGIST,
+                Role.DRONE_OPERATOR
+        );
+
+        return userRepository
+                .findByCompanyAndRoleInOrderByFirstNameAsc(
+                        company,
+                        staffRoles
+                )
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    @Transactional
+    public StaffResponse createStaff(
+            CreateStaffRequest request
+    ) {
+
+        SubscriberCompany company =
+                getCurrentAdminCompany();
+
+        String email =
+                request.getEmail().trim().toLowerCase();
+
+        if (userRepository.existsByEmail(email)) {
+            throw new RuntimeException(
+                    "A user with this email already exists"
+            );
+        }
+
+        User user = new User();
+
+        user.setFirstName(
+                request.getFirstName().trim()
+        );
+
+        user.setLastName(
+                request.getLastName().trim()
+        );
+
+        user.setEmail(email);
+
+        user.setPassword(
+                passwordEncoder.encode(
+                        request.getPassword()
+                )
+        );
+
+        user.setRole(
+                toEntityRole(request.getRole())
+        );
+
+        user.setActive(true);
+
+        /*
+         * IMPORTANT:
+         * The company comes from the authenticated ADMIN.
+         * The client cannot choose company_id.
+         */
+        user.setCompany(company);
+
+        return toResponse(
+                userRepository.save(user)
+        );
+    }
+
+    @Transactional
+    public StaffResponse updateStaff(
+            Long id,
+            UpdateStaffRequest request
+    ) {
+
+        SubscriberCompany company =
+                getCurrentAdminCompany();
+
+        User user = userRepository
+                .findByIdAndCompany(id, company)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Staff member not found"
+                        )
+                );
+
+        if (!isStaffRole(user.getRole())) {
+            throw new RuntimeException(
+                    "This account is not a staff account"
+            );
+        }
+
+        String email =
+                request.getEmail().trim().toLowerCase();
+
+        if (!email.equalsIgnoreCase(user.getEmail())
+                && userRepository.existsByEmail(email)) {
+
+            throw new RuntimeException(
+                    "A user with this email already exists"
+            );
+        }
+
+        user.setFirstName(
+                request.getFirstName().trim()
+        );
+
+        user.setLastName(
+                request.getLastName().trim()
+        );
+
+        user.setEmail(email);
+
+        user.setRole(
+                toEntityRole(request.getRole())
+        );
+
+        return toResponse(
+                userRepository.save(user)
+        );
+    }
+
+    @Transactional
+    public StaffResponse activateStaff(Long id) {
+
+        User user = getStaffForCurrentCompany(id);
+
+        user.setActive(true);
+
+        return toResponse(
+                userRepository.save(user)
+        );
+    }
+
+    @Transactional
+    public StaffResponse deactivateStaff(Long id) {
+
+        User user = getStaffForCurrentCompany(id);
+
+        user.setActive(false);
+
+        return toResponse(
+                userRepository.save(user)
+        );
+    }
+
+    private User getStaffForCurrentCompany(Long id) {
+
+        SubscriberCompany company =
+                getCurrentAdminCompany();
+
+        User user = userRepository
+                .findByIdAndCompany(id, company)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Staff member not found"
+                        )
+                );
+
+        if (!isStaffRole(user.getRole())) {
+            throw new RuntimeException(
+                    "This account is not a staff account"
+            );
+        }
+
+        return user;
+    }
+
+    private SubscriberCompany getCurrentAdminCompany() {
+
+        Authentication authentication =
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication();
+
+        if (authentication == null
+                || authentication.getName() == null) {
+
+            throw new RuntimeException(
+                    "Authenticated user not found"
+            );
+        }
+
+        User admin = userRepository
+                .findByEmail(
+                        authentication.getName()
+                )
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Authenticated user not found"
+                        )
+                );
+
+        if (admin.getRole() != Role.ADMIN) {
+            throw new RuntimeException(
+                    "Only company administrators can manage staff"
+            );
+        }
+
+        if (admin.getCompany() == null) {
+            throw new RuntimeException(
+                    "Administrator is not assigned to a company"
+            );
+        }
+
+        return admin.getCompany();
+    }
+
+    private Role toEntityRole(StaffRole role) {
+
+        return switch (role) {
+
+            case MANAGEMENT ->
+                    Role.MANAGEMENT;
+
+            case GEOLOGIST ->
+                    Role.GEOLOGIST;
+
+            case DRONE_OPERATOR ->
+                    Role.DRONE_OPERATOR;
+        };
+    }
+
+    private boolean isStaffRole(Role role) {
+
+        return role == Role.MANAGEMENT
+                || role == Role.GEOLOGIST
+                || role == Role.DRONE_OPERATOR;
+    }
+
+    private StaffResponse toResponse(User user) {
+
+        return new StaffResponse(
+                user.getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+                user.getRole().name(),
+                user.isActive(),
+                user.getCreatedAt(),
+                user.getUpdatedAt()
+        );
+    }
+}
+
+
+============================================================
+FILE: backend\dmfs-backend\src\main\java\com\dmfs\superadmin\service\SuperAdminDashboardService.java
+============================================================
+
+package com.dmfs.superadmin.service;
+
+import com.dmfs.auth.repository.UserRepository;
+import com.dmfs.company.entity.CompanyStatus;
+import com.dmfs.company.repository.SubscriberCompanyRepository;
+import com.dmfs.superadmin.dto.SuperAdminDashboardResponse;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+public class SuperAdminDashboardService {
+
+    private final SubscriberCompanyRepository companyRepository;
+    private final UserRepository userRepository;
+
+    public SuperAdminDashboardService(
+            SubscriberCompanyRepository companyRepository,
+            UserRepository userRepository
+    ) {
+        this.companyRepository = companyRepository;
+        this.userRepository = userRepository;
+    }
+
+    @Transactional(readOnly = true)
+    public SuperAdminDashboardResponse getDashboard() {
+
+        long totalCompanies =
+                companyRepository.count();
+
+        long activeCompanies =
+                companyRepository.countByStatus(CompanyStatus.ACTIVE);
+
+        long suspendedCompanies =
+                companyRepository.countByStatus(CompanyStatus.SUSPENDED);
+
+        long expiredCompanies =
+                companyRepository.countByStatus(CompanyStatus.EXPIRED);
+
+        long totalUsers =
+                userRepository.count();
+
+        long activeUsers =
+                userRepository.countByActiveTrue();
+
+        long inactiveUsers =
+                userRepository.countByActiveFalse();
+
+        return new SuperAdminDashboardResponse(
+                totalCompanies,
+                activeCompanies,
+                suspendedCompanies,
+                expiredCompanies,
+                totalUsers,
+                activeUsers,
+                inactiveUsers
+        );
+    }
+}

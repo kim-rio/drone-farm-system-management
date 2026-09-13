@@ -5,7 +5,6 @@ import com.dmfs.auth.dto.LoginResponse;
 import com.dmfs.auth.service.AuthService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,22 +20,29 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(
-            @Valid @RequestBody LoginRequest request,
+            @RequestParam String email,
+            @RequestParam String password,
             HttpServletResponse response
     ) {
 
+        LoginRequest request = new LoginRequest();
+        request.setEmail(email);
+        request.setPassword(password);
+
         LoginResponse loginResponse = authService.login(request);
 
-        Cookie cookie = new Cookie("access_token", loginResponse.getToken());
+        Cookie cookie = new Cookie(
+                "access_token",
+                loginResponse.getToken()
+        );
 
         cookie.setHttpOnly(true);
-        cookie.setSecure(false); // true when using HTTPS in production
+        cookie.setSecure(false);
         cookie.setPath("/");
         cookie.setMaxAge(24 * 60 * 60);
 
         response.addCookie(cookie);
 
-        // Token is no longer returned in the response body
         loginResponse.setToken(null);
 
         return ResponseEntity.ok(loginResponse);
@@ -47,7 +53,10 @@ public class AuthController {
             HttpServletResponse response
     ) {
 
-        Cookie cookie = new Cookie("access_token", null);
+        Cookie cookie = new Cookie(
+                "access_token",
+                null
+        );
 
         cookie.setHttpOnly(true);
         cookie.setSecure(false);
