@@ -1,0 +1,668 @@
+﻿<div class="page-shell">
+
+  <header class="page-header">
+
+    <div class="page-heading">
+
+      <span class="eyebrow">
+        COMPANY ADMINISTRATION
+      </span>
+
+      <h1>
+        Services
+      </h1>
+
+      <p class="description">
+        Manage the services your company provides to clients.
+      </p>
+
+    </div>
+
+    <div class="header-actions">
+
+      <button
+        type="button"
+        class="secondary-button"
+        (click)="goBack()">
+        ← Admin Dashboard
+      </button>
+
+      <button
+        type="button"
+        class="primary-button"
+        (click)="openCreate()">
+        + Add Service
+      </button>
+
+    </div>
+
+  </header>
+
+
+  <section class="summary-grid">
+
+    <article class="summary-card">
+
+      <span>
+        Total Services
+      </span>
+
+      <strong>
+        {{ services.length }}
+      </strong>
+
+    </article>
+
+
+    <article class="summary-card">
+
+      <span>
+        Active
+      </span>
+
+      <strong>
+        {{ activeCount }}
+      </strong>
+
+    </article>
+
+
+    <article class="summary-card">
+
+      <span>
+        Inactive
+      </span>
+
+      <strong>
+        {{ inactiveCount }}
+      </strong>
+
+    </article>
+
+  </section>
+
+
+  @if (errorMessage && !showForm) {
+
+    <div class="error-message">
+      {{ errorMessage }}
+    </div>
+
+  }
+
+
+  <section class="panel">
+
+    <div class="panel-header">
+
+      <div>
+
+        <span class="card-eyebrow">
+          SERVICE CATALOGUE
+        </span>
+
+        <h2>
+          Available Services
+        </h2>
+
+        <p>
+          Services available for company service requests.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    @if (loading) {
+
+      <div class="empty-state">
+
+        <div class="loading-spinner"></div>
+
+        <h3>
+          Loading services...
+        </h3>
+
+      </div>
+
+    } @else if (services.length === 0) {
+
+      <div class="empty-state">
+
+        <div class="empty-icon">
+          +
+        </div>
+
+        <h3>
+          No services available
+        </h3>
+
+        <p>
+          Add a service to define what your company can provide
+          to clients.
+        </p>
+
+        <button
+          type="button"
+          class="primary-button"
+          (click)="openCreate()">
+          Add First Service
+        </button>
+
+      </div>
+
+    } @else {
+
+      <div class="table">
+
+        <div class="table-header">
+
+          <span>Service</span>
+          <span>Category</span>
+          <span>Unit</span>
+          <span>Price</span>
+          <span>Min. Area</span>
+          <span>Duration</span>
+          <span>Status</span>
+          <span>Actions</span>
+
+        </div>
+
+
+        @for (service of services; track service.id) {
+
+          <div class="table-row">
+
+            <div class="service-name">
+
+              <strong>
+                {{ service.name }}
+              </strong>
+
+              <span>
+                {{ service.description }}
+              </span>
+
+            </div>
+
+
+            <span>
+              {{ service.category }}
+            </span>
+
+
+            <span>
+              {{ service.unitOfMeasurement }}
+            </span>
+
+
+            <strong>
+              {{ service.standardPrice | number:'1.2-2' }}
+            </strong>
+
+
+            <span>
+              {{ service.minimumArea | number:'1.0-2' }}
+            </span>
+
+
+            <span>
+              {{ service.estimatedDurationMinutes }} min
+            </span>
+
+
+            <span
+              class="status"
+              [class.active]="service.status === 'ACTIVE'"
+              [class.inactive]="service.status === 'INACTIVE'">
+
+              {{ service.status }}
+
+            </span>
+
+
+            <div class="actions">
+
+              <button
+                type="button"
+                class="action-button"
+                [disabled]="saving"
+                (click)="openEdit(service)">
+                Edit
+              </button>
+
+
+              @if (service.status === 'ACTIVE') {
+
+                <button
+                  type="button"
+                  class="action-button danger"
+                  [disabled]="saving"
+                  (click)="deactivate(service)">
+                  Deactivate
+                </button>
+
+              }
+
+            </div>
+
+          </div>
+
+        }
+
+      </div>
+
+    }
+
+  </section>
+
+
+  @if (showForm) {
+
+    <div class="modal-backdrop">
+
+      <section class="modal">
+
+        <header class="modal-header">
+
+          <div>
+
+            <span class="eyebrow">
+              SERVICE CATALOGUE
+            </span>
+
+            <h2>
+              {{
+                editingId === null
+                  ? 'Add Service'
+                  : 'Edit Service'
+              }}
+            </h2>
+
+            <p>
+              Define the service details and operational requirements.
+            </p>
+
+          </div>
+
+
+          <button
+            type="button"
+            class="close-button"
+            [disabled]="saving"
+            aria-label="Close"
+            (click)="closeForm()">
+            ×
+          </button>
+
+        </header>
+
+
+        @if (errorMessage) {
+
+          <div class="form-error">
+            {{ errorMessage }}
+          </div>
+
+        }
+
+
+        <form
+          class="form"
+          #serviceForm="ngForm"
+          (ngSubmit)="save()">
+
+
+          <section class="form-section">
+
+            <div class="section-heading">
+
+              <span>01</span>
+
+              <div>
+                <h3>
+                  Basic Information
+                </h3>
+
+                <p>
+                  Identify the service and describe what it provides.
+                </p>
+              </div>
+
+            </div>
+
+
+            <div class="form-grid">
+
+              <label>
+
+                <span>
+                  Service Name *
+                </span>
+
+                <input
+                  type="text"
+                  name="name"
+                  [(ngModel)]="form.name"
+                  placeholder="e.g. Mineral Exploration"
+                  maxlength="150"
+                  required>
+
+              </label>
+
+
+              <label>
+
+                <span>
+                  Category *
+                </span>
+
+                <input
+                  type="text"
+                  name="category"
+                  [(ngModel)]="form.category"
+                  placeholder="e.g. Survey"
+                  maxlength="50"
+                  required>
+
+              </label>
+
+            </div>
+
+
+            <label>
+
+              <span>
+                Description *
+              </span>
+
+              <textarea
+                name="description"
+                [(ngModel)]="form.description"
+                rows="4"
+                maxlength="1000"
+                placeholder="Describe what this service includes..."
+                required>
+              </textarea>
+
+            </label>
+
+          </section>
+
+
+          <section class="form-section">
+
+            <div class="section-heading">
+
+              <span>02</span>
+
+              <div>
+                <h3>
+                  Pricing & Measurement
+                </h3>
+
+                <p>
+                  Define how the service is measured and charged.
+                </p>
+              </div>
+
+            </div>
+
+
+            <div class="form-grid three">
+
+              <label>
+
+                <span>
+                  Area Unit *
+                </span>
+
+                <input
+                  type="text"
+                  name="unitOfMeasurement"
+                  [(ngModel)]="form.unitOfMeasurement"
+                  placeholder="e.g. ha"
+                  maxlength="30"
+                  required>
+
+              </label>
+
+
+              <label>
+
+                <span>
+                  Price per Unit *
+                </span>
+
+                <input
+                  type="number"
+                  name="standardPrice"
+                  [(ngModel)]="form.standardPrice"
+                  min="0"
+                  step="0.01"
+                  required>
+
+              </label>
+
+
+              <label>
+
+                <span>
+                  Minimum Area *
+                </span>
+
+                <input
+                  type="number"
+                  name="minimumArea"
+                  [(ngModel)]="form.minimumArea"
+                  min="0.01"
+                  step="0.01"
+                  required>
+
+              </label>
+
+            </div>
+
+          </section>
+
+
+          <section class="form-section">
+
+            <div class="section-heading">
+
+              <span>03</span>
+
+              <div>
+                <h3>
+                  Operational Requirements
+                </h3>
+
+                <p>
+                  Select the personnel required to perform this service.
+                </p>
+              </div>
+
+            </div>
+
+
+            <fieldset class="personnel-roles">
+
+              <legend>
+                Required Personnel *
+              </legend>
+
+
+              <div class="role-grid">
+
+                @for (role of personnelRoles; track role.value) {
+
+                  <button
+                    type="button"
+                    class="role-card"
+                    [class.selected]="isPersonnelSelected(role.value)"
+                    [attr.aria-pressed]="isPersonnelSelected(role.value)"
+                    (click)="togglePersonnelRole(role.value)">
+
+                    <span class="role-check">
+
+                      {{
+                        isPersonnelSelected(role.value)
+                          ? '✓'
+                          : ''
+                      }}
+
+                    </span>
+
+
+                    <span class="role-content">
+
+                      <strong>
+                        {{ role.label }}
+                      </strong>
+
+                      <small>
+                        {{ role.description }}
+                      </small>
+
+                    </span>
+
+                  </button>
+
+                }
+
+              </div>
+
+            </fieldset>
+
+
+            <label>
+
+              <span>
+                Required Equipment
+              </span>
+
+              <textarea
+                name="requiredEquipment"
+                [(ngModel)]="form.requiredEquipment"
+                rows="3"
+                placeholder="e.g. Drone, multispectral camera">
+              </textarea>
+
+            </label>
+
+          </section>
+
+
+          <section class="form-section">
+
+            <div class="section-heading">
+
+              <span>04</span>
+
+              <div>
+                <h3>
+                  Execution
+                </h3>
+
+                <p>
+                  Set the expected execution time and service status.
+                </p>
+              </div>
+
+            </div>
+
+
+            <div class="form-grid">
+
+              <label>
+
+                <span>
+                  Estimated Duration *
+                </span>
+
+                <div class="input-with-suffix">
+
+                  <input
+                    type="number"
+                    name="estimatedDurationMinutes"
+                    [(ngModel)]="form.estimatedDurationMinutes"
+                    min="1"
+                    step="1"
+                    required>
+
+                  <span>
+                    minutes
+                  </span>
+
+                </div>
+
+              </label>
+
+
+              <label>
+
+                <span>
+                  Status
+                </span>
+
+                <select
+                  name="status"
+                  [(ngModel)]="form.status">
+
+                  <option value="ACTIVE">
+                    Active
+                  </option>
+
+                  <option value="INACTIVE">
+                    Inactive
+                  </option>
+
+                </select>
+
+              </label>
+
+            </div>
+
+          </section>
+
+
+          <div class="form-actions">
+
+            <button
+              type="button"
+              class="secondary-button"
+              [disabled]="saving"
+              (click)="closeForm()">
+              Cancel
+            </button>
+
+
+            <button
+              type="submit"
+              class="primary-button"
+              [disabled]="saving || serviceForm.invalid">
+
+              @if (saving) {
+                Saving...
+              } @else {
+                {{
+                  editingId === null
+                    ? 'Create Service'
+                    : 'Save Changes'
+                }}
+              }
+
+            </button>
+
+          </div>
+
+        </form>
+
+      </section>
+
+    </div>
+
+  }
+
+</div>

@@ -1,11 +1,26 @@
 package com.dmfs.service.repository;
 
+import com.dmfs.service.entity.ServiceRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.dmfs.service.entity.ServiceRequest;
 import java.util.List;
 
 public interface ServiceRequestRepository
         extends JpaRepository<ServiceRequest, Long> {
-    List<ServiceRequest> findByStatusIgnoreCaseOrOperatorIdOrderByCreatedAtDesc(String status, Long operatorId);
+
+    List<ServiceRequest> findByStatusIgnoreCaseOrOperatorIdOrderByCreatedAtDesc(
+            String status,
+            Long operatorId
+    );
+
+    List<ServiceRequest> findByCustomerCompanyId(Long companyId);
+
+    long countByCustomerCompanyId(Long companyId);
+
+    long countByCustomerCompanyIdAndPaymentStatusIgnoreCase(Long companyId, String paymentStatus);
+
+    long countByCustomerCompanyIdAndStatusIgnoreCase(
+            Long companyId,
+            String status
+    );
 }

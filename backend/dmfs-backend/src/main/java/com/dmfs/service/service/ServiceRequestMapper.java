@@ -263,8 +263,6 @@ public class ServiceRequestMapper {
                     catalogueInfo
             );
         }
-
-
-        return response;
+return response;
     }
 }

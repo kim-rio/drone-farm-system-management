@@ -55,6 +55,18 @@ public class ServiceRequest {
     @Column(nullable = false, length = 30)
     private String status = "PENDING";
 
+    @Column(name = "control_number", length = 50)
+    private String controlNumber;
+
+    @Column(precision = 14, scale = 2)
+    private java.math.BigDecimal amount;
+
+    @Column(name = "payment_status", nullable = false, length = 20)
+    private String paymentStatus = "PENDING";
+
+    @Column(name = "paid_at")
+    private LocalDateTime paidAt;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "operator_id")
     private User operator;
@@ -140,6 +152,18 @@ public class ServiceRequest {
     public void setStatus(String status) {
         this.status = status;
     }
+    public String getControlNumber() { return controlNumber; }
+    public void setControlNumber(String controlNumber) { this.controlNumber = controlNumber; }
+
+    public java.math.BigDecimal getAmount() { return amount; }
+    public void setAmount(java.math.BigDecimal amount) { this.amount = amount; }
+
+    public String getPaymentStatus() { return paymentStatus; }
+    public void setPaymentStatus(String paymentStatus) { this.paymentStatus = paymentStatus; }
+
+    public LocalDateTime getPaidAt() { return paidAt; }
+    public void setPaidAt(LocalDateTime paidAt) { this.paidAt = paidAt; }
+
     public User getOperator() { return operator; }
     public void setOperator(User operator) { this.operator = operator; }
     public String getOperatorDecisionReason() { return operatorDecisionReason; }

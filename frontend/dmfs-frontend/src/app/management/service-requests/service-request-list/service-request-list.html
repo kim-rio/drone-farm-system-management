@@ -207,6 +207,36 @@
           </div>
 
 
+          <!-- payment -->
+
+          <div class="info-section">
+
+            <div class="info-item">
+              <span>Control Number</span>
+              <strong>{{ request.controlNumber || '-' }}</strong>
+            </div>
+
+            <div class="info-item">
+              <span>Amount</span>
+              <strong>{{ request.amount ?? 0 | number:'1.2-2' }}</strong>
+            </div>
+
+            <div class="info-item">
+              <span>Payment</span>
+              <strong>{{ request.paymentStatus || 'PENDING' }}</strong>
+            </div>
+
+          </div>
+
+          @if (request.paymentStatus !== 'PAID') {
+            <button
+              type="button"
+              class="primary"
+              (click)="markPaid(request)">
+              Mark Paid
+            </button>
+          }
+
           <!-- client -->
 
           <div class="info-section">
@@ -231,7 +261,7 @@
               </span>
 
               <strong>
-                {{ request.farm.name || 'â€”' }}
+                {{ request.farm.name || '-' }}
               </strong>
 
             </div>
@@ -244,7 +274,7 @@
               </span>
 
               <strong>
-                {{ request.farmBlock.name || 'â€”' }}
+                {{ request.farmBlock.name || '-' }}
               </strong>
 
             </div>
@@ -276,7 +306,7 @@
               </span>
 
               <strong>
-                {{ request.serviceCatalogue.category || 'â€”' }}
+                {{ request.serviceCatalogue.category || '-' }}
               </strong>
 
             </div>
@@ -288,7 +318,7 @@
               </span>
 
               <strong>
-                {{ request.serviceCatalogue.unitOfMeasurement || 'â€”' }}
+                {{ request.serviceCatalogue.unitOfMeasurement || '-' }}
               </strong>
 
             </div>

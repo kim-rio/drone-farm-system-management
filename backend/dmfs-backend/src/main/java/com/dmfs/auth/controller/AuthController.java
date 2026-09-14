@@ -20,14 +20,9 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(
-            @RequestParam String email,
-            @RequestParam String password,
+            @RequestBody LoginRequest request,
             HttpServletResponse response
     ) {
-
-        LoginRequest request = new LoginRequest();
-        request.setEmail(email);
-        request.setPassword(password);
 
         LoginResponse loginResponse = authService.login(request);
 

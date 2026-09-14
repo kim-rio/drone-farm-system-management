@@ -98,41 +98,6 @@ export const routes: Routes = [
             .then(m => m.Staff)
       },
 
-      {
-        path: 'company',
-        loadComponent: () =>
-          import('./admin/company/company')
-            .then(m => m.AdminCompany)
-      },
-
-      {
-        path: 'operations',
-        loadComponent: () =>
-          import('./admin/operations/operations')
-            .then(m => m.AdminOperations)
-      },
-
-      {
-        path: 'operations/service-catalogue',
-        loadComponent: () =>
-          import('./admin/operations/service-catalogue/service-catalogue')
-            .then(m => m.ServiceCataloguePage)
-      },
-
-      {
-        path: 'reports',
-        loadComponent: () =>
-          import('./admin/reports/reports')
-            .then(m => m.AdminReports)
-      },
-
-      {
-        path: 'settings',
-        loadComponent: () =>
-          import('./admin/settings/settings')
-            .then(m => m.AdminSettings)
-      }
-
     ]
   },
 
@@ -293,7 +258,7 @@ export const routes: Routes = [
         {
           label: 'Dashboard',
           description: 'Overview of your operational workload.',
-          icon: '�',
+          icon: 'Ã¯Â¿Â½',
           route: '/drone-operator'
         },
         {
@@ -352,7 +317,7 @@ export const routes: Routes = [
         {
           label: 'Dashboard',
           description: 'Return to your dashboard.',
-          icon: '�',
+          icon: 'Ã¯Â¿Â½',
           route: '/drone-operator'
         },
         {
@@ -389,7 +354,7 @@ export const routes: Routes = [
         {
           label: 'Dashboard',
           description: 'Return to dashboard.',
-          icon: '�',
+          icon: 'Ã¯Â¿Â½',
           route: '/drone-operator'
         },
         {
@@ -426,7 +391,7 @@ export const routes: Routes = [
         {
           label: 'Dashboard',
           description: 'Return to dashboard.',
-          icon: '�',
+          icon: 'Ã¯Â¿Â½',
           route: '/drone-operator'
         },
         {
@@ -469,7 +434,7 @@ export const routes: Routes = [
         {
           label: 'Dashboard',
           description: 'Return to dashboard.',
-          icon: '�',
+          icon: 'Ã¯Â¿Â½',
           route: '/drone-operator'
         },
         {

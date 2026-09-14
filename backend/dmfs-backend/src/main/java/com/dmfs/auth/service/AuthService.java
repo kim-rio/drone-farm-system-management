@@ -29,7 +29,15 @@ public class AuthService {
 
     public LoginResponse login(LoginRequest request) {
 
-        User user = userRepository.findByEmail(request.getEmail())
+        if (request == null
+                || request.getEmail() == null
+                || request.getPassword() == null) {
+            throw new RuntimeException("Email and password are required");
+        }
+
+        String email = request.getEmail().trim().toLowerCase();
+
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() ->
                         new RuntimeException("Invalid email or password")
                 );
@@ -38,10 +46,6 @@ public class AuthService {
             throw new RuntimeException("User account is inactive");
         }
 
-        /*
-         * SUPER_ADMIN is not tied to a subscriber company.
-         * All other users must belong to an ACTIVE company.
-         */
         if (user.getRole() != Role.SUPER_ADMIN) {
 
             if (user.getCompany() == null) {
@@ -65,6 +69,10 @@ public class AuthService {
         }
 
         String token = jwtService.generateToken(user);
+
+        if (token == null || token.isBlank()) {
+            throw new RuntimeException("Failed to generate authentication token");
+        }
 
         return new LoginResponse(
                 token,

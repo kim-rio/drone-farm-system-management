@@ -11,4 +11,6 @@ public interface FarmRepository extends JpaRepository<Farm, Long> {
     List<Farm> findByCustomer(Client customer);
 
     List<Farm> findByCustomerId(Long customerId);
+
+    long countByCustomerCompanyId(Long companyId);
 }

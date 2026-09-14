@@ -54,6 +54,11 @@ export interface ServiceRequest {
   createdAt?: string;
 
   updatedAt?: string;
+
+  controlNumber?: string;
+  amount?: number;
+  paymentStatus?: string;
+  paidAt?: string;
 }
 
 export interface CreateServiceRequestPayload {
@@ -161,5 +166,8 @@ export class ServiceRequestService {
       }
     );
   }
-}
 
+  markPaid(id: number): Observable<any> {
+    return this.http.put(`/api/management/payments/${id}/paid`, {});
+  }
+}

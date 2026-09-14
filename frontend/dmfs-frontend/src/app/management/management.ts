@@ -1,12 +1,13 @@
-﻿import { Component, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { RouterOutlet } from '@angular/router';
 import { AuthService, LoginResponse } from '../services/auth.service';
+import { ManagementDashboardService } from './management-dashboard.service';
 
 interface ManagementMenuItem {
   label: string;
   route: string;
-  icon: string;
+
 }
 
 @Component({
@@ -20,6 +21,22 @@ export class Management {
 
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
+  private readonly dashboardService = inject(ManagementDashboardService);
+
+  dashboard = {
+    clients: 0,
+    farms: 0,
+    blocks: 0,
+    serviceRequests: 0,
+    requestStatuses: {} as Record<string, number>
+  };
+
+  constructor() {
+    this.dashboardService.getDashboard().subscribe({
+      next: data => this.dashboard = data,
+      error: err => console.error('Management dashboard failed:', err)
+    });
+  }
 
   sidebarOpen = true;
 
@@ -31,32 +48,22 @@ export class Management {
   {
     label: 'Dashboard',
     route: '/management',
-    icon: '▦'
   },
 
   {
     label: 'Clients',
     route: '/management/clients',
-    icon: '♙'
   },
 
   {
     label: 'Farms',
     route: '/management/farms',
-    icon: '⌂'
   },
 
   {
     label: 'Service Requests',
     route: '/management/service-requests',
-    icon: '✓'
   },
-
-  {
-    label: 'Missions',
-    route: '/management/missions',
-    icon: '◇'
-  }
 
 ];
 

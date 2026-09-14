@@ -1,5 +1,19 @@
-import { Component, inject } from '@angular/core';
-import { Router, RouterOutlet } from '@angular/router';
+import {
+  Component,
+  inject
+} from '@angular/core';
+
+import {
+  NavigationEnd,
+  Router,
+  RouterOutlet
+} from '@angular/router';
+
+import {
+  filter,
+  startWith
+} from 'rxjs';
+
 import {
   AuthService,
   LoginResponse
@@ -24,70 +38,65 @@ export class AdminLayout {
 
   sidebarOpen = true;
 
-  user: LoginResponse | null =
+  readonly user: LoginResponse | null =
     this.authService.getCurrentUser();
 
-  menuItems: AdminMenuItem[] = [
+  readonly initials = this.buildInitials();
 
+  readonly menuItems: AdminMenuItem[] = [
     {
       label: 'Dashboard',
       route: '/admin'
     },
-
     {
       label: 'Staff',
       route: '/admin/staff'
     },
-
     {
-      label: 'My Company',
-      route: '/admin/company'
+      label: 'Services',
+      route: '/admin/services'
     },
-
-    {
-      label: 'Operations',
-      route: '/admin/operations'
-    },
-
-    {
-      label: 'Service Catalogue',
-      route: '/admin/operations/service-catalogue'
-    },
-
-    {
-      label: 'Reports',
-      route: '/admin/reports'
-    },
-
-    {
-      label: 'Settings',
-      route: '/admin/settings'
-    }
-
   ];
+
+  activeRoute = this.router.url;
+
+  constructor() {
+    this.router.events
+      .pipe(
+        filter(
+          event => event instanceof NavigationEnd
+        ),
+        startWith(null)
+      )
+      .subscribe(() => {
+        this.activeRoute = this.router.url;
+      });
+  }
 
   toggleSidebar(): void {
     this.sidebarOpen = !this.sidebarOpen;
   }
 
   navigate(route: string): void {
+    if (this.activeRoute === route) {
+      return;
+    }
+
     this.router.navigateByUrl(route);
   }
 
   isActive(route: string): boolean {
-
     if (route === '/admin') {
       return (
-        this.router.url === '/admin' ||
-        this.router.url === '/admin/'
+        this.activeRoute === '/admin' ||
+        this.activeRoute === '/admin/'
       );
     }
 
-    return this.router.url.startsWith(route);
+    return this.activeRoute.startsWith(route);
   }
 
-  getInitials(): string {
-
+  private buildInitials(): string {
     if (!this.user) {
       return 'AD';
     }
@@ -102,10 +111,13 @@ export class AdminLayout {
   }
 
   logout(): void {
-
     this.authService.logout().subscribe({
-      next: () => this.router.navigate(['/login']),
-      error: () => this.router.navigate(['/login'])
+      next: () => {
+        this.router.navigate(['/login']);
+      },
+      error: () => {
+        this.router.navigate(['/login']);
+      }
     });
   }
 }

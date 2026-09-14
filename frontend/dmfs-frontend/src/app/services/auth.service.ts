@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+﻿import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 
@@ -18,8 +18,7 @@ export class AuthService {
 
   private readonly http = inject(HttpClient);
 
-  private readonly apiUrl =
-    'http://localhost:8080/api/auth';
+  private readonly apiUrl = '/api/auth';
 
   private readonly storageKey =
     'dmfs_current_user';
@@ -37,12 +36,10 @@ export class AuthService {
       {
         email: email,
         password: password
-      },
-      {
-        withCredentials: true
       }
     ).pipe(
       tap((user) => {
+
         this.currentUser = user;
 
         localStorage.setItem(
@@ -57,27 +54,24 @@ export class AuthService {
     return this.currentUser;
   }
 
-  logout(): Observable<void> {
-
-    return this.http.post<void>(
-      `${this.apiUrl}/logout`,
-      {},
-      {
-        withCredentials: true
-      }
-    ).pipe(
-      tap(() => {
-        this.clearSession();
-      })
-    );
-  }
-
   isLoggedIn(): boolean {
     return this.currentUser !== null;
   }
 
   hasRole(role: string): boolean {
     return this.currentUser?.role === role;
+  }
+
+  logout(): Observable<void> {
+
+    return this.http.post<void>(
+      `${this.apiUrl}/logout`,
+      {}
+    ).pipe(
+      tap(() => {
+        this.clearSession();
+      })
+    );
   }
 
   clearSession(): void {
@@ -100,7 +94,20 @@ export class AuthService {
         return null;
       }
 
-      return JSON.parse(stored) as LoginResponse;
+      const user =
+        JSON.parse(stored) as LoginResponse;
+
+      if (
+        !user ||
+        !user.userId ||
+        !user.email ||
+        !user.role
+      ) {
+        localStorage.removeItem(this.storageKey);
+        return null;
+      }
+
+      return user;
 
     } catch (error) {
 

@@ -28,4 +28,6 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
     List<Client> findByCompanyOrderByCreatedAtDesc(
             SubscriberCompany company
     );
+
+    long countByCompanyId(Long companyId);
 }

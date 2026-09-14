@@ -42,7 +42,7 @@
 
           <span class="nav-indicator"></span>
 
-          <span class="nav-icon" aria-hidden="true">{{ item.icon }}</span>
+          
 
           <span>
             {{ item.label }}
@@ -88,7 +88,7 @@
       >
 
         <span class="logout-circle">
-          →
+          
         </span>
 
         <span class="logout-text">
@@ -116,7 +116,7 @@
             (click)="toggleSidebar()"
             aria-label="Open navigation"
           >
-            ☰
+            
           </button>
 
         }
@@ -179,9 +179,7 @@
             Clients
           </span>
 
-          <strong>
-            —
-          </strong>
+          <strong>{{ dashboard.clients }}</strong>
 
           <small>
             Company clients
@@ -196,9 +194,7 @@
             Farms
           </span>
 
-          <strong>
-            —
-          </strong>
+          <strong>{{ dashboard.farms }}</strong>
 
           <small>
             Managed farms
@@ -213,9 +209,7 @@
             Service Requests
           </span>
 
-          <strong>
-            —
-          </strong>
+          <strong>{{ dashboard.serviceRequests }}</strong>
 
           <small>
             Current requests
@@ -230,9 +224,7 @@
             Completed
           </span>
 
-          <strong>
-            —
-          </strong>
+          <strong>{{ dashboard.requestStatuses['COMPLETED'] }}</strong>
 
           <small>
             Completed services
@@ -241,189 +233,6 @@
         </div>
 
       </div>
-
-
-      <section class="panel">
-
-        <div class="panel-header">
-
-          <div>
-
-            <span class="eyebrow">
-              MANAGEMENT
-            </span>
-
-            <h2>
-              Quick Actions
-            </h2>
-
-          </div>
-
-        </div>
-
-
-        <div class="card-grid">
-
-          @for (
-            item of menuItems;
-            track item.route
-          ) {
-
-            @if (item.route !== '/management') {
-
-              <button
-                type="button"
-                class="action-card"
-                (click)="navigate(item.route)"
-              >
-
-                <div class="action-icon">
-                  {{ item.icon }}
-                </div>
-
-                <div class="action-content">
-
-                  <strong>
-                    {{ item.label }}
-                  </strong>
-
-                  <p>
-
-                    @switch (item.label) {
-
-                      @case ('Clients') {
-                        Register and manage company clients.
-                      }
-
-                      @case ('Farms') {
-                        View and manage client farms.
-                      }
-
-                      @case ('Service Requests') {
-                        Create and coordinate requested services.
-                      }
-
-                    }
-
-                  </p>
-
-                </div>
-
-                <span class="arrow">
-                  →
-                </span>
-
-              </button>
-
-            }
-
-          }
-
-        </div>
-
-      </section>
-
-
-      <section class="panel activity-panel">
-
-        <div class="panel-header">
-
-          <div>
-
-            <span class="eyebrow">
-              WORKFLOW
-            </span>
-
-            <h2>
-              Service Workflow
-            </h2>
-
-          </div>
-
-        </div>
-
-
-        <div class="workflow">
-
-          <div class="workflow-step">
-
-            <span>
-              1
-            </span>
-
-            <strong>
-              Client
-            </strong>
-
-            <small>
-              Register client
-            </small>
-
-          </div>
-
-
-          <div class="workflow-line"></div>
-
-
-          <div class="workflow-step">
-
-            <span>
-              2
-            </span>
-
-            <strong>
-              Farm
-            </strong>
-
-            <small>
-              Manage farm
-            </small>
-
-          </div>
-
-
-          <div class="workflow-line"></div>
-
-
-          <div class="workflow-step">
-
-            <span>
-              3
-            </span>
-
-            <strong>
-              Request
-            </strong>
-
-            <small>
-              Create service
-            </small>
-
-          </div>
-
-
-          <div class="workflow-line"></div>
-
-
-          <div class="workflow-step">
-
-            <span>
-              4
-            </span>
-
-            <strong>
-              Operations
-            </strong>
-
-            <small>
-              Track progress
-            </small>
-
-          </div>
-
-        </div>
-
-      </section>
 
     </section>
     } @else {

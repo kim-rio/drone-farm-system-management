@@ -50,6 +50,19 @@ public class ServiceRequestService {
             ServiceRequest serviceRequest
     ) {
         // The server is the source of truth for when a request was made.
+        if (serviceRequest.getServiceCatalogue() != null &&
+            serviceRequest.getServiceCatalogue().getId() != null) {
+            var catalogue = serviceCatalogueRepository
+                    .findById(serviceRequest.getServiceCatalogue().getId())
+                    .orElseThrow(() -> new RuntimeException("Service catalogue not found"));
+
+            serviceRequest.setAmount(catalogue.getStandardPrice());
+        }
+
+        serviceRequest.setControlNumber(
+                "DMFS" + System.currentTimeMillis()
+        );
+        serviceRequest.setPaymentStatus("PENDING");
         serviceRequest.setRequestedDate(java.time.LocalDate.now());
         validateRelationships(serviceRequest);
 
