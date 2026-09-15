@@ -64,7 +64,10 @@ export class Management {
     label: 'Service Requests',
     route: '/management/service-requests',
   },
-
+  {
+    label: 'Missions',
+    route: '/management/missions',
+  },
 ];
 
   getInitials(): string {
