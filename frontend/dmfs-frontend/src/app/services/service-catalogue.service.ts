@@ -43,9 +43,9 @@ export class ServiceCatalogueService {
   private readonly apiUrl = '/api/service-catalogue';
 
   getServices(): Observable<ServiceCatalogue[]> {
-    return this.http.get<ServiceCatalogue[]>(
-      this.apiUrl
-    );
+    return this.http.get<ServiceCatalogue[]>(this.apiUrl, {
+      withCredentials: true
+    });
   }
 
   getService(id: number): Observable<ServiceCatalogue> {

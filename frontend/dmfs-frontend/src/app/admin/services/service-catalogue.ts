@@ -1,5 +1,5 @@
 import { CommonModule, DecimalPipe } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
@@ -35,6 +35,7 @@ export class ServiceCataloguePage implements OnInit {
   ];
 
   private readonly router = inject(Router);
+  private readonly changeDetector = inject(ChangeDetectorRef);
 
   private readonly serviceCatalogueService =
     inject(ServiceCatalogueService);
@@ -73,18 +74,23 @@ export class ServiceCataloguePage implements OnInit {
     this.loading = true;
     this.errorMessage = '';
 
+    console.log('[Services] requesting catalogue...');
+
     this.serviceCatalogueService.getServices().subscribe({
       next: services => {
+        console.log('[Services] catalogue received:', services);
         this.services = services;
         this.loading = false;
+        this.changeDetector.detectChanges();
       },
       error: error => {
-        console.error('Unable to load service catalogue:', error);
-
-        this.errorMessage =
-          'Unable to load the service catalogue.';
-
+        console.error('[Services] catalogue failed:', error);
+        this.errorMessage = 'Unable to load the service catalogue.';
         this.loading = false;
+        this.changeDetector.detectChanges();
+      },
+      complete: () => {
+        console.log('[Services] catalogue request completed');
       }
     });
   }

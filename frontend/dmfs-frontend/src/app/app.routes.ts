@@ -1,4 +1,4 @@
-import { Routes } from '@angular/router';
+﻿import { Routes } from '@angular/router';
 
 import { superAdminGuard } from './guards/super-admin.guard';
 import { roleGuard } from './guards/role.guard';
@@ -98,6 +98,12 @@ export const routes: Routes = [
             .then(m => m.Staff)
       },
 
+      {
+        path: 'services',
+        loadComponent: () =>
+          import('./admin/services/service-catalogue')
+            .then(m => m.ServiceCataloguePage)
+      },
     ]
   },
 
@@ -258,7 +264,7 @@ export const routes: Routes = [
         {
           label: 'Dashboard',
           description: 'Overview of your operational workload.',
-          icon: 'Ã¯Â¿Â½',
+          icon: 'ÃƒÂ¯Ã‚Â¿Ã‚Â½',
           route: '/drone-operator'
         },
         {
@@ -317,7 +323,7 @@ export const routes: Routes = [
         {
           label: 'Dashboard',
           description: 'Return to your dashboard.',
-          icon: 'Ã¯Â¿Â½',
+          icon: 'ÃƒÂ¯Ã‚Â¿Ã‚Â½',
           route: '/drone-operator'
         },
         {
@@ -354,7 +360,7 @@ export const routes: Routes = [
         {
           label: 'Dashboard',
           description: 'Return to dashboard.',
-          icon: 'Ã¯Â¿Â½',
+          icon: 'ÃƒÂ¯Ã‚Â¿Ã‚Â½',
           route: '/drone-operator'
         },
         {
@@ -391,7 +397,7 @@ export const routes: Routes = [
         {
           label: 'Dashboard',
           description: 'Return to dashboard.',
-          icon: 'Ã¯Â¿Â½',
+          icon: 'ÃƒÂ¯Ã‚Â¿Ã‚Â½',
           route: '/drone-operator'
         },
         {
@@ -434,7 +440,7 @@ export const routes: Routes = [
         {
           label: 'Dashboard',
           description: 'Return to dashboard.',
-          icon: 'Ã¯Â¿Â½',
+          icon: 'ÃƒÂ¯Ã‚Â¿Ã‚Â½',
           route: '/drone-operator'
         },
         {
