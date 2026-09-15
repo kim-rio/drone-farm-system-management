@@ -10,6 +10,11 @@ export interface ManagementDashboard {
   pendingPayments: number;
   paidPayments: number;
   requestStatuses: Record<string, number>;
+  missions: number;
+  missionStatuses: Record<string, number>;
+  paidRequestsAwaitingMission: number;
+  missionsAwaitingAssignment: number;
+  missionsAwaitingAcceptance: number;
 }
 
 @Injectable({ providedIn: 'root' })

@@ -1,4 +1,4 @@
-<div class="page">
+﻿<div class="page">
 
   <!-- HEADER -->
 
@@ -249,7 +249,7 @@
                 {{ block.name }}
 
                 @if (block.areaHectares !== null) {
-                  â€” {{ block.areaHectares }} ha
+                  -
                 }
 
               </option>
@@ -324,7 +324,7 @@
 
                 {{ service.name }}
 
-                â€”
+                -
                 {{ service.category }}
 
               </option>
@@ -353,7 +353,7 @@
             </div>
 
             @if (quotedTotal !== null) {
-              <p class="warning">Estimated payment: {{ quotedTotal | number:'1.0-2' }} ({{ selectedService.standardPrice | number:'1.0-2' }} per {{ selectedService.unitOfMeasurement }} × block area).</p>
+              <p class="warning">Estimated payment: {{ quotedTotal | number:'1.0-2' }} ({{ selectedService.standardPrice | number:'1.0-2' }} per {{ selectedService.unitOfMeasurement }} x block area).</p>
             }
 
             <div>
@@ -481,4 +481,12 @@
   </div>
 
 </div>
+
+
+
+
+
+
+
+
 

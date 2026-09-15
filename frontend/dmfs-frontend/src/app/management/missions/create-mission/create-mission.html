@@ -1,4 +1,4 @@
-<div class="page">
+﻿<div class="page">
 
   <div class="page-header">
 
@@ -9,7 +9,7 @@
         class="back"
         (click)="cancel()">
 
-        ← Missions
+          Back
 
       </button>
 
@@ -77,9 +77,9 @@
                 [ngValue]="request.id">
 
                 Request #{{ request.id }}
-                —
+                -
                 {{ request.serviceCatalogue.name }}
-                —
+                -
                 {{ getClientName(request) }}
 
               </option>
@@ -106,7 +106,7 @@
 
             @for (operator of operators; track operator.id) {
               <option [ngValue]="operator.id">
-                {{ operator.firstName }} {{ operator.lastName }} — {{ operator.email }}
+                {{ operator.firstName }} {{ operator.lastName }} - {{ operator.email }}
               </option>
             }
 
@@ -139,21 +139,21 @@
               <div>
                 <span>Farm</span>
                 <strong>
-                  {{ request.farm.name || '—' }}
+                  {{ request.farm.name || '-' }}
                 </strong>
               </div>
 
               <div>
                 <span>Block</span>
                 <strong>
-                  {{ request.farmBlock.name || '—' }}
+                  {{ request.farmBlock.name || '-' }}
                 </strong>
               </div>
 
               <div>
                 <span>Service</span>
                 <strong>
-                  {{ request.serviceCatalogue.name || '—' }}
+                  {{ request.serviceCatalogue.name || '-' }}
                 </strong>
               </div>
 
@@ -230,3 +230,13 @@
   }
 
 </div>
+
+
+
+
+
+
+
+
+
+

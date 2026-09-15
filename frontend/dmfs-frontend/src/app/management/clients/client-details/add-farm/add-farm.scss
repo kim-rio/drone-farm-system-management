@@ -1,4 +1,4 @@
-.modal-overlay {
+﻿.modal-overlay {
   position: fixed;
   inset: 0;
   z-index: 2000;
@@ -22,7 +22,7 @@
 
   overflow-y: auto;
 
-  background: #ffffff;
+  background: #fff;
 
   border-radius: 14px;
 
@@ -37,7 +37,7 @@
 
   padding: 24px;
 
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e5e3;
 }
 
 .eyebrow {
@@ -50,7 +50,7 @@
 
   letter-spacing: 1.4px;
 
-  color: #6b7280;
+  color: #666;
 }
 
 .modal-header h2 {
@@ -59,7 +59,7 @@
   font-size: 23px;
   font-weight: 700;
 
-  color: #111827;
+  color: #111;
 }
 
 .modal-header p {
@@ -67,7 +67,7 @@
 
   font-size: 14px;
 
-  color: #6b7280;
+  color: #666;
 }
 
 .close-button {
@@ -82,14 +82,14 @@
   font-size: 28px;
   line-height: 1;
 
-  color: #64748b;
+  color: #666;
 
   cursor: pointer;
 }
 
 .close-button:hover {
-  background: #f1f5f9;
-  color: #111827;
+  background: #f1f1ef;
+  color: #111;
 }
 
 form {
@@ -102,7 +102,7 @@ form {
 
   gap: 7px;
 
-  margin-bottom: 18px;
+  margin-bottom: 20px;
 }
 
 .form-group label {
@@ -120,12 +120,12 @@ form {
 
   padding: 11px 12px;
 
-  border: 1px solid #d1d5db;
+  border: 1px solid #d5d5d3;
   border-radius: 8px;
 
-  background: #ffffff;
+  background: #fff;
 
-  color: #111827;
+  color: #111;
 
   font-size: 14px;
 
@@ -134,7 +134,7 @@ form {
 
 .form-group input:focus,
 .form-group textarea:focus {
-  border-color: #111827;
+  border-color: #111;
 
   box-shadow:
     0 0 0 2px rgba(17, 24, 39, 0.08);
@@ -181,7 +181,7 @@ form {
 
   padding-top: 20px;
 
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid #e5e5e3;
 }
 
 .primary-button,
@@ -198,27 +198,27 @@ form {
 }
 
 .primary-button {
-  border: 1px solid #111827;
+  border: 1px solid #111;
 
-  background: #111827;
+  background: #111;
 
-  color: #ffffff;
+  color: #fff;
 }
 
 .primary-button:hover:not(:disabled) {
-  background: #1f2937;
+  background: #111;
 }
 
 .secondary-button {
-  border: 1px solid #d1d5db;
+  border: 1px solid #d5d5d3;
 
-  background: #ffffff;
+  background: #fff;
 
   color: #374151;
 }
 
 .secondary-button:hover:not(:disabled) {
-  background: #f8fafc;
+  background: #f7f7f5;
 }
 
 .primary-button:disabled,
@@ -261,3 +261,4 @@ form {
     width: 100%;
   }
 }
+

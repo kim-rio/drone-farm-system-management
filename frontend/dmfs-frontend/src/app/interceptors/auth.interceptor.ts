@@ -23,7 +23,7 @@ export const authInterceptor: HttpInterceptorFn =
       catchError(error => {
 
         if (error?.status === 401) {
-          authService.clearSession();
+          console.error('AUTH 401:', req.url, error);
         }
 
         return throwError(() => error);

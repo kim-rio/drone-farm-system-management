@@ -1,4 +1,4 @@
-<div class="page">
+﻿<div class="page">
 
   @if (loading) {
 
@@ -19,7 +19,7 @@
           class="back"
           (click)="backToRequests()">
 
-          â† Service Requests
+          Back
 
         </button>
 
@@ -187,28 +187,28 @@
             <div>
               <span>client Code</span>
               <strong>
-                {{ request.client.clientCode || 'â€”' }}
+                {{ request.client.clientCode || '-' }}
               </strong>
             </div>
 
             <div>
               <span>Type</span>
               <strong>
-                {{ request.client.type || 'â€”' }}
+                {{ request.client.type || '-' }}
               </strong>
             </div>
 
             <div>
               <span>Email</span>
               <strong>
-                {{ request.client.email || 'â€”' }}
+                {{ request.client.email || '-' }}
               </strong>
             </div>
 
             <div>
               <span>Phone</span>
               <strong>
-                {{ request.client.phone || 'â€”' }}
+                {{ request.client.phone || '-' }}
               </strong>
             </div>
 
@@ -238,7 +238,7 @@
             <div>
               <span>Farm</span>
               <strong>
-                {{ request.farm.name || 'â€”' }}
+                {{ request.farm.name || '-' }}
               </strong>
             </div>
 
@@ -248,7 +248,7 @@
                 {{
                   request.farm.areaHectares != null
                     ? request.farm.areaHectares + ' ha'
-                    : 'â€”'
+                    : '-'
                 }}
               </strong>
             </div>
@@ -256,7 +256,7 @@
             <div>
               <span>Description</span>
               <strong>
-                {{ request.farm.description || 'â€”' }}
+                {{ request.farm.description || '-' }}
               </strong>
             </div>
 
@@ -286,7 +286,7 @@
             <div>
               <span>Block</span>
               <strong>
-                {{ request.farmBlock.name || 'â€”' }}
+                {{ request.farmBlock.name || '-' }}
               </strong>
             </div>
 
@@ -296,7 +296,7 @@
                 {{
                   request.farmBlock.areaHectares != null
                     ? request.farmBlock.areaHectares + ' ha'
-                    : 'â€”'
+                    : '-'
                 }}
               </strong>
             </div>
@@ -304,14 +304,14 @@
             <div>
               <span>Centre Latitude</span>
               <strong>
-                {{ request.farmBlock.centerLatitude ?? 'â€”' }}
+                {{ request.farmBlock.centerLatitude ?? '-' }}
               </strong>
             </div>
 
             <div>
               <span>Centre Longitude</span>
               <strong>
-                {{ request.farmBlock.centerLongitude ?? 'â€”' }}
+                {{ request.farmBlock.centerLongitude ?? '-' }}
               </strong>
             </div>
 
@@ -341,21 +341,21 @@
             <div>
               <span>Service</span>
               <strong>
-                {{ request.serviceCatalogue.name || 'â€”' }}
+                {{ request.serviceCatalogue.name || '-' }}
               </strong>
             </div>
 
             <div>
               <span>Category</span>
               <strong>
-                {{ request.serviceCatalogue.category || 'â€”' }}
+                {{ request.serviceCatalogue.category || '-' }}
               </strong>
             </div>
 
             <div>
               <span>Unit</span>
               <strong>
-                {{ request.serviceCatalogue.unitOfMeasurement || 'â€”' }}
+                {{ request.serviceCatalogue.unitOfMeasurement || '-' }}
               </strong>
             </div>
 
@@ -375,7 +375,7 @@
                 {{
                   request.serviceCatalogue.minimumArea != null
                     ? request.serviceCatalogue.minimumArea + ' ha'
-                    : '—'
+                    : '-'
                 }}
               </strong>
             </div>
@@ -386,7 +386,7 @@
                 {{
                   request.serviceCatalogue.estimatedDurationMinutes != null
                     ? request.serviceCatalogue.estimatedDurationMinutes + ' minutes'
-                    : '—'
+                    : '-'
                 }}
               </strong>
             </div>
@@ -708,15 +708,20 @@
       <button
         type="button"
         class="primary"
-        (click)="backToRequests()">
-
-        Back to Requests
-
-      </button>
+        (click)="backToRequests()">Back</button>
 
     </div>
 
   }
 
 </div>
+
+
+
+
+
+
+
+
+
 

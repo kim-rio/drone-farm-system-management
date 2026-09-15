@@ -1,4 +1,4 @@
-<div class="page">
+﻿<div class="page">
 
   @if (loading) {
 
@@ -17,9 +17,7 @@
           class="back"
           (click)="back()">
 
-          ← Missions
-
-        </button>
+          Back</button>
 
         <p class="eyebrow">
           FIELD MISSION
@@ -84,7 +82,7 @@
             <span>Request ID</span>
 
             <strong>
-              #{{ mission.serviceRequest?.id || '—' }}
+              #{{ mission.serviceRequest?.id || '-' }}
             </strong>
           </div>
 
@@ -92,7 +90,7 @@
             <span>Requested Date</span>
 
             <strong>
-              {{ mission.serviceRequest?.requestedDate || '—' }}
+              {{ mission.serviceRequest?.requestedDate || '-' }}
             </strong>
           </div>
 
@@ -100,7 +98,7 @@
             <span>Request Status</span>
 
             <strong>
-              {{ mission.serviceRequest?.status || '—' }}
+              {{ mission.serviceRequest?.status || '-' }}
             </strong>
           </div>
 
@@ -131,7 +129,7 @@
             <span>Farm</span>
 
             <strong>
-              {{ mission.farm?.name || '—' }}
+              {{ mission.farm?.name || '-' }}
             </strong>
           </div>
 
@@ -139,7 +137,7 @@
             <span>Block</span>
 
             <strong>
-              {{ mission.farmBlock?.name || '—' }}
+              {{ mission.farmBlock?.name || '-' }}
             </strong>
           </div>
 
@@ -147,7 +145,7 @@
             <span>Area</span>
 
             <strong>
-              {{ mission.farmBlock?.areaHectares || '—' }}
+              {{ mission.farmBlock?.areaHectares || '-' }}
               @if (mission.farmBlock?.areaHectares) {
                 ha
               }
@@ -393,14 +391,21 @@
       <button
         type="button"
         class="primary"
-        (click)="back()">
-
-        Back to Missions
-
-      </button>
+        (click)="back()">Back</button>
 
     </div>
 
   }
 
 </div>
+
+
+
+
+
+
+
+
+
+
+

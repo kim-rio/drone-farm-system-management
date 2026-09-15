@@ -1,7 +1,7 @@
-.page {
+﻿.page {
   padding: 32px;
   min-height: 100%;
-  background: #f8fafc;
+  background: #f7f7f5;
 }
 
 .page-header {
@@ -18,7 +18,7 @@
 
   p {
     margin: 6px 0 0;
-    color: #64748b;
+    color: #666;
   }
 }
 
@@ -26,13 +26,13 @@
   border: none;
   border-radius: 8px;
   padding: 12px 20px;
-  background: #111827;
+  background: #111;
   color: white;
   font-weight: 600;
   cursor: pointer;
 
   &:hover {
-    background: #1f2937;
+    background: #111;
   }
 
   &:disabled {
@@ -42,7 +42,7 @@
 }
 
 .secondary {
-  border: 1px solid #d1d5db;
+  border: 1px solid #d5d5d3;
   border-radius: 8px;
   padding: 12px 20px;
   background: white;
@@ -51,7 +51,7 @@
   cursor: pointer;
 
   &:hover {
-    background: #f3f4f6;
+    background: #f1f1ef;
   }
 
   &:disabled {
@@ -63,7 +63,7 @@
 .state {
   padding: 50px;
   text-align: center;
-  color: #64748b;
+  color: #666;
 }
 
 .alert {
@@ -77,7 +77,7 @@
   padding: 80px 20px;
   text-align: center;
   background: white;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #e5e5e3;
   border-radius: 12px;
 
   h2 {
@@ -85,7 +85,7 @@
   }
 
   p {
-    color: #64748b;
+    color: #666;
     margin-bottom: 24px;
   }
 }
@@ -97,15 +97,15 @@
 }
 
 .client-card {
-  padding: 22px;
+  padding: 24px;
   background: white;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #e5e5e3;
   border-radius: 12px;
   cursor: pointer;
   transition: 0.2s;
 
   &:hover {
-    border-color: #9ca3af;
+    border-color: #999;
     transform: translateY(-2px);
   }
 }
@@ -114,7 +114,7 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  margin-bottom: 22px;
+  margin-bottom: 24px;
 }
 
 .avatar {
@@ -124,7 +124,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #111827;
+  background: #111;
   color: white;
   font-weight: 700;
   font-size: 18px;
@@ -138,7 +138,7 @@
 .code {
   display: block;
   margin-top: 4px;
-  color: #64748b;
+  color: #666;
   font-size: 13px;
 }
 
@@ -154,12 +154,12 @@
 
   span {
     font-size: 12px;
-    color: #94a3b8;
+    color: #999;
   }
 
   strong {
     font-size: 14px;
-    color: #334155;
+    color: #111;
     word-break: break-word;
   }
 }
@@ -167,7 +167,7 @@
 .view {
   margin-top: 20px;
   padding-top: 16px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid #e5e5e3;
   font-size: 14px;
   font-weight: 600;
 }
@@ -215,7 +215,7 @@
 
   padding: 24px;
 
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e5e3;
 
   h2 {
     margin: 0;
@@ -224,7 +224,7 @@
 
   p {
     margin: 6px 0 0;
-    color: #64748b;
+    color: #666;
     font-size: 14px;
   }
 }
@@ -241,13 +241,13 @@
   font-size: 28px;
   line-height: 1;
 
-  color: #64748b;
+  color: #666;
 
   cursor: pointer;
 
   &:hover {
-    background: #f1f5f9;
-    color: #111827;
+    background: #f1f1ef;
+    color: #111;
   }
 }
 
@@ -272,7 +272,7 @@ form {
   flex-direction: column;
   gap: 7px;
 
-  margin-bottom: 18px;
+  margin-bottom: 20px;
 
   label {
     font-size: 13px;
@@ -287,7 +287,7 @@ form {
 
     padding: 11px 12px;
 
-    border: 1px solid #d1d5db;
+    border: 1px solid #d5d5d3;
     border-radius: 8px;
 
     background: white;
@@ -296,7 +296,7 @@ form {
     outline: none;
 
     &:focus {
-      border-color: #111827;
+      border-color: #111;
       box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.08);
     }
   }
@@ -316,7 +316,7 @@ form {
   margin-top: 28px;
   padding-top: 20px;
 
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid #e5e5e3;
 }
 
 
@@ -349,3 +349,42 @@ form {
     max-height: calc(100vh - 24px);
   }
 }
+
+
+/* Compact client list cards */
+.client-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.client-card {
+  width: 100%;
+  min-height: 64px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  box-sizing: border-box;
+  text-align: left;
+  border-radius: 12px;
+}
+
+.client-name {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.client-card .view {
+  margin: 0;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .client-card {
+    min-height: 60px;
+    padding: 14px 16px;
+  }
+}
+

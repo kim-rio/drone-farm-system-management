@@ -151,90 +151,360 @@
     </header>
 
 
-    @if (isDashboard()) {
-    <section class="page">
+        @if (isDashboard()) {
+      <section class="page">
 
-      <div class="page-heading">
+        <div class="page-heading">
+          <div>
+            <span class="eyebrow">MANAGEMENT PORTAL</span>
+            <h1>Management Dashboard</h1>
+            <p>Company operations and service workflow overview.</p>
+          </div>
+        </div>
 
-        <span class="eyebrow">
-          MANAGEMENT PORTAL
-        </span>
+        <!-- CORE METRICS -->
+        <div class="metric-grid">
 
-        <h1>
-          Management Dashboard
-        </h1>
+          <div class="metric-card">
+            <div class="metric-top">
+              <span>Clients</span>
+              <span class="metric-mark">CL</span>
+            </div>
+            <strong>{{ dashboard.clients }}</strong>
+            <small>Company clients</small>
+          </div>
 
-        <p>
-          Manage clients, farms and service requests.
-        </p>
+          <div class="metric-card">
+            <div class="metric-top">
+              <span>Farms</span>
+              <span class="metric-mark">FM</span>
+            </div>
+            <strong>{{ dashboard.farms }}</strong>
+            <small>Managed farms</small>
+          </div>
 
-      </div>
+          <div class="metric-card">
+            <div class="metric-top">
+              <span>Blocks</span>
+              <span class="metric-mark">BL</span>
+            </div>
+            <strong>{{ dashboard.blocks }}</strong>
+            <small>Farm blocks</small>
+          </div>
 
-
-      <div class="stat-grid">
-
-        <div class="stat-card">
-
-          <span>
-            Clients
-          </span>
-
-          <strong>{{ dashboard.clients }}</strong>
-
-          <small>
-            Company clients
-          </small>
+          <div class="metric-card metric-card-dark">
+            <div class="metric-top">
+              <span>Service Requests</span>
+              <span class="metric-mark">SR</span>
+            </div>
+            <strong>{{ dashboard.serviceRequests }}</strong>
+            <small>Current requests</small>
+          </div>
 
         </div>
 
+        <!-- ANALYTICS -->
+        <div class="analytics-grid">
 
-        <div class="stat-card">
+          <section class="panel analytics-panel">
+            <div class="panel-header">
+              <div>
+                <h2>Service Requests</h2>
+                <p>Request status distribution</p>
+              </div>
 
-          <span>
-            Farms
-          </span>
+              <button
+                type="button"
+                class="panel-link"
+                (click)="navigate('/management/service-requests')">
+                View
+              </button>
+            </div>
 
-          <strong>{{ dashboard.farms }}</strong>
+            <div class="analytics-content">
 
-          <small>
-            Managed farms
-          </small>
+              <div
+                class="donut"
+                [style.--progress]="dashboard.serviceRequests > 0
+                  ? ((dashboard.requestStatuses['COMPLETED'] || 0) / dashboard.serviceRequests) * 100 + '%'
+                  : '0%'">
+
+                <div class="donut-inner">
+                  <strong>{{ dashboard.serviceRequests }}</strong>
+                  <span>Total</span>
+                </div>
+
+              </div>
+
+              <div class="legend">
+
+                <div class="legend-item">
+                  <span class="legend-dot"></span>
+                  <span>Pending</span>
+                  <strong>{{ dashboard.requestStatuses['PENDING'] || 0 }}</strong>
+                </div>
+
+                <div class="legend-item">
+                  <span class="legend-dot"></span>
+                  <span>Approved</span>
+                  <strong>{{ dashboard.requestStatuses['APPROVED'] || 0 }}</strong>
+                </div>
+
+                <div class="legend-item">
+                  <span class="legend-dot"></span>
+                  <span>Rejected</span>
+                  <strong>{{ dashboard.requestStatuses['REJECTED'] || 0 }}</strong>
+                </div>
+
+                <div class="legend-item">
+                  <span class="legend-dot"></span>
+                  <span>Completed</span>
+                  <strong>{{ dashboard.requestStatuses['COMPLETED'] || 0 }}</strong>
+                </div>
+
+              </div>
+
+            </div>
+          </section>
+
+          <section class="panel analytics-panel">
+            <div class="panel-header">
+              <div>
+                <h2>Mission Status</h2>
+                <p>Current field operations</p>
+              </div>
+
+              <button
+                type="button"
+                class="panel-link"
+                (click)="navigate('/management/missions')">
+                Missions
+              </button>
+            </div>
+
+            <div class="analytics-content">
+
+              <div
+                class="donut mission-donut"
+                [style.--progress]="dashboard.missions > 0
+                  ? ((dashboard.missionStatuses['COMPLETED'] || 0) / dashboard.missions) * 100 + '%'
+                  : '0%'">
+
+                <div class="donut-inner">
+                  <strong>{{ dashboard.missions }}</strong>
+                  <span>Total</span>
+                </div>
+
+              </div>
+
+              <div class="legend">
+
+                <div class="legend-item">
+                  <span class="legend-dot"></span>
+                  <span>Planned</span>
+                  <strong>{{ dashboard.missionStatuses['PLANNED'] || 0 }}</strong>
+                </div>
+
+                <div class="legend-item">
+                  <span class="legend-dot"></span>
+                  <span>Assigned</span>
+                  <strong>{{ dashboard.missionStatuses['ASSIGNED'] || 0 }}</strong>
+                </div>
+
+                <div class="legend-item">
+                  <span class="legend-dot"></span>
+                  <span>In Progress</span>
+                  <strong>{{ dashboard.missionStatuses['IN_PROGRESS'] || 0 }}</strong>
+                </div>
+
+                <div class="legend-item">
+                  <span class="legend-dot"></span>
+                  <span>Completed</span>
+                  <strong>{{ dashboard.missionStatuses['COMPLETED'] || 0 }}</strong>
+                </div>
+
+              </div>
+
+            </div>
+          </section>
 
         </div>
 
+        <!-- WORKFLOW -->
+        <section class="panel workflow-panel">
 
-        <div class="stat-card">
+          <div class="panel-header">
+            <div>
+              <h2>Operations Workflow</h2>
+              <p>Where work currently sits in the process</p>
+            </div>
+          </div>
 
-          <span>
-            Service Requests
-          </span>
+          <div class="workflow">
 
-          <strong>{{ dashboard.serviceRequests }}</strong>
+            <div class="workflow-step">
+              <div class="workflow-number">
+                {{ dashboard.requestStatuses['PENDING'] || 0 }}
+              </div>
+              <strong>Requests</strong>
+              <span>Pending</span>
+            </div>
 
-          <small>
-            Current requests
-          </small>
+            <div class="workflow-connector"></div>
+
+            <div class="workflow-step">
+              <div class="workflow-number">
+                {{ dashboard.pendingPayments }}
+              </div>
+              <strong>Payment</strong>
+              <span>Pending</span>
+            </div>
+
+            <div class="workflow-connector"></div>
+
+            <div class="workflow-step">
+              <div class="workflow-number">
+                {{ dashboard.paidRequestsAwaitingMission }}
+              </div>
+              <strong>Mission</strong>
+              <span>Awaiting creation</span>
+            </div>
+
+            <div class="workflow-connector"></div>
+
+            <div class="workflow-step">
+              <div class="workflow-number">
+                {{ dashboard.missionsAwaitingAssignment }}
+              </div>
+              <strong>Assignment</strong>
+              <span>Awaiting operator</span>
+            </div>
+
+            <div class="workflow-connector"></div>
+
+            <div class="workflow-step">
+              <div class="workflow-number">
+                {{ dashboard.missionsAwaitingAcceptance }}
+              </div>
+              <strong>Operation</strong>
+              <span>Awaiting acceptance</span>
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- ATTENTION + PAYMENT -->
+        <div class="bottom-grid">
+
+          <section class="panel attention-panel">
+
+            <div class="panel-header">
+              <div>
+                <h2>Needs Attention</h2>
+                <p>Items requiring management action</p>
+              </div>
+            </div>
+
+            <div class="attention-list">
+
+              @if ((dashboard.requestStatuses['PENDING'] || 0) > 0) {
+                <button
+                  type="button"
+                  class="attention-row"
+                  (click)="navigate('/management/service-requests')">
+                  <div>
+                    <strong>{{ dashboard.requestStatuses['PENDING'] }} pending requests</strong>
+                    <span>Service requests need review.</span>
+                  </div>
+                  <span class="attention-arrow">View</span>
+                </button>
+              }
+
+              @if (dashboard.pendingPayments > 0) {
+                <button
+                  type="button"
+                  class="attention-row"
+                  (click)="navigate('/management/service-requests')">
+                  <div>
+                    <strong>{{ dashboard.pendingPayments }} pending payments</strong>
+                    <span>Requests are waiting for payment.</span>
+                  </div>
+                  <span class="attention-arrow">View</span>
+                </button>
+              }
+
+              @if (dashboard.missionsAwaitingAssignment > 0) {
+                <button
+                  type="button"
+                  class="attention-row"
+                  (click)="navigate('/management/missions')">
+                  <div>
+                    <strong>{{ dashboard.missionsAwaitingAssignment }} missions awaiting assignment</strong>
+                    <span>An operator needs to be assigned.</span>
+                  </div>
+                  <span class="attention-arrow">View</span>
+                </button>
+              }
+
+              @if (dashboard.missionsAwaitingAcceptance > 0) {
+                <button
+                  type="button"
+                  class="attention-row"
+                  (click)="navigate('/management/missions')">
+                  <div>
+                    <strong>{{ dashboard.missionsAwaitingAcceptance }} missions awaiting acceptance</strong>
+                    <span>The assigned operator has not accepted.</span>
+                  </div>
+                  <span class="attention-arrow">View</span>
+                </button>
+              }
+
+              @if (
+                (dashboard.requestStatuses['PENDING'] || 0) === 0 &&
+                dashboard.pendingPayments === 0 &&
+                dashboard.missionsAwaitingAssignment === 0 &&
+                dashboard.missionsAwaitingAcceptance === 0
+              ) {
+                <div class="empty-state">
+                  <strong>No action required</strong>
+                  <span>Everything is currently up to date.</span>
+                </div>
+              }
+
+            </div>
+
+          </section>
+
+          <section class="panel payment-panel">
+
+            <div class="panel-header">
+              <div>
+                <h2>Payments</h2>
+                <p>Service request payment status</p>
+              </div>
+            </div>
+
+            <div class="payment-summary">
+
+              <div class="payment-value">
+                <span>Pending</span>
+                <strong>{{ dashboard.pendingPayments }}</strong>
+              </div>
+
+              <div class="payment-divider"></div>
+
+              <div class="payment-value">
+                <span>Paid</span>
+                <strong>{{ dashboard.paidPayments }}</strong>
+              </div>
+
+            </div>
+
+          </section>
 
         </div>
-
-
-        <div class="stat-card">
-
-          <span>
-            Completed
-          </span>
-
-          <strong>{{ dashboard.requestStatuses['COMPLETED'] }}</strong>
-
-          <small>
-            Completed services
-          </small>
-
-        </div>
-
-      </div>
-
-    </section>
+      </section>
     } @else {
       <router-outlet />
     }
@@ -242,3 +512,11 @@
   </main>
 
 </div>
+
+
+
+
+
+
+
+

@@ -1,4 +1,4 @@
-@'
+﻿@'
 <div class="page">
 
   <!-- PAGE HEADER -->
@@ -24,9 +24,7 @@
     <button
       class="primary"
       type="button"
-      (click)="registerDrone()">
-
-      + Register Drone
+      (click)="registerDrone()"> Register Drone
 
     </button>
 
@@ -101,9 +99,7 @@
       <button
         class="primary"
         type="button"
-        (click)="registerDrone()">
-
-        + Register Drone
+        (click)="registerDrone()"> Register Drone
 
       </button>
 
@@ -208,7 +204,7 @@
                 </span>
 
                 <strong>
-                  {{ drone.manufacturer || '—' }}
+                  {{ drone.manufacturer || '-' }}
                 </strong>
 
               </div>
@@ -223,7 +219,7 @@
                 </span>
 
                 <strong>
-                  {{ drone.model || '—' }}
+                  {{ drone.model || '-' }}
                 </strong>
 
               </div>
@@ -271,7 +267,7 @@
               </div>
 
               <span class="view">
-                View Drone →
+                View Drone
               </span>
 
             </div>
@@ -289,3 +285,12 @@
 
 </div>
 '@ | Set-Content .\src\app\management\drones\drone-list\drone-list.html -Encoding UTF8
+
+
+
+
+
+
+
+
+

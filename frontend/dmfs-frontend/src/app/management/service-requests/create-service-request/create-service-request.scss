@@ -1,7 +1,7 @@
-:host {
+﻿:host {
   display: block;
   min-height: 100%;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: inherit;
   color: #111;
 }
 
@@ -18,7 +18,7 @@
   min-height: 100%;
   padding: 32px;
 
-  background: #f8fafc;
+  background: #f7f7f5;
 }
 
 
@@ -41,7 +41,7 @@
   p:last-child {
     margin: 6px 0 0;
 
-    color: #64748b;
+    color: #666;
 
     font-size: 11px;
   }
@@ -50,7 +50,7 @@
 .eyebrow {
   margin: 0 0 6px;
 
-  color: #888;
+  color: #999;
 
   font-size: 8px;
   font-weight: 700;
@@ -95,11 +95,11 @@
 
   margin: 0 auto;
 
-  padding: 28px;
+  padding: 32px;
 
   background: white;
 
-  border: 1px solid #e5e7eb;
+  border: 1px solid #e5e5e3;
 
   border-radius: 12px;
 }
@@ -124,7 +124,7 @@
 }
 
 .section-heading {
-  margin-bottom: 18px;
+  margin-bottom: 20px;
 
   h2 {
     margin: 0;
@@ -145,7 +145,7 @@
 
   gap: 7px;
 
-  margin-bottom: 18px;
+  margin-bottom: 20px;
 
   &:last-child {
     margin-bottom: 0;
@@ -165,13 +165,13 @@
 
     padding: 12px;
 
-    border: 1px solid #d1d5db;
+    border: 1px solid #d5d5d3;
 
     border-radius: 8px;
 
     background: white;
 
-    color: #111827;
+    color: #111;
 
     font-family: inherit;
 
@@ -180,7 +180,7 @@
     outline: none;
 
     &:focus {
-      border-color: #111827;
+      border-color: #111;
 
       box-shadow:
         0 0 0 2px
@@ -188,9 +188,9 @@
     }
 
     &:disabled {
-      background: #f8fafc;
+      background: #f7f7f5;
 
-      color: #94a3b8;
+      color: #999;
 
       cursor: not-allowed;
     }
@@ -203,7 +203,7 @@
   }
 
   small {
-    color: #64748b;
+    color: #666;
 
     font-size: 11px;
   }
@@ -230,9 +230,9 @@
 
   padding: 15px;
 
-  background: #f8fafc;
+  background: #f7f7f5;
 
-  border: 1px solid #e5e7eb;
+  border: 1px solid #e5e5e3;
 
   border-radius: 9px;
 
@@ -244,13 +244,13 @@
   }
 
   span {
-    color: #94a3b8;
+    color: #999;
 
     font-size: 10px;
   }
 
   strong {
-    color: #334155;
+    color: #111;
 
     font-size: 13px;
   }
@@ -290,12 +290,12 @@
 .primary {
   border: none;
 
-  background: #111827;
+  background: #111;
 
   color: white;
 
   &:hover {
-    background: #1f2937;
+    background: #111;
   }
 
   &:disabled {
@@ -306,14 +306,14 @@
 }
 
 .secondary {
-  border: 1px solid #d1d5db;
+  border: 1px solid #d5d5d3;
 
   background: white;
 
   color: #374151;
 
   &:hover {
-    background: #f3f4f6;
+    background: #f1f1ef;
   }
 
   &:disabled {
@@ -360,3 +360,5 @@
   }
 
 }
+
+

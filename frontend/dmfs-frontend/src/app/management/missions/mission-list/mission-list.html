@@ -1,4 +1,4 @@
-<div class="page">
+﻿<div class="page">
 
   <div class="page-header">
 
@@ -22,9 +22,7 @@
     <button
       type="button"
       class="primary"
-      (click)="createMission()">
-
-      + Create Mission
+      (click)="createMission()"> Create Mission
 
     </button>
 
@@ -124,7 +122,7 @@
               <span>Client</span>
 
               <strong>
-                {{ mission.customer?.clientCode || '—' }}
+                {{ mission.customer?.clientCode || '-' }}
               </strong>
             </div>
 
@@ -133,7 +131,7 @@
               <span>Block</span>
 
               <strong>
-                {{ mission.farmBlock?.name || '—' }}
+                {{ mission.farmBlock?.name || '-' }}
               </strong>
             </div>
 
@@ -142,7 +140,7 @@
               <span>Scheduled</span>
 
               <strong>
-                {{ mission.scheduledDate || '—' }}
+                {{ mission.scheduledDate || '-' }}
               </strong>
             </div>
 
@@ -180,3 +178,12 @@
   }
 
 </div>
+
+
+
+
+
+
+
+
+

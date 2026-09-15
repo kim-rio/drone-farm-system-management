@@ -1,13 +1,26 @@
 import { Component, inject } from '@angular/core';
-import { Router } from '@angular/router';
-import { RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { AuthService, LoginResponse } from '../services/auth.service';
 import { ManagementDashboardService } from './management-dashboard.service';
 
 interface ManagementMenuItem {
   label: string;
   route: string;
+}
 
+interface ManagementDashboard {
+  clients: number;
+  farms: number;
+  blocks: number;
+  serviceRequests: number;
+  pendingPayments: number;
+  paidPayments: number;
+  requestStatuses: Record<string, number>;
+  missions: number;
+  missionStatuses: Record<string, number>;
+  paidRequestsAwaitingMission: number;
+  missionsAwaitingAssignment: number;
+  missionsAwaitingAcceptance: number;
 }
 
 @Component({
@@ -18,18 +31,35 @@ interface ManagementMenuItem {
   styleUrl: './management.scss'
 })
 export class Management {
-
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
   private readonly dashboardService = inject(ManagementDashboardService);
 
-  dashboard = {
+  dashboard: ManagementDashboard = {
     clients: 0,
     farms: 0,
     blocks: 0,
     serviceRequests: 0,
-    requestStatuses: {} as Record<string, number>
+    pendingPayments: 0,
+    paidPayments: 0,
+    requestStatuses: {},
+    missions: 0,
+    missionStatuses: {},
+    paidRequestsAwaitingMission: 0,
+    missionsAwaitingAssignment: 0,
+    missionsAwaitingAcceptance: 0
   };
+
+  sidebarOpen = true;
+  user: LoginResponse | null = this.authService.getCurrentUser();
+
+  menuItems: ManagementMenuItem[] = [
+    { label: 'Dashboard', route: '/management' },
+    { label: 'Clients', route: '/management/clients' },
+    { label: 'Farms', route: '/management/farms' },
+    { label: 'Service Requests', route: '/management/service-requests' },
+    { label: 'Missions', route: '/management/missions' }
+  ];
 
   constructor() {
     this.dashboardService.getDashboard().subscribe({
@@ -38,49 +68,11 @@ export class Management {
     });
   }
 
-  sidebarOpen = true;
-
-  user: LoginResponse | null =
-    this.authService.getCurrentUser();
-
-  menuItems: ManagementMenuItem[] = [
-
-  {
-    label: 'Dashboard',
-    route: '/management',
-  },
-
-  {
-    label: 'Clients',
-    route: '/management/clients',
-  },
-
-  {
-    label: 'Farms',
-    route: '/management/farms',
-  },
-
-  {
-    label: 'Service Requests',
-    route: '/management/service-requests',
-  },
-  {
-    label: 'Missions',
-    route: '/management/missions',
-  },
-];
-
   getInitials(): string {
+    if (!this.user) return 'MG';
 
-    if (!this.user) {
-      return 'MG';
-    }
-
-    const first =
-      this.user.firstName?.charAt(0) ?? '';
-
-    const last =
-      this.user.lastName?.charAt(0) ?? '';
+    const first = this.user.firstName?.charAt(0) ?? '';
+    const last = this.user.lastName?.charAt(0) ?? '';
 
     return `${first}${last}`.toUpperCase();
   }
@@ -94,12 +86,8 @@ export class Management {
   }
 
   isActive(route: string): boolean {
-
     if (route === '/management') {
-      return (
-        this.router.url === '/management' ||
-        this.router.url === '/management/'
-      );
+      return this.router.url === '/management' || this.router.url === '/management/';
     }
 
     return this.router.url.startsWith(route);
@@ -110,11 +98,9 @@ export class Management {
   }
 
   logout(): void {
-
     this.authService.logout().subscribe({
       next: () => this.router.navigate(['/login']),
       error: () => this.router.navigate(['/login'])
     });
-
   }
 }

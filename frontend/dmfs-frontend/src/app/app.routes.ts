@@ -1,4 +1,4 @@
-﻿import { Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 
 import { superAdminGuard } from './guards/super-admin.guard';
 import { roleGuard } from './guards/role.guard';
@@ -132,88 +132,6 @@ export const routes: Routes = [
       { path: 'missions/:id', loadComponent: () => import('./management/missions/mission-details/mission-details').then(m => m.MissionDetails) }
     ]
   },
-
-  {
-    path: 'management/clients',
-    canActivate: [roleGuard(['MANAGEMENT'])],
-    loadComponent: () =>
-      import('./management/clients/client-list/client-list')
-        .then(m => m.ClientList)
-  },
-
-  {
-    path: 'management/clients/register',
-    canActivate: [roleGuard(['MANAGEMENT'])],
-    loadComponent: () =>
-      import('./management/clients/register-clients/register-clients')
-        .then(m => m.RegisterClients)
-  },
-
-  {
-    path: 'management/clients/:clientId/farms/:farmId',
-    canActivate: [roleGuard(['MANAGEMENT'])],
-    loadComponent: () =>
-      import('./management/clients/client-details/farm-details/farm-details')
-        .then(m => m.FarmDetails)
-  },
-
-  {
-    path: 'management/clients/:id',
-    canActivate: [roleGuard(['MANAGEMENT'])],
-    loadComponent: () =>
-      import('./management/clients/client-details/client-details')
-        .then(m => m.ClientDetails)
-  },
-
-
-  { path: 'management/farms', component: FarmList, canActivate: [roleGuard(['MANAGEMENT'])] },
-
-    {
-    path: 'management/service-requests',
-    canActivate: [roleGuard(['MANAGEMENT'])],
-    loadComponent: () =>
-      import('./management/service-requests/service-request-list/service-request-list')
-        .then(m => m.ServiceRequestList)
-  },
-
-  {
-    path: 'management/service-requests/new',
-    canActivate: [roleGuard(['MANAGEMENT'])],
-    loadComponent: () =>
-      import('./management/service-requests/create-service-request/create-service-request')
-        .then(m => m.CreateServiceRequest)
-  },
-
-  {
-    path: 'management/service-requests/:id',
-    canActivate: [roleGuard(['MANAGEMENT'])],
-    loadComponent: () =>
-      import('./management/service-requests/service-request-details/service-request-details')
-        .then(m => m.ServiceRequestDetails)
-  },
-  {
-  path: 'management/missions',
-  canActivate: [roleGuard(['MANAGEMENT'])],
-  loadComponent: () =>
-    import('./management/missions/mission-list/mission-list')
-      .then(m => m.MissionList)
-},
-
-{
-  path: 'management/missions/new',
-  canActivate: [roleGuard(['MANAGEMENT'])],
-  loadComponent: () =>
-    import('./management/missions/create-mission/create-mission')
-      .then(m => m.CreateMission)
-},
-
-{
-  path: 'management/missions/:id',
-  canActivate: [roleGuard(['MANAGEMENT'])],
-  loadComponent: () =>
-    import('./management/missions/mission-details/mission-details')
-      .then(m => m.MissionDetails)
-},
 
 
   // ==========================================================

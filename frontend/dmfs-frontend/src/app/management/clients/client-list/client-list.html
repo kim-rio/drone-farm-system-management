@@ -1,51 +1,34 @@
-<div class="page">
+﻿<div class="page">
 
   <div class="page-header">
-
     <div>
       <h1>Clients</h1>
-      <p>
-        Manage registered companies and individuals.
-      </p>
+      <p>Manage registered companies and individuals.</p>
     </div>
 
     <button
       class="primary"
       type="button"
       (click)="registerClient()">
-
-      + Register Client
-
+      Register Client
     </button>
-
   </div>
 
   @if (loading) {
-
     <div class="state">
       Loading clients...
     </div>
-
   }
 
   @if (!loading && errorMessage) {
-
     <div class="alert">
       {{ errorMessage }}
     </div>
-
   }
 
-  @if (
-    !loading &&
-    !errorMessage &&
-    clients.length === 0
-  ) {
-
+  @if (!loading && !errorMessage && clients.length === 0) {
     <div class="empty">
-
       <h2>No clients yet</h2>
-
       <p>
         Register a company or individual client
         to get started.
@@ -55,91 +38,42 @@
         class="primary"
         type="button"
         (click)="registerClient()">
-
         Register Client
-
       </button>
-
     </div>
-
   }
 
   @if (!loading && !errorMessage && clients.length > 0) {
-
     <div class="client-grid">
 
-      @for (
-        client of clients;
-        track client.id
-      ) {
-
+      @for (client of clients; track client.id) {
         <button
           type="button"
           class="client-card"
           (click)="openClient(client)">
 
-          <div class="client-top">
+          <strong class="client-name">
+            {{ getClientName(client) }}
+          </strong>
 
-            <div class="avatar">
-              {{ getClientInitial(client) }}
-            </div>
-
-            <div>
-
-              <h2>
-                {{ getClientName(client) }}
-              </h2>
-
-              <span class="code">
-                Code: {{ client.clientCode }}
-              </span>
-
-            </div>
-
-          </div>
-
-          <div class="client-info">
-
-            <div>
-              <span>Email</span>
-              <strong>
-                {{ client.email || '�' }}
-              </strong>
-            </div>
-
-            <div>
-              <span>Phone</span>
-              <strong>
-                {{ client.phone || '�' }}
-              </strong>
-            </div>
-
-            <div>
-              <span>Type</span>
-              <strong>
-                {{ client.type }}
-              </strong>
-            </div>
-
-            <div>
-              <span>Status</span>
-              <strong>
-                {{ client.status || 'ACTIVE' }}
-              </strong>
-            </div>
-
-          </div>
-
-          <div class="view">
-            View Client ?
-          </div>
+          <span class="view">
+            View
+          </span>
 
         </button>
-
       }
 
     </div>
-
   }
 
 </div>
+
+
+
+
+
+
+
+
+
+
