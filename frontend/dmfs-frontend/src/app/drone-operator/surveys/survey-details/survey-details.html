@@ -1,0 +1,614 @@
+<div class="survey-shell">
+
+  <!-- =========================================================
+       OPERATOR SIDEBAR
+       ========================================================= -->
+
+  <aside class="sidebar">
+
+    <a
+      class="brand"
+      routerLink="/drone-operator"
+    >
+
+      <span class="brand-mark">
+        ✦
+      </span>
+
+      <span>
+        DfmS<span>Operator</span>
+      </span>
+
+    </a>
+
+
+    <div class="operator">
+
+      <span class="avatar">
+        {{ initials }}
+      </span>
+
+      <div>
+
+        <strong>
+          {{ name }} {{ user?.lastName }}
+        </strong>
+
+        <small>
+          Drone operator
+        </small>
+
+      </div>
+
+    </div>
+
+
+    <nav>
+
+      <a
+        routerLink="/drone-operator"
+      >
+        <i>⌂</i>
+        Overview
+      </a>
+
+
+      <a
+        routerLink="/drone-operator/missions"
+      >
+        <i>◈</i>
+        My missions
+      </a>
+
+
+      <a
+        routerLink="/drone-operator/surveys"
+        class="active"
+      >
+        <i>⌁</i>
+        Field surveys
+      </a>
+
+
+      <a
+        routerLink="/drone-operator/data"
+      >
+        <i>⇧</i>
+        Data handoff
+      </a>
+
+    </nav>
+
+
+    <div class="side-foot">
+
+      <span class="online-dot"></span>
+
+      System online
+
+      <button
+        type="button"
+        (click)="logout()"
+      >
+        Sign out →
+      </button>
+
+    </div>
+
+  </aside>
+
+
+  <!-- =========================================================
+       MAIN
+       ========================================================= -->
+
+  <main>
+
+    <header>
+
+      <div>
+
+        <p class="eyebrow">
+          FIELD OPERATION
+        </p>
+
+        <h1>
+          Field Survey
+        </h1>
+
+        <p class="muted">
+          Review and execute the assigned field survey.
+        </p>
+
+      </div>
+
+    </header>
+
+
+    <!-- =========================================================
+         ERROR
+         ========================================================= -->
+
+    <div
+      *ngIf="error"
+      class="alert"
+    >
+
+      {{ error }}
+
+      <button
+        type="button"
+        (click)="error = ''"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <!-- =========================================================
+         LOADING
+         ========================================================= -->
+
+    <section
+      *ngIf="loading"
+      class="loading"
+    >
+
+      <span></span>
+
+      Loading field survey…
+
+    </section>
+
+
+    <!-- =========================================================
+         SURVEY
+         ========================================================= -->
+
+    <ng-container
+      *ngIf="!loading && survey"
+    >
+
+      <a
+        class="back"
+        routerLink="/drone-operator/missions"
+      >
+        ← Back to missions
+      </a>
+
+
+      <!-- =======================================================
+           SURVEY HERO
+           ======================================================= -->
+
+      <section class="survey-hero">
+
+        <div class="hero-left">
+
+          <div class="survey-icon">
+            ⌁
+          </div>
+
+          <div>
+
+            <p class="eyebrow">
+              SURVEY
+            </p>
+
+            <h2>
+              {{ survey.surveyName || 'Field survey' }}
+            </h2>
+
+            <p>
+              {{ survey.surveyCode }}
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <span
+          class="status"
+          [class]="
+            'status ' +
+            survey.status.toLowerCase()
+          "
+        >
+          {{ statusLabel }}
+        </span>
+
+      </section>
+
+
+      <!-- =======================================================
+           INFORMATION
+           ======================================================= -->
+
+      <section class="card">
+
+        <div class="section-heading">
+
+          <div>
+
+            <h3>
+              Survey Information
+            </h3>
+
+            <p>
+              Details associated with this field operation.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="info-grid">
+
+          <div>
+
+            <small>
+              SURVEY CODE
+            </small>
+
+            <strong>
+              {{ survey.surveyCode }}
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <small>
+              SURVEY NAME
+            </small>
+
+            <strong>
+              {{ survey.surveyName || 'Field survey' }}
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <small>
+              OPERATOR
+            </small>
+
+            <strong>
+              {{ operatorName }}
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <small>
+              STATUS
+            </small>
+
+            <strong>
+              {{ statusLabel }}
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <small>
+              STARTED AT
+            </small>
+
+            <strong>
+
+              {{
+                survey.startedAt
+                  ? (survey.startedAt | date:'medium')
+                  : 'Not started'
+              }}
+
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <small>
+              SURVEY ID
+            </small>
+
+            <strong>
+              #{{ survey.id }}
+            </strong>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- =======================================================
+           FIELD OPERATION
+           ======================================================= -->
+
+      <section class="card">
+
+        <div class="section-heading">
+
+          <div>
+
+            <h3>
+              Field Operation
+            </h3>
+
+            <p>
+              Follow the survey workflow to collect
+              the magnetometer data.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             DRAFT
+             ===================================================== -->
+
+        <div
+          *ngIf="survey.status === 'DRAFT'"
+          class="operation-state"
+        >
+
+          <div class="state-number">
+            1
+          </div>
+
+          <div class="state-content">
+
+            <h4>
+              Start Survey
+            </h4>
+
+            <p>
+              Start the field survey when the drone and
+              magnetometer are ready for data collection.
+            </p>
+
+          </div>
+
+
+          <button
+            class="primary"
+            type="button"
+            [disabled]="busy"
+            (click)="startSurvey()"
+          >
+
+            {{
+              busy
+                ? 'Starting...'
+                : 'Start Survey'
+            }}
+
+          </button>
+
+        </div>
+
+
+        <!-- =====================================================
+             IN PROGRESS — NO DATA YET
+             ===================================================== -->
+
+        <div
+          *ngIf="
+            survey.status === 'IN_PROGRESS' &&
+            !hasUploadedData
+          "
+          class="operation-state active"
+        >
+
+          <div class="state-number">
+            2
+          </div>
+
+          <div class="state-content">
+
+            <h4>
+              Survey In Progress
+            </h4>
+
+            <p>
+              The survey is active and ready for
+              magnetometer data collection.
+            </p>
+
+          </div>
+
+
+          <button
+            class="primary"
+            type="button"
+            [disabled]="loadingData"
+            (click)="openDataCapture()"
+          >
+
+            {{
+              loadingData
+                ? 'Checking data...'
+                : 'Collect Data'
+            }}
+
+          </button>
+
+        </div>
+
+
+        <!-- =====================================================
+             IN PROGRESS — DATA ALREADY UPLOADED
+             ===================================================== -->
+
+        <div
+          *ngIf="
+            survey.status === 'IN_PROGRESS' &&
+            hasUploadedData
+          "
+          class="operation-state completed"
+        >
+
+          <div class="state-number">
+            ✓
+          </div>
+
+
+          <div class="state-content">
+
+            <h4>
+              Data Uploaded
+            </h4>
+
+            <p>
+              Survey data has already been uploaded
+              successfully.
+            </p>
+
+
+            <!-- Uploaded file information -->
+
+            <div
+              *ngIf="uploadedData[0]"
+              class="uploaded-file"
+            >
+
+              <strong>
+                {{ uploadedData[0].fileName }}
+              </strong>
+
+              <small>
+                {{
+                  uploadedData[0].recordCount | number
+                }}
+                records
+              </small>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             COMPLETED
+             ===================================================== -->
+
+        <div
+          *ngIf="survey.status === 'COMPLETED'"
+          class="operation-state completed"
+        >
+
+          <div class="state-number">
+            ✓
+          </div>
+
+          <div class="state-content">
+
+            <h4>
+              Survey Completed
+            </h4>
+
+            <p>
+              This field survey has been completed.
+            </p>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- =======================================================
+           COMPLETE SURVEY
+           ======================================================= -->
+
+      <section
+        *ngIf="
+          survey.status === 'IN_PROGRESS' &&
+          hasUploadedData
+        "
+        class="complete-card"
+      >
+
+        <div>
+
+          <h3>
+            Finish Field Survey
+          </h3>
+
+          <p>
+            Data has been uploaded. You can now
+            complete the field survey.
+          </p>
+
+        </div>
+
+
+        <button
+          class="danger-outline"
+          type="button"
+          [disabled]="busy"
+          (click)="completeSurvey()"
+        >
+
+          {{
+            busy
+              ? 'Completing...'
+              : 'Complete Survey'
+          }}
+
+        </button>
+
+      </section>
+
+
+      <!-- =======================================================
+           WAITING FOR DATA
+           ======================================================= -->
+
+      <section
+        *ngIf="
+          survey.status === 'IN_PROGRESS' &&
+          !hasUploadedData
+        "
+        class="complete-card"
+      >
+
+        <div>
+
+          <h3>
+            Data Required
+          </h3>
+
+          <p>
+            Upload the required magnetometer data before
+            completing the field survey.
+          </p>
+
+        </div>
+
+      </section>
+
+    </ng-container>
+
+  </main>
+
+</div>

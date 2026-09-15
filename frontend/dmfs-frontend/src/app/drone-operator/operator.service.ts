@@ -15,6 +15,19 @@ export interface Survey {
   id: number; surveyCode: string; surveyName?: string; serviceRequestId: number; status: 'DRAFT' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED' | 'FAILED';
   startedAt?: string; endedAt?: string; startLatitude?: number; startLongitude?: number; endLatitude?: number; endLongitude?: number;
 }
+export interface SurveyData {
+  id: number;
+  surveyId: number;
+  surveyCode?: string;
+  fileName: string;
+  filePath?: string;
+  fileType?: string;
+  fileSize?: number;
+  recordCount?: number;
+  uploadedById?: number;
+  uploadedByName?: string;
+  uploadedAt?: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class OperatorService {
@@ -31,4 +44,23 @@ export class OperatorService {
   createSurvey(payload: object) { return this.http.post<Survey>(`${this.api}/surveys`, payload, this.options); }
   startSurvey(id: number) { return this.http.patch<Survey>(`${this.api}/surveys/${id}/start`, {}, this.options); }
   completeSurvey(id: number) { return this.http.patch<Survey>(`${this.api}/surveys/${id}/complete`, {}, this.options); }
+uploadSurveyData(
+  surveyId: number,
+  file: File
+) {
+  const formData = new FormData();
+
+  formData.append('file', file);
+
+  return this.http.post<SurveyData>(
+    `${this.api}/surveys/${surveyId}/data`,
+    formData,
+    this.options
+  );
 }
+surveyData(surveyId: number) {
+  return this.http.get<SurveyData[]>(
+    `${this.api}/surveys/${surveyId}/data`,
+    this.options
+  );
+}}

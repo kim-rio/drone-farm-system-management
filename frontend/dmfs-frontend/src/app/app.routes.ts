@@ -135,253 +135,98 @@ export const routes: Routes = [
 
 
   // ==========================================================
-  // DRONE OPERATOR
-  // ==========================================================
+// DRONE OPERATOR
+// ==========================================================
 
-  {
-    path: 'drone-operator',
-    pathMatch: 'full',
-    canActivate: [roleGuard(['DRONE_OPERATOR'])],
-    loadComponent: () => import('./drone-operator/operator-workspace').then(m => m.OperatorWorkspace),
-    data: { page: 'dashboard' }
-  },
-  {
-    path: 'drone-operator/missions',
-    canActivate: [roleGuard(['DRONE_OPERATOR'])],
-    loadComponent: () => import('./drone-operator/operator-workspace').then(m => m.OperatorWorkspace),
-    data: { page: 'missions' }
-  },
-  {
-    path: 'drone-operator/missions/:id',
-    canActivate: [roleGuard(['DRONE_OPERATOR'])],
-    loadComponent: () => import('./drone-operator/operator-workspace').then(m => m.OperatorWorkspace),
-    data: { page: 'detail' }
-  },
-  {
-    path: 'drone-operator/surveys',
-    canActivate: [roleGuard(['DRONE_OPERATOR'])],
-    loadComponent: () => import('./drone-operator/operator-workspace').then(m => m.OperatorWorkspace),
-    data: { page: 'surveys' }
-  },
-  {
-    path: 'drone-operator/data',
-    canActivate: [roleGuard(['DRONE_OPERATOR'])],
-    loadComponent: () => import('./drone-operator/operator-workspace').then(m => m.OperatorWorkspace),
-    data: { page: 'data' }
-  },
+{
+  path: 'drone-operator',
+  canActivate: [roleGuard(['DRONE_OPERATOR'])],
+  loadComponent: () =>
+    import('./drone-operator/operator-workspace')
+      .then(m => m.OperatorWorkspace),
+  data: {
+    page: 'dashboard'
+  }
+},
 
-  {
-    path: 'drone-operator',
-    canActivate: [roleGuard(['DRONE_OPERATOR'])],
-    component: RoleWorkspace,
-    data: {
-      role: 'DRONE_OPERATOR',
-      title: 'Drone Operations Dashboard',
-      subtitle: 'Manage assigned field operations, drones and survey activities.',
-      menuItems: [
-        {
-          label: 'Dashboard',
-          description: 'Overview of your operational workload.',
-          icon: 'ÃƒÂ¯Ã‚Â¿Ã‚Â½',
-          route: '/drone-operator'
-        },
-        {
-          label: 'Operations',
-          description: 'View and manage assigned field operations.',
-          icon: 'O',
-          route: '/drone-operator/operations'
-        },
-        {
-          label: 'Drones',
-          description: 'View available and assigned drones.',
-          icon: 'D',
-          route: '/drone-operator/drones'
-        },
-        {
-          label: 'Surveys',
-          description: 'Manage survey execution and status.',
-          icon: 'S',
-          route: '/drone-operator/surveys'
-        },
-        {
-          label: 'Survey Data',
-          description: 'Upload and manage collected survey data.',
-          icon: '?',
-          route: '/drone-operator/survey-data'
-        }
-      ]
-    }
-  },
+{
+  path: 'drone-operator/missions',
+  canActivate: [roleGuard(['DRONE_OPERATOR'])],
+  loadComponent: () =>
+    import('./drone-operator/operator-workspace')
+      .then(m => m.OperatorWorkspace),
+  data: {
+    page: 'missions'
+  }
+},
 
-  {
-    path: 'drone-operator/operations',
-    canActivate: [roleGuard(['DRONE_OPERATOR'])],
-    loadComponent: () => import('./drone-operator/operations/operations').then(m => m.OperationsComponent)
-  },
-  {
-    path: 'drone-operator/surveys',
-    canActivate: [roleGuard(['DRONE_OPERATOR'])],
-    loadComponent: () => import('./drone-operator/surveys/surveys').then(m => m.SurveysComponent)
-  },
-  {
-    path: 'drone-operator/survey-data',
-    canActivate: [roleGuard(['DRONE_OPERATOR'])],
-    loadComponent: () => import('./drone-operator/survey-data/survey-data').then(m => m.SurveyDataComponent)
-  },
+{
+  path: 'drone-operator/missions/:id',
+  canActivate: [roleGuard(['DRONE_OPERATOR'])],
+  loadComponent: () =>
+    import('./drone-operator/operator-workspace')
+      .then(m => m.OperatorWorkspace),
+  data: {
+    page: 'detail'
+  }
+},
 
-  {
-    path: 'drone-operator/operations',
-    canActivate: [roleGuard(['DRONE_OPERATOR'])],
-    component: RoleWorkspace,
-    data: {
-      role: 'DRONE_OPERATOR',
-      title: 'Field Operations',
-      subtitle: 'Review and manage assigned operational work.',
-      menuItems: [
-        {
-          label: 'Dashboard',
-          description: 'Return to your dashboard.',
-          icon: 'ÃƒÂ¯Ã‚Â¿Ã‚Â½',
-          route: '/drone-operator'
-        },
-        {
-          label: 'Operations',
-          description: 'Assigned field operations.',
-          icon: 'O',
-          route: '/drone-operator/operations'
-        },
-        {
-          label: 'Drones',
-          description: 'Available drones.',
-          icon: 'D',
-          route: '/drone-operator/drones'
-        },
-        {
-          label: 'Surveys',
-          description: 'Survey execution.',
-          icon: 'S',
-          route: '/drone-operator/surveys'
-        }
-      ]
-    }
-  },
+{
+  path: 'drone-operator/surveys',
+  canActivate: [roleGuard(['DRONE_OPERATOR'])],
+  loadComponent: () =>
+    import('./drone-operator/operator-workspace')
+      .then(m => m.OperatorWorkspace),
+  data: {
+    page: 'surveys'
+  }
+},
 
-  {
-    path: 'drone-operator/drones',
-    canActivate: [roleGuard(['DRONE_OPERATOR'])],
-    component: RoleWorkspace,
-    data: {
-      role: 'DRONE_OPERATOR',
-      title: 'Drone Management',
-      subtitle: 'View and manage drones assigned to field operations.',
-      menuItems: [
-        {
-          label: 'Dashboard',
-          description: 'Return to dashboard.',
-          icon: 'ÃƒÂ¯Ã‚Â¿Ã‚Â½',
-          route: '/drone-operator'
-        },
-        {
-          label: 'Operations',
-          description: 'Assigned operations.',
-          icon: 'O',
-          route: '/drone-operator/operations'
-        },
-        {
-          label: 'Drones',
-          description: 'Manage operational drones.',
-          icon: 'D',
-          route: '/drone-operator/drones'
-        },
-        {
-          label: 'Surveys',
-          description: 'Manage surveys.',
-          icon: 'S',
-          route: '/drone-operator/surveys'
-        }
-      ]
-    }
-  },
+// ⭐ Individual Field Survey
+{
+  path: 'drone-operator/surveys/:id',
+  canActivate: [roleGuard(['DRONE_OPERATOR'])],
+  loadComponent: () =>
+    import('./drone-operator/surveys/survey-details/survey-details')
+      .then(m => m.SurveyDetails)
+},
 
-  {
-    path: 'drone-operator/surveys',
-    canActivate: [roleGuard(['DRONE_OPERATOR'])],
-    component: RoleWorkspace,
-    data: {
-      role: 'DRONE_OPERATOR',
-      title: 'Survey Operations',
-      subtitle: 'Execute surveys and update field survey progress.',
-      menuItems: [
-        {
-          label: 'Dashboard',
-          description: 'Return to dashboard.',
-          icon: 'ÃƒÂ¯Ã‚Â¿Ã‚Â½',
-          route: '/drone-operator'
-        },
-        {
-          label: 'Operations',
-          description: 'Assigned operations.',
-          icon: 'O',
-          route: '/drone-operator/operations'
-        },
-        {
-          label: 'Drones',
-          description: 'Operational drones.',
-          icon: 'D',
-          route: '/drone-operator/drones'
-        },
-        {
-          label: 'Surveys',
-          description: 'Execute surveys.',
-          icon: 'S',
-          route: '/drone-operator/surveys'
-        },
-        {
-          label: 'Survey Data',
-          description: 'Manage collected data.',
-          icon: '?',
-          route: '/drone-operator/survey-data'
-        }
-      ]
-    }
-  },
+{
+  path: 'drone-operator/data',
+  canActivate: [roleGuard(['DRONE_OPERATOR'])],
+  loadComponent: () =>
+    import('./drone-operator/operator-workspace')
+      .then(m => m.OperatorWorkspace),
+  data: {
+    page: 'data'
+  }
+},
 
-  {
-    path: 'drone-operator/survey-data',
-    canActivate: [roleGuard(['DRONE_OPERATOR'])],
-    component: RoleWorkspace,
-    data: {
-      role: 'DRONE_OPERATOR',
-      title: 'Survey Data',
-      subtitle: 'Upload and manage data collected during field operations.',
-      menuItems: [
-        {
-          label: 'Dashboard',
-          description: 'Return to dashboard.',
-          icon: 'ÃƒÂ¯Ã‚Â¿Ã‚Â½',
-          route: '/drone-operator'
-        },
-        {
-          label: 'Operations',
-          description: 'Assigned operations.',
-          icon: 'O',
-          route: '/drone-operator/operations'
-        },
-        {
-          label: 'Surveys',
-          description: 'Survey execution.',
-          icon: 'S',
-          route: '/drone-operator/surveys'
-        },
-        {
-          label: 'Survey Data',
-          description: 'Collected survey data.',
-          icon: '?',
-          route: '/drone-operator/survey-data'
-        }
-      ]
-    }
-  },
+{
+  path: 'drone-operator/operations',
+  canActivate: [roleGuard(['DRONE_OPERATOR'])],
+  loadComponent: () =>
+    import('./drone-operator/operations/operations')
+      .then(m => m.OperationsComponent)
+},
+
+{
+  path: 'drone-operator/survey-data',
+  canActivate: [roleGuard(['DRONE_OPERATOR'])],
+  loadComponent: () =>
+    import('./drone-operator/survey-data/survey-data')
+      .then(m => m.SurveyDataComponent)
+},
+{
+  path: 'drone-operator/surveys/:id/data',
+  canActivate: [roleGuard(['DRONE_OPERATOR'])],
+  loadComponent: () =>
+    import('./drone-operator/surveys/survey-data/survey-data')
+      .then(m => m.SurveyData)
+},
+
+
+
 
   {
   path: 'geologist',

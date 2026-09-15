@@ -349,160 +349,160 @@ export class OperatorWorkspace implements OnInit {
      ========================================================= */
 
   action(
-    action:
-      'accept'
-      | 'start'
-      | 'complete',
+  action: 'accept' | 'start' | 'complete',
+  mission: Mission
+): void {
 
-    mission: Mission
-  ): void {
+  if (this.busy) {
+    return;
+  }
 
-    if (this.busy) {
-      return;
-    }
+  this.busy = true;
+  this.error = '';
 
-    this.busy = true;
+  if (action === 'start') {
 
-    const call =
-      action === 'accept'
-        ? this.api.accept(mission.id)
-        : action === 'start'
-          ? this.api.startMission(mission.id)
-          : this.api.completeMission(mission.id);
+    this.api.startMission(mission.id).subscribe({
 
-
-    call.subscribe({
-
-      next: () => {
+      next: updatedMission => {
 
         this.busy = false;
 
-        this.load(
-          mission.id
-        );
+        // Mission is now IN_PROGRESS.
+        // Immediately open/create its field survey.
+        this.launchSurvey(updatedMission);
       },
 
-      error: (error) => {
-
-        console.error(
-          'MISSION ACTION ERROR:',
-          error
-        );
-
-        this.busy = false;
+      error: error => {
 
         this.error =
-          error?.error?.message
-          ||
-          'The mission could not be updated. Please try again.';
+          error?.error?.message ||
+          'The mission could not be started.';
 
-        this.cdr.detectChanges();
+        this.busy = false;
       }
 
     });
+
+    return;
   }
 
+  const call =
+    action === 'accept'
+      ? this.api.accept(mission.id)
+      : this.api.completeMission(mission.id);
+
+  call.subscribe({
+
+    next: () => {
+
+      this.busy = false;
+      this.load(mission.id);
+    },
+
+    error: error => {
+
+      this.error =
+        error?.error?.message ||
+        'The mission could not be updated.';
+
+      this.busy = false;
+    }
+
+  });
+}
 
   /* =========================================================
      CREATE / OPEN SURVEY
      ========================================================= */
 
-  launchSurvey(
-    mission: Mission
-  ): void {
+  launchSurvey(mission: Mission): void {
 
-    const survey =
-      this.surveyFor(mission);
+  const existingSurvey = this.surveyFor(mission);
 
-    if (survey) {
+  /*
+   * Survey already exists.
+   * Open it instead of creating another one.
+   */
+  if (existingSurvey) {
 
+    this.router.navigate([
+      '/drone-operator/surveys',
+      existingSurvey.id
+    ]);
+
+    return;
+  }
+
+  /*
+   * No survey exists yet.
+   * Create the field survey for this mission.
+   */
+
+  if (!mission.serviceRequest?.id) {
+
+    this.error =
+      'This mission does not have a service request attached to it.';
+
+    return;
+  }
+
+  this.busy = true;
+  this.error = '';
+
+  const now = new Date().toISOString();
+
+  this.api.createSurvey({
+
+    serviceRequestId:
+      mission.serviceRequest.id,
+
+    operatorId:
+      this.user?.userId,
+
+    surveyCode:
+      `SRV-${mission.missionCode.replace('MIS-', '')}`,
+
+    surveyName:
+      `${mission.missionCode} field survey`,
+
+    startedAt:
+      now,
+
+    startLatitude:
+      mission.farmBlock?.centerLatitude,
+
+    startLongitude:
+      mission.farmBlock?.centerLongitude
+
+  }).subscribe({
+
+    next: survey => {
+
+      this.busy = false;
+
+      /*
+       * Backend created the survey.
+       * Navigate directly to the new survey.
+       */
       this.router.navigate([
-        '/drone-operator/surveys'
+        '/drone-operator/surveys',
+        survey.id
       ]);
 
-      return;
-    }
+    },
 
-
-    if (!mission.serviceRequest?.id) {
+    error: error => {
 
       this.error =
-        'This mission is missing its service request.';
+        error?.error?.message ||
+        'Unable to create the field survey.';
 
-      return;
+      this.busy = false;
     }
 
-
-    if (this.busy) {
-      return;
-    }
-
-
-    this.busy = true;
-
-
-    const now =
-      new Date().toISOString();
-
-
-    this.api
-      .createSurvey({
-
-        serviceRequestId:
-          mission.serviceRequest.id,
-
-        operatorId:
-          this.user?.userId,
-
-        surveyCode:
-          `SRV-${mission.missionCode.replace(
-            'MIS-',
-            ''
-          )}`,
-
-        surveyName:
-          `${mission.missionCode} field survey`,
-
-        startedAt:
-          now,
-
-        startLatitude:
-          mission.farmBlock?.centerLatitude,
-
-        startLongitude:
-          mission.farmBlock?.centerLongitude
-
-      })
-      .subscribe({
-
-        next: () => {
-
-          this.busy = false;
-
-          this.load(
-            mission.id
-          );
-        },
-
-        error: (error) => {
-
-          console.error(
-            'CREATE SURVEY ERROR:',
-            error
-          );
-
-          this.busy = false;
-
-          this.error =
-            error?.error?.message
-            ||
-            'Unable to create the survey.';
-
-          this.cdr.detectChanges();
-        }
-
-      });
-  }
+  });
+}
 
 
   /* =========================================================

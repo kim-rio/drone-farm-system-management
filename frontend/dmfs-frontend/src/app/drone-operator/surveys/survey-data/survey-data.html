@@ -1,0 +1,544 @@
+<div class="data-shell">
+
+  <!-- SIDEBAR -->
+
+  <aside class="sidebar">
+
+    <a
+      class="brand"
+      routerLink="/drone-operator"
+    >
+
+      <span class="brand-mark">
+        ✦
+      </span>
+
+      <span>
+        DfmS<span>Operator</span>
+      </span>
+
+    </a>
+
+
+    <div class="operator">
+
+      <span class="avatar">
+        {{ initials }}
+      </span>
+
+      <div>
+
+        <strong>
+          {{ operatorName }}
+        </strong>
+
+        <small>
+          Drone operator
+        </small>
+
+      </div>
+
+    </div>
+
+
+    <nav>
+
+      <a routerLink="/drone-operator">
+        <i>⌂</i>
+        Overview
+      </a>
+
+      <a routerLink="/drone-operator/missions">
+        <i>◈</i>
+        My missions
+      </a>
+
+      <a
+        routerLink="/drone-operator/surveys"
+        class="active"
+      >
+        <i>⌁</i>
+        Field surveys
+      </a>
+
+      <a routerLink="/drone-operator/data">
+        <i>⇧</i>
+        Data handoff
+      </a>
+
+    </nav>
+
+
+    <div class="side-foot">
+
+      <span class="online-dot"></span>
+
+      System online
+
+      <button
+        type="button"
+        (click)="logout()"
+      >
+        Sign out →
+      </button>
+
+    </div>
+
+  </aside>
+
+
+  <!-- MAIN -->
+
+  <main>
+
+    <header>
+
+      <div>
+
+        <p class="eyebrow">
+          RAW MAGNETOMETER DATA
+        </p>
+
+        <h1>
+          Collect Data
+        </h1>
+
+        <p class="muted">
+          Upload the raw field data collected during this survey.
+        </p>
+
+      </div>
+
+
+      
+     
+
+    </header>
+
+
+    <!-- ERROR -->
+
+    <div
+      *ngIf="error"
+      class="alert"
+    >
+
+      {{ error }}
+
+      <button
+        type="button"
+        (click)="error = ''"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <!-- LOADING -->
+
+    <section
+      *ngIf="loading"
+      class="loading"
+    >
+
+      <span></span>
+
+      Loading survey…
+
+    </section>
+
+
+    <ng-container
+      *ngIf="!loading && survey"
+    >
+
+      <!-- BACK -->
+
+      <a
+        class="back"
+        (click)="goBack()"
+      >
+        ← Back to field survey
+      </a>
+
+
+      <!-- SURVEY CONTEXT -->
+
+      <section class="context-card">
+
+        <div>
+
+          <p class="eyebrow">
+            SURVEY
+          </p>
+
+          <h2>
+            {{ survey.surveyName || 'Field survey' }}
+          </h2>
+
+          <p class="context-code">
+            {{ survey.surveyCode }}
+          </p>
+
+        </div>
+
+
+        <div class="context-right">
+
+          <span class="status">
+            {{ statusLabel }}
+          </span>
+
+          <span>
+            Survey #{{ survey.id }}
+          </span>
+
+        </div>
+
+      </section>
+
+
+      <!-- UPLOAD -->
+
+      <section class="card">
+
+        <div class="section-heading">
+
+          <div>
+
+            <h3>
+              Raw Magnetometer File
+            </h3>
+
+            <p>
+              Select the CSV recorded during the drone field operation.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <label
+          class="drop-zone"
+          [class.has-file]="selectedFile"
+        >
+
+          <input
+            type="file"
+            accept=".csv,text/csv"
+            (change)="onFileSelected($event)"
+          />
+
+
+          <div class="upload-icon">
+            ⇧
+          </div>
+
+
+          <ng-container
+            *ngIf="!selectedFile"
+          >
+
+            <strong>
+              Select magnetometer CSV
+            </strong>
+
+            <span>
+              CSV files only for this first version
+            </span>
+
+          </ng-container>
+
+
+          <ng-container
+            *ngIf="selectedFile"
+          >
+
+            <strong>
+              {{ fileName }}
+            </strong>
+
+            <span>
+              {{ fileSizeLabel }}
+            </span>
+
+          </ng-container>
+
+        </label>
+
+
+        <!-- FILE SUMMARY -->
+
+        <div
+          *ngIf="selectedFile"
+          class="file-summary"
+        >
+
+          <div>
+
+            <small>
+              FILE
+            </small>
+
+            <strong>
+              {{ fileName }}
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <small>
+              SIZE
+            </small>
+
+            <strong>
+              {{ fileSizeLabel }}
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <small>
+              DATA ROWS
+            </small>
+
+            <strong>
+              {{ rowCount | number }}
+            </strong>
+
+          </div>
+
+
+          <button
+            type="button"
+            class="remove"
+            (click)="resetFile()"
+          >
+            Remove
+          </button>
+
+        </div>
+
+      </section>
+
+
+      <!-- VALIDATION -->
+
+      <section
+        *ngIf="selectedFile"
+        class="card"
+      >
+
+        <div class="section-heading">
+
+          <div>
+
+            <h3>
+              Data Structure Check
+            </h3>
+
+            <p>
+              The browser checks the basic raw magnetometer structure
+              before we send anything to the backend.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div
+          class="validation"
+          [class.valid]="missingColumns.length === 0"
+          [class.invalid]="missingColumns.length > 0"
+        >
+
+          <div class="validation-icon">
+
+            {{
+              missingColumns.length === 0
+                ? '✓'
+                : '!'
+            }}
+
+          </div>
+
+
+          <div>
+
+            <strong>
+              {{ validationMessage }}
+            </strong>
+
+
+            <p
+              *ngIf="missingColumns.length"
+            >
+
+              Missing:
+
+              <span
+                *ngFor="let column of missingColumns"
+              >
+                {{ column }}
+              </span>
+
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <!-- EXPECTED COLUMNS -->
+
+        <div class="columns">
+
+          <span
+            *ngFor="let column of requiredColumns"
+          >
+
+            {{ column }}
+
+          </span>
+
+        </div>
+
+      </section>
+
+
+      <!-- PREVIEW -->
+
+      <section
+        *ngIf="previewRows.length"
+        class="card"
+      >
+
+        <div class="section-heading">
+
+          <div>
+
+            <h3>
+              Data Preview
+            </h3>
+
+            <p>
+              First {{ previewRows.length }} rows from the selected file.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="table-wrap">
+
+          <table>
+
+            <thead>
+
+              <tr>
+
+                <th
+                  *ngFor="let header of headers"
+                >
+                  {{ header }}
+                </th>
+
+              </tr>
+
+            </thead>
+
+
+            <tbody>
+
+              <tr
+                *ngFor="let row of previewRows"
+              >
+
+                <td
+                  *ngFor="let value of row"
+                >
+                  {{ value }}
+                </td>
+
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </section>
+
+
+      <!-- ACTION -->
+
+      <section class="action-card">
+
+        <div>
+
+          <h3>
+            Upload to DfmS
+          </h3>
+
+          <p>
+            Backend storage and processing will be connected
+            in the next step.
+          </p>
+
+        </div>
+
+
+        <button
+  class="primary"
+  type="button"
+  [disabled]="!fileValid || uploading"
+  (click)="uploadData()"
+>
+  {{
+    uploading
+      ? 'Uploading...'
+      : 'Upload data'
+  }}
+</button>
+
+      </section>
+      <div
+  *ngIf="uploadResult"
+  class="upload-success"
+>
+
+  <div class="success-icon">
+    ✓
+  </div>
+
+  <div>
+
+    <strong>
+      Data uploaded successfully
+    </strong>
+
+    <p>
+      {{ uploadResult.fileName }}
+      ·
+      {{ uploadResult.recordCount | number }}
+      records
+    </p>
+
+  </div>
+
+</div>
+
+    </ng-container>
+
+  </main>
+
+</div>
