@@ -13,8 +13,7 @@ import {
 
 import {
   OperatorService,
-  Survey,
-  SurveyData
+  Survey
 } from '../../operator.service';
 
 import { AuthService } from '../../../services/auth.service';
@@ -40,16 +39,17 @@ export class SurveyDetails implements OnInit {
 
   survey?: Survey;
 
+  sidebarOpen = true;
+
+  menuItems = [
+    { label: 'Dashboard', route: '/drone-operator' },
+    { label: 'My Missions', route: '/drone-operator/missions' },
+    { label: 'Field Surveys', route: '/drone-operator/surveys' }
+  ];
+
   loading = true;
   busy = false;
   error = '';
-
-  /* =========================================================
-     UPLOADED SURVEY DATA
-     ========================================================= */
-
-  uploadedData: SurveyData[] = [];
-  loadingData = false;
 
   user = this.auth.getCurrentUser();
 
@@ -109,12 +109,6 @@ export class SurveyDetails implements OnInit {
 
         this.survey = survey;
 
-        /*
-         * Once the survey is found, load any
-         * data files already uploaded for it.
-         */
-        this.loadUploadedData(id);
-
         this.loading = false;
 
         this.cdr.detectChanges();
@@ -137,55 +131,6 @@ export class SurveyDetails implements OnInit {
       }
 
     });
-  }
-
-
-  /* =========================================================
-     LOAD UPLOADED DATA FILES
-     ========================================================= */
-
-  private loadUploadedData(surveyId: number): void {
-
-    this.loadingData = true;
-
-    this.api.surveyData(surveyId).subscribe({
-
-      next: data => {
-
-        this.uploadedData = data;
-        this.loadingData = false;
-
-        this.cdr.detectChanges();
-      },
-
-      error: error => {
-
-        console.error(
-          'LOAD UPLOADED SURVEY DATA ERROR:',
-          error
-        );
-
-        /*
-         * If there is no data or the request fails,
-         * keep the list empty.
-         */
-        this.uploadedData = [];
-        this.loadingData = false;
-
-        this.cdr.detectChanges();
-      }
-
-    });
-  }
-
-
-  /* =========================================================
-     CHECK WHETHER DATA HAS BEEN UPLOADED
-     ========================================================= */
-
-  get hasUploadedData(): boolean {
-
-    return this.uploadedData.length > 0;
   }
 
 
@@ -314,10 +259,9 @@ export class SurveyDetails implements OnInit {
      OPEN DATA CAPTURE
      ========================================================= */
 
-  openDataCapture(): void {
+  openDataUpload(): void {
 
-    if (!this.survey) {
-
+    if (!this.survey || this.survey.status !== 'COMPLETED') {
       return;
     }
 
@@ -338,6 +282,26 @@ export class SurveyDetails implements OnInit {
     this.router.navigate([
       '/drone-operator/missions'
     ]);
+  }
+
+
+  /* =========================================================
+     NAVIGATION
+     ========================================================= */
+
+  toggleSidebar(): void {
+    this.sidebarOpen = !this.sidebarOpen;
+  }
+
+  navigate(route: string): void {
+    this.router.navigateByUrl(route);
+  }
+
+  isActive(route: string): boolean {
+    if (route === '/drone-operator') {
+      return this.router.url === '/drone-operator' || this.router.url === '/drone-operator/';
+    }
+    return this.router.url.startsWith(route);
   }
 
 

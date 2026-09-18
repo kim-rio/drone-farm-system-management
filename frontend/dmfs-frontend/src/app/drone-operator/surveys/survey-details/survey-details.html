@@ -1,614 +1,144 @@
-<div class="survey-shell">
-
-  <!-- =========================================================
-       OPERATOR SIDEBAR
-       ========================================================= -->
-
+<div class="survey-shell" [class.sidebar-open]="sidebarOpen">
   <aside class="sidebar">
-
-    <a
-      class="brand"
-      routerLink="/drone-operator"
-    >
-
-      <span class="brand-mark">
-        ✦
-      </span>
-
-      <span>
-        DfmS<span>Operator</span>
-      </span>
-
-    </a>
-
-
-    <div class="operator">
-
-      <span class="avatar">
-        {{ initials }}
-      </span>
-
-      <div>
-
-        <strong>
-          {{ name }} {{ user?.lastName }}
-        </strong>
-
-        <small>
-          Drone operator
-        </small>
-
-      </div>
-
+    <div class="brand">
+      <div class="brand-mark">DM</div>
+      <div class="brand-text"><strong>DMFS</strong><span>DRONE OPERATOR</span></div>
     </div>
 
-
-    <nav>
-
-      <a
-        routerLink="/drone-operator"
-      >
-        <i>⌂</i>
-        Overview
-      </a>
-
-
-      <a
-        routerLink="/drone-operator/missions"
-      >
-        <i>◈</i>
-        My missions
-      </a>
-
-
-      <a
-        routerLink="/drone-operator/surveys"
-        class="active"
-      >
-        <i>⌁</i>
-        Field surveys
-      </a>
-
-
-      <a
-        routerLink="/drone-operator/data"
-      >
-        <i>⇧</i>
-        Data handoff
-      </a>
-
+    <nav class="navigation">
+      @for (item of menuItems; track item.route) {
+        <button type="button" class="nav-item" [class.active]="isActive(item.route)" (click)="navigate(item.route)">
+          <span class="nav-indicator"></span>
+          <span>{{ item.label }}</span>
+        </button>
+      }
     </nav>
 
-
-    <div class="side-foot">
-
-      <span class="online-dot"></span>
-
-      System online
-
-      <button
-        type="button"
-        (click)="logout()"
-      >
-        Sign out →
+    <div class="sidebar-bottom">
+      <button type="button" class="account">
+        <div class="account-avatar">{{ initials }}</div>
+        <div class="account-details"><strong>{{ user?.firstName }} {{ user?.lastName }}</strong><span>Drone Operator Account</span></div>
       </button>
-
+      <button type="button" class="logout" (click)="logout()">
+        <span class="logout-circle"></span><span class="logout-text">Logout</span>
+      </button>
     </div>
-
   </aside>
 
-
-  <!-- =========================================================
-       MAIN
-       ========================================================= -->
-
-  <main>
-
-    <header>
-
-      <div>
-
-        <p class="eyebrow">
-          FIELD OPERATION
-        </p>
-
-        <h1>
-          Field Survey
-        </h1>
-
-        <p class="muted">
-          Review and execute the assigned field survey.
-        </p>
-
+  <main class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        @if (!sidebarOpen) {
+          <button type="button" class="open-menu-button" (click)="toggleSidebar()" aria-label="Open navigation"></button>
+        }
       </div>
-
+      <div class="topbar-right">
+        <div class="top-user">
+          <div class="top-avatar">{{ initials }}</div>
+          <div class="top-user-details"><strong>{{ user?.firstName }} {{ user?.lastName }}</strong><span>DRONE OPERATOR</span></div>
+        </div>
+      </div>
+    </header>
+    <section class="page">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">FIELD OPERATION</p>
+        <h1>Field Survey</h1>
+        <p class="muted">Manage the assigned survey from field execution through data submission.</p>
+      </div>
     </header>
 
-
-    <!-- =========================================================
-         ERROR
-         ========================================================= -->
-
-    <div
-      *ngIf="error"
-      class="alert"
-    >
-
+    <div *ngIf="error" class="alert">
       {{ error }}
-
-      <button
-        type="button"
-        (click)="error = ''"
-      >
-        ×
-      </button>
-
+      <button type="button" (click)="error = ''">×</button>
     </div>
 
-
-    <!-- =========================================================
-         LOADING
-         ========================================================= -->
-
-    <section
-      *ngIf="loading"
-      class="loading"
-    >
-
-      <span></span>
-
-      Loading field survey…
-
+    <section *ngIf="loading" class="loading">
+      <span></span> Loading field survey…
     </section>
 
-
-    <!-- =========================================================
-         SURVEY
-         ========================================================= -->
-
-    <ng-container
-      *ngIf="!loading && survey"
-    >
-
-      <a
-        class="back"
-        routerLink="/drone-operator/missions"
-      >
-        ← Back to missions
-      </a>
-
-
-      <!-- =======================================================
-           SURVEY HERO
-           ======================================================= -->
+    <ng-container *ngIf="!loading && survey">
+      <a class="back" routerLink="/drone-operator/surveys">← Back to field surveys</a>
 
       <section class="survey-hero">
-
         <div class="hero-left">
-
-          <div class="survey-icon">
-            ⌁
-          </div>
-
+          <div class="survey-icon">⌁</div>
           <div>
-
-            <p class="eyebrow">
-              SURVEY
-            </p>
-
-            <h2>
-              {{ survey.surveyName || 'Field survey' }}
-            </h2>
-
-            <p>
-              {{ survey.surveyCode }}
-            </p>
-
+            <p class="eyebrow">SURVEY</p>
+            <h2>{{ survey.surveyName || 'Field survey' }}</h2>
+            <p>{{ survey.surveyCode }}</p>
           </div>
-
         </div>
-
-
-        <span
-          class="status"
-          [class]="
-            'status ' +
-            survey.status.toLowerCase()
-          "
-        >
-          {{ statusLabel }}
-        </span>
-
+        <span [class]="'status ' + survey.status.toLowerCase()">{{ statusLabel }}</span>
       </section>
 
-
-      <!-- =======================================================
-           INFORMATION
-           ======================================================= -->
-
       <section class="card">
-
         <div class="section-heading">
-
           <div>
-
-            <h3>
-              Survey Information
-            </h3>
-
-            <p>
-              Details associated with this field operation.
-            </p>
-
+            <h3>Survey Information</h3>
+            <p>Details associated with this assigned field operation.</p>
           </div>
-
         </div>
-
 
         <div class="info-grid">
-
-          <div>
-
-            <small>
-              SURVEY CODE
-            </small>
-
-            <strong>
-              {{ survey.surveyCode }}
-            </strong>
-
-          </div>
-
-
-          <div>
-
-            <small>
-              SURVEY NAME
-            </small>
-
-            <strong>
-              {{ survey.surveyName || 'Field survey' }}
-            </strong>
-
-          </div>
-
-
-          <div>
-
-            <small>
-              OPERATOR
-            </small>
-
-            <strong>
-              {{ operatorName }}
-            </strong>
-
-          </div>
-
-
-          <div>
-
-            <small>
-              STATUS
-            </small>
-
-            <strong>
-              {{ statusLabel }}
-            </strong>
-
-          </div>
-
-
-          <div>
-
-            <small>
-              STARTED AT
-            </small>
-
-            <strong>
-
-              {{
-                survey.startedAt
-                  ? (survey.startedAt | date:'medium')
-                  : 'Not started'
-              }}
-
-            </strong>
-
-          </div>
-
-
-          <div>
-
-            <small>
-              SURVEY ID
-            </small>
-
-            <strong>
-              #{{ survey.id }}
-            </strong>
-
-          </div>
-
+          <div><small>SURVEY CODE</small><strong>{{ survey.surveyCode }}</strong></div>
+          <div><small>SURVEY NAME</small><strong>{{ survey.surveyName || 'Field survey' }}</strong></div>
+          <div><small>OPERATOR</small><strong>{{ operatorName }}</strong></div>
+          <div><small>STATUS</small><strong>{{ statusLabel }}</strong></div>
+          <div><small>STARTED AT</small><strong>{{ survey.startedAt ? (survey.startedAt | date:'medium') : 'Not started' }}</strong></div>
+          <div><small>SURVEY ID</small><strong>#{{ survey.id }}</strong></div>
+          <div><small>SERVICE REQUEST</small><strong>#{{ survey.serviceRequestId }}</strong></div>
         </div>
-
       </section>
-
-
-      <!-- =======================================================
-           FIELD OPERATION
-           ======================================================= -->
 
       <section class="card">
-
         <div class="section-heading">
-
           <div>
-
-            <h3>
-              Field Operation
-            </h3>
-
-            <p>
-              Follow the survey workflow to collect
-              the magnetometer data.
-            </p>
-
+            <h3>Survey Workflow</h3>
+            <p>Complete the field operation first. Survey data is uploaded after the survey is completed.</p>
           </div>
-
         </div>
 
-
-        <!-- =====================================================
-             DRAFT
-             ===================================================== -->
-
-        <div
-          *ngIf="survey.status === 'DRAFT'"
-          class="operation-state"
-        >
-
-          <div class="state-number">
-            1
-          </div>
-
+        <div *ngIf="survey.status === 'DRAFT'" class="operation-state">
+          <div class="state-number">1</div>
           <div class="state-content">
-
-            <h4>
-              Start Survey
-            </h4>
-
-            <p>
-              Start the field survey when the drone and
-              magnetometer are ready for data collection.
-            </p>
-
+            <h4>Start Survey</h4>
+            <p>Start the assigned field survey when you are ready to conduct the operation.</p>
           </div>
-
-
-          <button
-            class="primary"
-            type="button"
-            [disabled]="busy"
-            (click)="startSurvey()"
-          >
-
-            {{
-              busy
-                ? 'Starting...'
-                : 'Start Survey'
-            }}
-
+          <button class="primary" type="button" [disabled]="busy" (click)="startSurvey()">
+            {{ busy ? 'Starting...' : 'Start Survey' }}
           </button>
-
         </div>
 
-
-        <!-- =====================================================
-             IN PROGRESS — NO DATA YET
-             ===================================================== -->
-
-        <div
-          *ngIf="
-            survey.status === 'IN_PROGRESS' &&
-            !hasUploadedData
-          "
-          class="operation-state active"
-        >
-
-          <div class="state-number">
-            2
-          </div>
-
+        <div *ngIf="survey.status === 'IN_PROGRESS'" class="operation-state active">
+          <div class="state-number">2</div>
           <div class="state-content">
-
-            <h4>
-              Survey In Progress
-            </h4>
-
-            <p>
-              The survey is active and ready for
-              magnetometer data collection.
-            </p>
-
+            <h4>Conduct Field Survey</h4>
+            <p>Carry out the assigned drone and field data collection. When the field work is finished, complete this survey.</p>
           </div>
-
-
-          <button
-            class="primary"
-            type="button"
-            [disabled]="loadingData"
-            (click)="openDataCapture()"
-          >
-
-            {{
-              loadingData
-                ? 'Checking data...'
-                : 'Collect Data'
-            }}
-
+          <button class="danger-outline" type="button" [disabled]="busy" (click)="completeSurvey()">
+            {{ busy ? 'Completing...' : 'Complete Survey' }}
           </button>
-
         </div>
 
-
-        <!-- =====================================================
-             IN PROGRESS — DATA ALREADY UPLOADED
-             ===================================================== -->
-
-        <div
-          *ngIf="
-            survey.status === 'IN_PROGRESS' &&
-            hasUploadedData
-          "
-          class="operation-state completed"
-        >
-
-          <div class="state-number">
-            ✓
-          </div>
-
-
+        <div *ngIf="survey.status === 'COMPLETED'" class="operation-state completed">
+          <div class="state-number">3</div>
           <div class="state-content">
-
-            <h4>
-              Data Uploaded
-            </h4>
-
-            <p>
-              Survey data has already been uploaded
-              successfully.
-            </p>
-
-
-            <!-- Uploaded file information -->
-
-            <div
-              *ngIf="uploadedData[0]"
-              class="uploaded-file"
-            >
-
-              <strong>
-                {{ uploadedData[0].fileName }}
-              </strong>
-
-              <small>
-                {{
-                  uploadedData[0].recordCount | number
-                }}
-                records
-              </small>
-
-            </div>
-
+            <h4>Survey Completed</h4>
+            <p>The field operation is complete. The collected survey input data can now be uploaded for validation.</p>
           </div>
-
+          <button class="primary" type="button" (click)="openDataUpload()">Upload Survey Data</button>
         </div>
 
-
-        <!-- =====================================================
-             COMPLETED
-             ===================================================== -->
-
-        <div
-          *ngIf="survey.status === 'COMPLETED'"
-          class="operation-state completed"
-        >
-
-          <div class="state-number">
-            ✓
-          </div>
-
+        <div *ngIf="survey.status === 'CANCELLED' || survey.status === 'FAILED'" class="operation-state">
+          <div class="state-number">!</div>
           <div class="state-content">
-
-            <h4>
-              Survey Completed
-            </h4>
-
-            <p>
-              This field survey has been completed.
-            </p>
-
+            <h4>Survey {{ statusLabel }}</h4>
+            <p>This survey cannot continue through the normal field workflow.</p>
           </div>
-
         </div>
-
       </section>
-
-
-      <!-- =======================================================
-           COMPLETE SURVEY
-           ======================================================= -->
-
-      <section
-        *ngIf="
-          survey.status === 'IN_PROGRESS' &&
-          hasUploadedData
-        "
-        class="complete-card"
-      >
-
-        <div>
-
-          <h3>
-            Finish Field Survey
-          </h3>
-
-          <p>
-            Data has been uploaded. You can now
-            complete the field survey.
-          </p>
-
-        </div>
-
-
-        <button
-          class="danger-outline"
-          type="button"
-          [disabled]="busy"
-          (click)="completeSurvey()"
-        >
-
-          {{
-            busy
-              ? 'Completing...'
-              : 'Complete Survey'
-          }}
-
-        </button>
-
-      </section>
-
-
-      <!-- =======================================================
-           WAITING FOR DATA
-           ======================================================= -->
-
-      <section
-        *ngIf="
-          survey.status === 'IN_PROGRESS' &&
-          !hasUploadedData
-        "
-        class="complete-card"
-      >
-
-        <div>
-
-          <h3>
-            Data Required
-          </h3>
-
-          <p>
-            Upload the required magnetometer data before
-            completing the field survey.
-          </p>
-
-        </div>
-
-      </section>
-
     </ng-container>
-
+    </section>
   </main>
-
 </div>

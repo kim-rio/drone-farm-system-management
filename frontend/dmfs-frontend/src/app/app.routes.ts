@@ -182,7 +182,16 @@ export const routes: Routes = [
   }
 },
 
-// ⭐ Individual Field Survey
+// Individual survey data package
+{
+  path: 'drone-operator/surveys/:id/data',
+  canActivate: [roleGuard(['DRONE_OPERATOR'])],
+  loadComponent: () =>
+    import('./drone-operator/surveys/survey-data/survey-data')
+      .then(m => m.SurveyData)
+},
+
+// Individual Field Survey
 {
   path: 'drone-operator/surveys/:id',
   canActivate: [roleGuard(['DRONE_OPERATOR'])],
@@ -192,40 +201,12 @@ export const routes: Routes = [
 },
 
 {
-  path: 'drone-operator/data',
-  canActivate: [roleGuard(['DRONE_OPERATOR'])],
-  loadComponent: () =>
-    import('./drone-operator/operator-workspace')
-      .then(m => m.OperatorWorkspace),
-  data: {
-    page: 'data'
-  }
-},
-
-{
   path: 'drone-operator/operations',
   canActivate: [roleGuard(['DRONE_OPERATOR'])],
   loadComponent: () =>
     import('./drone-operator/operations/operations')
       .then(m => m.OperationsComponent)
 },
-
-{
-  path: 'drone-operator/survey-data',
-  canActivate: [roleGuard(['DRONE_OPERATOR'])],
-  loadComponent: () =>
-    import('./drone-operator/survey-data/survey-data')
-      .then(m => m.SurveyDataComponent)
-},
-{
-  path: 'drone-operator/surveys/:id/data',
-  canActivate: [roleGuard(['DRONE_OPERATOR'])],
-  loadComponent: () =>
-    import('./drone-operator/surveys/survey-data/survey-data')
-      .then(m => m.SurveyData)
-},
-
-
 
 
   {

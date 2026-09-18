@@ -1,544 +1,219 @@
-<div class="data-shell">
-
-  <!-- SIDEBAR -->
-
+<div class="data-shell" [class.sidebar-open]="sidebarOpen">
   <aside class="sidebar">
-
-    <a
-      class="brand"
-      routerLink="/drone-operator"
-    >
-
-      <span class="brand-mark">
-        ✦
-      </span>
-
-      <span>
-        DfmS<span>Operator</span>
-      </span>
-
-    </a>
-
-
-    <div class="operator">
-
-      <span class="avatar">
-        {{ initials }}
-      </span>
-
-      <div>
-
-        <strong>
-          {{ operatorName }}
-        </strong>
-
-        <small>
-          Drone operator
-        </small>
-
-      </div>
-
+    <div class="brand">
+      <div class="brand-mark">DM</div>
+      <div class="brand-text"><strong>DMFS</strong><span>DRONE OPERATOR</span></div>
     </div>
 
-
-    <nav>
-
-      <a routerLink="/drone-operator">
-        <i>⌂</i>
-        Overview
-      </a>
-
-      <a routerLink="/drone-operator/missions">
-        <i>◈</i>
-        My missions
-      </a>
-
-      <a
-        routerLink="/drone-operator/surveys"
-        class="active"
-      >
-        <i>⌁</i>
-        Field surveys
-      </a>
-
-      <a routerLink="/drone-operator/data">
-        <i>⇧</i>
-        Data handoff
-      </a>
-
+    <nav class="navigation">
+      @for (item of menuItems; track item.route) {
+        <button type="button" class="nav-item" [class.active]="isActive(item.route)" (click)="navigate(item.route)">
+          <span class="nav-indicator"></span><span>{{ item.label }}</span>
+        </button>
+      }
     </nav>
 
-
-    <div class="side-foot">
-
-      <span class="online-dot"></span>
-
-      System online
-
-      <button
-        type="button"
-        (click)="logout()"
-      >
-        Sign out →
+    <div class="sidebar-bottom">
+      <button type="button" class="account">
+        <div class="account-avatar">{{ initials }}</div>
+        <div class="account-details"><strong>{{ user?.firstName }} {{ user?.lastName }}</strong><span>Drone Operator Account</span></div>
       </button>
-
+      <button type="button" class="logout" (click)="logout()">
+        <span class="logout-circle"></span><span class="logout-text">Logout</span>
+      </button>
     </div>
-
   </aside>
 
-
-  <!-- MAIN -->
-
-  <main>
-
-    <header>
-
-      <div>
-
-        <p class="eyebrow">
-          RAW MAGNETOMETER DATA
-        </p>
-
-        <h1>
-          Collect Data
-        </h1>
-
-        <p class="muted">
-          Upload the raw field data collected during this survey.
-        </p>
-
+  <main class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        @if (!sidebarOpen) {
+          <button type="button" class="open-menu-button" (click)="toggleSidebar()" aria-label="Open navigation"></button>
+        }
       </div>
-
-
-      
-     
-
+      <div class="topbar-right">
+        <div class="top-user">
+          <div class="top-avatar">{{ initials }}</div>
+          <div class="top-user-details"><strong>{{ user?.firstName }} {{ user?.lastName }}</strong><span>DRONE OPERATOR</span></div>
+        </div>
+      </div>
+    </header>
+    <section class="page">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">SURVEY DATA PACKAGE</p>
+        <h1>Upload Survey Data</h1>
+        <p class="muted">Upload the input files collected during this completed field survey.</p>
+      </div>
     </header>
 
-
-    <!-- ERROR -->
-
-    <div
-      *ngIf="error"
-      class="alert"
-    >
-
-      {{ error }}
-
-      <button
-        type="button"
-        (click)="error = ''"
-      >
-        ×
-      </button>
-
+    <div *ngIf="error" class="alert error-alert">
+      <span>{{ error }}</span><button type="button" (click)="error = ''">Dismiss</button>
     </div>
 
+    <div *ngIf="success" class="alert success-alert">
+      <span>{{ success }}</span><button type="button" (click)="success = ''">Dismiss</button>
+    </div>
 
-    <!-- LOADING -->
+    <section *ngIf="loading" class="loading">Loading survey...</section>
 
-    <section
-      *ngIf="loading"
-      class="loading"
-    >
-
-      <span></span>
-
-      Loading survey…
-
-    </section>
-
-
-    <ng-container
-      *ngIf="!loading && survey"
-    >
-
-      <!-- BACK -->
-
-      <a
-        class="back"
-        (click)="goBack()"
-      >
-        ← Back to field survey
-      </a>
-
-
-      <!-- SURVEY CONTEXT -->
+    <ng-container *ngIf="!loading && survey">
+      <a class="back" (click)="goBack()">Back to field survey</a>
 
       <section class="context-card">
-
         <div>
-
-          <p class="eyebrow">
-            SURVEY
-          </p>
-
-          <h2>
-            {{ survey.surveyName || 'Field survey' }}
-          </h2>
-
-          <p class="context-code">
-            {{ survey.surveyCode }}
-          </p>
-
+          <p class="eyebrow">COMPLETED SURVEY</p>
+          <h2>{{ survey.surveyName || 'Field survey' }}</h2>
+          <p class="context-code">{{ survey.surveyCode }}</p>
         </div>
-
-
         <div class="context-right">
-
-          <span class="status">
-            {{ statusLabel }}
-          </span>
-
-          <span>
-            Survey #{{ survey.id }}
-          </span>
-
+          <span class="status">{{ statusLabel }}</span>
+          <span>Survey #{{ survey.id }}</span>
         </div>
-
       </section>
 
-
-      <!-- UPLOAD -->
-
-      <section class="card">
-
+      <section class="card" *ngIf="!package">
         <div class="section-heading">
-
           <div>
-
-            <h3>
-              Raw Magnetometer File
-            </h3>
-
-            <p>
-              Select the CSV recorded during the drone field operation.
-            </p>
-
+            <h3>Survey Input Data</h3>
+            <p>UAV is required. XYZ, KML and BNA are optional and are structurally validated by the backend.</p>
           </div>
-
         </div>
 
-
-        <label
-          class="drop-zone"
-          [class.has-file]="selectedFile"
-        >
-
-          <input
-            type="file"
-            accept=".csv,text/csv"
-            (change)="onFileSelected($event)"
-          />
-
-
-          <div class="upload-icon">
-            ⇧
-          </div>
-
-
-          <ng-container
-            *ngIf="!selectedFile"
-          >
-
-            <strong>
-              Select magnetometer CSV
-            </strong>
-
-            <span>
-              CSV files only for this first version
-            </span>
-
-          </ng-container>
-
-
-          <ng-container
-            *ngIf="selectedFile"
-          >
-
-            <strong>
-              {{ fileName }}
-            </strong>
-
-            <span>
-              {{ fileSizeLabel }}
-            </span>
-
-          </ng-container>
-
+        <label class="drop-zone" (drop)="onDrop($event)" (dragover)="allowDrop($event)">
+          <input type="file" multiple accept=".uav,.xyz,.kml,.bna" (change)="onFilesSelected($event)">
+          <div class="upload-icon">UPLOAD</div>
+          <strong>Drop survey files here or browse</strong>
+          <span>Accepted formats: UAV, XYZ, KML, BNA</span>
         </label>
 
-
-        <!-- FILE SUMMARY -->
-
-        <div
-          *ngIf="selectedFile"
-          class="file-summary"
-        >
-
-          <div>
-
-            <small>
-              FILE
-            </small>
-
-            <strong>
-              {{ fileName }}
-            </strong>
-
-          </div>
-
-
-          <div>
-
-            <small>
-              SIZE
-            </small>
-
-            <strong>
-              {{ fileSizeLabel }}
-            </strong>
-
-          </div>
-
-
-          <div>
-
-            <small>
-              DATA ROWS
-            </small>
-
-            <strong>
-              {{ rowCount | number }}
-            </strong>
-
-          </div>
-
-
-          <button
-            type="button"
-            class="remove"
-            (click)="resetFile()"
-          >
-            Remove
-          </button>
-
+        <div class="selection-summary" *ngIf="selectedFiles.length">
+          <span>{{ selectedFiles.length }} file{{ selectedFiles.length === 1 ? '' : 's' }} selected</span>
+          <span>{{ totalSizeLabel }} total</span>
         </div>
 
+        <div class="file-list" *ngIf="selectedFiles.length">
+          <div class="file-row" *ngFor="let file of selectedFiles; let i = index">
+            <div class="file-type">{{ typeLabel(file) }}</div>
+            <div class="file-info"><strong>{{ file.name }}</strong><small>{{ formatSize(file.size) }}</small></div>
+            <span class="file-status">Ready for validation</span>
+            <button class="remove" type="button" (click)="removeFile(i)">Remove</button>
+          </div>
+        </div>
       </section>
 
-
-      <!-- VALIDATION -->
-
-      <section
-        *ngIf="selectedFile"
-        class="card"
-      >
-
+      <section class="card" *ngIf="!package">
         <div class="section-heading">
-
           <div>
-
-            <h3>
-              Data Structure Check
-            </h3>
-
-            <p>
-              The browser checks the basic raw magnetometer structure
-              before we send anything to the backend.
-            </p>
-
+            <h3>Submission Requirements</h3>
+            <p>The package must contain the required operator input before it can be submitted.</p>
           </div>
-
         </div>
 
-
-        <div
-          class="validation"
-          [class.valid]="missingColumns.length === 0"
-          [class.invalid]="missingColumns.length > 0"
-        >
-
-          <div class="validation-icon">
-
-            {{
-              missingColumns.length === 0
-                ? '✓'
-                : '!'
-            }}
-
+        <div class="requirements">
+          <div [class.ok]="hasUav">
+            <span>{{ hasUav ? 'OK' : 'REQUIRED' }}</span>
+            <div><strong>UAV file</strong><small>{{ hasUav ? 'Required file supplied' : 'Add one .uav file' }}</small></div>
           </div>
-
-
           <div>
-
-            <strong>
-              {{ validationMessage }}
-            </strong>
-
-
-            <p
-              *ngIf="missingColumns.length"
-            >
-
-              Missing:
-
-              <span
-                *ngFor="let column of missingColumns"
-              >
-                {{ column }}
-              </span>
-
-            </p>
-
+            <span>OPTIONAL</span>
+            <div><strong>XYZ / KML / BNA</strong><small>Any supplied optional files will be structurally validated.</small></div>
           </div>
-
+          <div>
+            <span>INFO</span>
+            <div><strong>Scientific analysis</strong><small>Not performed at this stage.</small></div>
+          </div>
         </div>
-
-
-        <!-- EXPECTED COLUMNS -->
-
-        <div class="columns">
-
-          <span
-            *ngFor="let column of requiredColumns"
-          >
-
-            {{ column }}
-
-          </span>
-
-        </div>
-
       </section>
 
+      <section class="action-card" *ngIf="!package">
+        <div><h3>Validate Survey Data</h3><p>Send the selected files to DfmS for package creation and structural validation.</p></div>
+        <button class="primary" type="button" [disabled]="!canValidate" (click)="uploadPackage()">
+          {{ uploading ? 'Validating...' : 'Validate & Create Package' }}
+        </button>
+      </section>
 
-      <!-- PREVIEW -->
-
-      <section
-        *ngIf="previewRows.length"
-        class="card"
-      >
-
-        <div class="section-heading">
-
-          <div>
-
-            <h3>
-              Data Preview
-            </h3>
-
-            <p>
-              First {{ previewRows.length }} rows from the selected file.
-            </p>
-
+      <ng-container *ngIf="package">
+        <section class="card package-result">
+          <div class="package-header">
+            <div>
+              <p class="eyebrow">PACKAGE {{ package.packageCode }}</p>
+              <h3>Validation Result</h3>
+            </div>
+            <span class="status" [class.invalid-status]="package.status !== 'VALID' && package.status !== 'SUBMITTED'" [class.submitted-status]="package.status === 'SUBMITTED'">{{ package.status }}</span>
           </div>
 
-        </div>
+          <div class="package-meta">
+            <div><small>PACKAGE ID</small><strong>#{{ package.id }}</strong></div>
+            <div><small>SURVEY ID</small><strong>#{{ package.surveyId }}</strong></div>
+            <div><small>CREATED</small><strong>{{ package.createdAt ? (package.createdAt | date:'medium') : '—' }}</strong></div>
+            <div><small>VALIDATED</small><strong>{{ package.validatedAt ? (package.validatedAt | date:'medium') : '—' }}</strong></div>
+          </div>
 
+          <div class="file-list">
+            <div class="package-file" *ngFor="let file of package.files">
+              <div class="file-row">
+                <div class="file-type">{{ file.fileType }}</div>
+                <div class="file-info"><strong>{{ file.fileName }}</strong><small>{{ formatSize(file.fileSize) }}</small></div>
+                <span [class]="'file-status ' + file.validationStatus.toLowerCase()">
+                  {{ file.validationStatus === 'VALID' ? 'Structure Valid' : file.validationStatus }}
+                </span>
+                <button class="details-button" type="button" (click)="toggleFileDetails(file.id)">
+                  {{ expandedFileId === file.id ? 'Hide details' : 'View details' }}
+                </button>
+              </div>
+              <div class="validation-detail" *ngIf="expandedFileId === file.id">
+                <strong>Validation message</strong>
+                <p>{{ file.validationMessage || 'No validation message returned.' }}</p>
+              </div>
+            </div>
+          </div>
+        </section>
 
-        <div class="table-wrap">
+        <section class="submission-summary card">
+          <div class="section-heading">
+            <div><h3>Submission Summary</h3><p>Current package state and processing boundary.</p></div>
+          </div>
+          <div class="summary-grid">
+            <div><span>Required input</span><strong>{{ packageHasUav ? 'UAV supplied' : 'UAV missing' }}</strong></div>
+            <div><span>Optional input</span><strong>{{ packageHasOptionalFiles ? 'Optional files supplied' : 'No optional files supplied' }}</strong></div>
+            <div><span>Structural validation</span><strong>{{ packageIsValid || packageIsSubmitted ? 'Passed' : 'Requires review' }}</strong></div>
+            <div><span>Scientific analysis</span><strong>Not performed at this stage</strong></div>
+          </div>
+        </section>
 
-          <table>
+        <section class="action-card" *ngIf="!packageIsSubmitted">
+          <div>
+            <h3>{{ packageIsValid ? 'Package Ready for Submission' : 'Package Requires Attention' }}</h3>
+            <p *ngIf="packageIsValid">All supplied files passed structural validation and are ready for submission.</p>
+            <p *ngIf="!packageIsValid">Review the validation results. A new package can be created after correcting the selected files.</p>
+          </div>
+          <div class="action-buttons">
+            <button class="secondary" type="button" (click)="resetPackage()">Create New Package</button>
+            <button *ngIf="packageIsValid" class="primary" type="button" [disabled]="submitting" (click)="submitPackage()">
+              {{ submitting ? 'Submitting...' : 'Submit Survey Data' }}
+            </button>
+          </div>
+        </section>
 
-            <thead>
+        <section class="action-card submitted-card" *ngIf="packageIsSubmitted">
+          <div>
+            <h3>Package Submitted</h3>
+            <p>Package {{ package.packageCode }} has been submitted to the next processing stage.</p>
+          </div>
+          <button class="secondary" type="button" (click)="goBack()">Return to Survey</button>
+        </section>
 
-              <tr>
-
-                <th
-                  *ngFor="let header of headers"
-                >
-                  {{ header }}
-                </th>
-
-              </tr>
-
-            </thead>
-
-
-            <tbody>
-
-              <tr
-                *ngFor="let row of previewRows"
-              >
-
-                <td
-                  *ngFor="let value of row"
-                >
-                  {{ value }}
-                </td>
-
-              </tr>
-
-            </tbody>
-
-          </table>
-
-        </div>
-
-      </section>
-
-
-      <!-- ACTION -->
-
-      <section class="action-card">
-
-        <div>
-
-          <h3>
-            Upload to DfmS
-          </h3>
-
-          <p>
-            Backend storage and processing will be connected
-            in the next step.
-          </p>
-
-        </div>
-
-
-        <button
-  class="primary"
-  type="button"
-  [disabled]="!fileValid || uploading"
-  (click)="uploadData()"
->
-  {{
-    uploading
-      ? 'Uploading...'
-      : 'Upload data'
-  }}
-</button>
-
-      </section>
-      <div
-  *ngIf="uploadResult"
-  class="upload-success"
->
-
-  <div class="success-icon">
-    ✓
-  </div>
-
-  <div>
-
-    <strong>
-      Data uploaded successfully
-    </strong>
-
-    <p>
-      {{ uploadResult.fileName }}
-      ·
-      {{ uploadResult.recordCount | number }}
-      records
-    </p>
-
-  </div>
-
-</div>
-
+        <section class="mission-completion-card" *ngIf="packageIsSubmitted && mission?.status === 'COMPLETED'">
+          <div>
+            <span class="completion-label">MISSION WORKFLOW COMPLETE</span>
+            <h3>Mission {{ mission?.missionCode }} completed</h3>
+            <p>The survey data package was submitted successfully and the associated mission is now marked completed.</p>
+          </div>
+          <button class="primary" type="button" (click)="navigate('/drone-operator/missions/' + mission?.id)">View completed mission</button>
+        </section>
+      </ng-container>
     </ng-container>
-
+    </section>
   </main>
-
 </div>

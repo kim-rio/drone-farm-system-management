@@ -57,10 +57,18 @@ export class OperatorWorkspace implements OnInit {
 
 
   /* =========================================================
-     PAGE
+     PAGE / NAVIGATION
      ========================================================= */
 
   page = 'dashboard';
+
+  sidebarOpen = true;
+
+  menuItems = [
+    { label: 'Dashboard', route: '/drone-operator' },
+    { label: 'My Missions', route: '/drone-operator/missions' },
+    { label: 'Field Surveys', route: '/drone-operator/surveys' }
+  ];
 
 
   /* =========================================================
@@ -558,6 +566,27 @@ export class OperatorWorkspace implements OnInit {
       }
 
     });
+  }
+
+
+  /* =========================================================
+     NAVIGATION
+     ========================================================= */
+
+  toggleSidebar(): void {
+    this.sidebarOpen = !this.sidebarOpen;
+  }
+
+  navigate(route: string): void {
+    this.router.navigateByUrl(route);
+  }
+
+  isActive(route: string): boolean {
+    if (route === '/drone-operator') {
+      return this.router.url === '/drone-operator' || this.router.url === '/drone-operator/';
+    }
+
+    return this.router.url.startsWith(route);
   }
 
 

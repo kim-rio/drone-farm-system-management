@@ -84,6 +84,62 @@ public class MissionService {
     public MissionResponse completeMission(Long id) {
         return transitionMyMission(id, MissionStatus.IN_PROGRESS, MissionStatus.COMPLETED);
     }
+    @Transactional
+public void completeMissionForServiceRequest(Long serviceRequestId) {
+
+    if (serviceRequestId == null) {
+        throw new IllegalArgumentException("Service request ID is required");
+    }
+
+    User user = getCurrentUser();
+
+    if (user.getRole() != Role.DRONE_OPERATOR) {
+        throw new RuntimeException(
+                "Only drone operators can complete field missions"
+        );
+    }
+
+    ServiceRequest serviceRequest = serviceRequestRepository
+            .findById(serviceRequestId)
+            .orElseThrow(() ->
+                    new RuntimeException("Service request not found")
+            );
+
+    Mission mission = missionRepository
+            .findByServiceRequest(serviceRequest)
+            .orElseThrow(() ->
+                    new RuntimeException(
+                            "Mission not found for service request"
+                    )
+            );
+
+    if (mission.getOperator() == null
+            || !mission.getOperator().getId().equals(user.getId())) {
+
+        throw new RuntimeException(
+                "This mission is not assigned to you"
+        );
+    }
+
+    if (mission.getCompany() == null
+            || user.getCompany() == null
+            || !mission.getCompany().getId().equals(user.getCompany().getId())) {
+
+        throw new RuntimeException(
+                "This mission does not belong to your company"
+        );
+    }
+
+    if (mission.getStatus() != MissionStatus.IN_PROGRESS) {
+        throw new RuntimeException(
+                "Mission must be IN_PROGRESS before it can be completed"
+        );
+    }
+
+    mission.setStatus(MissionStatus.COMPLETED);
+
+    missionRepository.save(mission);
+}
 
 
     // =========================================================

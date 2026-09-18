@@ -1,4 +1,4 @@
-<div class="shell">
+<div class="shell" [class.sidebar-open]="sidebarOpen">
 
   <!-- =========================================================
        SIDEBAR
@@ -6,92 +6,41 @@
 
   <aside class="sidebar">
 
-    <a class="brand" routerLink="/drone-operator">
-      <span class="brand-mark">✦</span>
-
-      <span>
-        DfmS<span>Operator</span>
-      </span>
-    </a>
-
-
-    <div class="operator">
-
-      <span class="avatar">
-        {{ initials }}
-      </span>
-
-      <div>
-        <strong>
-          {{ name }} {{ user?.lastName }}
-        </strong>
-
-        <small>
-          Drone operator
-        </small>
+    <div class="brand">
+      <div class="brand-mark">DM</div>
+      <div class="brand-text">
+        <strong>DMFS</strong>
+        <span>DRONE OPERATOR</span>
       </div>
-
     </div>
 
-
-    <nav>
-
-      <a
-        routerLink="/drone-operator"
-        [class.active]="page === 'dashboard'"
-      >
-        <i>⌂</i>
-        Overview
-      </a>
-
-
-      <a
-        routerLink="/drone-operator/missions"
-        [class.active]="page === 'missions' || page === 'detail'"
-      >
-        <i>◈</i>
-
-        My missions
-
-        <b>
-          {{ pending.length }}
-        </b>
-      </a>
-
-
-      <a
-        routerLink="/drone-operator/surveys"
-        [class.active]="page === 'surveys'"
-      >
-        <i>⌁</i>
-        Field surveys
-      </a>
-
-
-      <a
-        routerLink="/drone-operator/data"
-        [class.active]="page === 'data'"
-      >
-        <i>⇧</i>
-        Data handoff
-      </a>
-
+    <nav class="navigation">
+      @for (item of menuItems; track item.route) {
+        <button
+          type="button"
+          class="nav-item"
+          [class.active]="isActive(item.route)"
+          (click)="navigate(item.route)"
+        >
+          <span class="nav-indicator"></span>
+          <span>{{ item.label }}</span>
+        </button>
+      }
     </nav>
 
-
-    <div class="side-foot">
-
-      <span class="online-dot"></span>
-
-      System online
-
-      <button
-        type="button"
-        (click)="logout()"
-      >
-        Sign out →
+    <div class="sidebar-bottom">
+      <button type="button" class="account">
+        <div class="account-avatar">{{ initials }}</div>
+        <div class="account-details">
+          <strong>{{ user?.firstName }} {{ user?.lastName }}</strong>
+          <span>Drone Operator Account</span>
+        </div>
       </button>
 
+      <button type="button" class="logout" (click)="logout()">
+        <span class="logout-circle"></span>
+        <span class="logout-text">Logout</span>
+      </button>
     </div>
 
   </aside>
@@ -101,11 +50,36 @@
        MAIN CONTENT
        ========================================================= -->
 
-  <main>
+  <main class="main-content">
+
+    <header class="topbar">
+      <div class="topbar-left">
+        @if (!sidebarOpen) {
+          <button
+            type="button"
+            class="open-menu-button"
+            (click)="toggleSidebar()"
+            aria-label="Open navigation"
+          ></button>
+        }
+      </div>
+
+      <div class="topbar-right">
+        <div class="top-user">
+          <div class="top-avatar">{{ initials }}</div>
+          <div class="top-user-details">
+            <strong>{{ user?.firstName }} {{ user?.lastName }}</strong>
+            <span>DRONE OPERATOR</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section class="page">
 
     <!-- HEADER -->
 
-    <header>
+    <header class="page-header">
 
       <div>
 
@@ -123,9 +97,7 @@
                 ? (selected?.missionCode || 'Mission details')
                 : page === 'missions'
                   ? 'My missions'
-                  : page === 'surveys'
-                    ? 'Field surveys'
-                    : 'Data handoff'
+                  : 'Field surveys'
           }}
 
         </h1>
@@ -140,9 +112,7 @@
                 ? 'Review the assignment and complete your field operation.'
                 : page === 'missions'
                   ? 'Execute assigned work and keep the field team moving.'
-                  : page === 'surveys'
-                    ? 'Manage your field survey activity.'
-                    : 'Prepare completed survey data for handoff.'
+                  : 'Manage your field survey activity.'
           }}
 
         </p>
@@ -737,7 +707,7 @@
                 </strong>
 
                 <p>
-                  Start the survey to record your field activity.
+                  Continue the field workflow by opening the survey assigned to this mission.
                 </p>
 
               </div>
@@ -751,7 +721,9 @@
 
                 {{
                   surveyFor(selected)
-                    ? 'Open field survey'
+                    ? (surveyFor(selected)?.status === 'COMPLETED'
+                      ? 'Open completed survey'
+                      : 'Open field survey')
                     : 'Create field survey'
                 }}
 
@@ -760,33 +732,18 @@
             </div>
 
 
-            <!-- COMPLETE -->
+            <!-- COMPLETED -->
 
             <div
               class="action-box complete"
               *ngIf="selected.status === 'COMPLETED'"
             >
-
               <div>
-
-                <strong>
-                  Mission complete
-                </strong>
-
+                <strong>Mission complete</strong>
                 <p>
-                  The field operation is ready for its data handoff.
+                  The survey data package has been submitted and the mission has been completed.
                 </p>
-
               </div>
-
-
-              <a
-                class="outline"
-                routerLink="/drone-operator/data"
-              >
-                View data handoff
-              </a>
-
             </div>
 
 
@@ -885,73 +842,41 @@
 
           <aside class="workflow">
 
-            <p class="eyebrow">
-              MISSION FLOW
-            </p>
-
+            <p class="eyebrow">MISSION FLOW</p>
 
             <ol>
-
-              <li
-                [class.done]="selected.status !== 'ASSIGNED'"
-              >
-
-                <i>
-                  1
-                </i>
-
+              <li [class.done]="selected.status !== 'ASSIGNED'">
+                <i>1</i>
                 Accept assignment
-
               </li>
 
-
-              <li
-                [class.done]="
-                  selected.status === 'IN_PROGRESS'
-                  || selected.status === 'COMPLETED'
-                "
-              >
-
-                <i>
-                  2
-                </i>
-
+              <li [class.done]="selected.status === 'IN_PROGRESS' || selected.status === 'COMPLETED'">
+                <i>2</i>
                 Start mission
-
               </li>
 
-
-              <li
-                [class.done]="
-                  surveyFor(selected)?.status === 'IN_PROGRESS'
-                  || surveyFor(selected)?.status === 'COMPLETED'
-                "
-              >
-
-                <i>
-                  3
-                </i>
-
-                Conduct survey
-
+              <li [class.done]="surveyFor(selected)?.status === 'IN_PROGRESS' || surveyFor(selected)?.status === 'COMPLETED'">
+                <i>3</i>
+                Start survey
               </li>
 
-
-              <li
-                [class.done]="
-                  selected.status === 'COMPLETED'
-                "
-              >
-
-                <i>
-                  4
-                </i>
-
-                Complete & hand off
-
+              <li [class.done]="surveyFor(selected)?.status === 'COMPLETED'">
+                <i>4</i>
+                Complete survey
               </li>
 
+              <li [class.done]="selected.status === 'COMPLETED'">
+                <i>5</i>
+                Submit survey data
+              </li>
+
+              <li [class.done]="selected.status === 'COMPLETED'">
+                <i>6</i>
+                Complete mission
+              </li>
             </ol>
+
+            <span *ngIf="selected.status === 'COMPLETED'" class="done-text">Mission workflow completed.</span>
 
           </aside>
 
@@ -1068,7 +993,7 @@
                 *ngIf="s.status === 'COMPLETED'"
                 class="done-text"
               >
-                ✓ Ready for data handoff
+                ✓ Survey completed — ready for data upload
               </span>
 
             </article>
@@ -1089,50 +1014,11 @@
 
 
 
-      <!-- =======================================================
-           DATA HANDOFF
-           ======================================================= -->
-
-      <ng-container
-        *ngIf="page === 'data'"
-      >
-
-        <section class="handoff">
-
-          <div class="handoff-icon">
-            ⇧
-          </div>
-
-
-          <p class="eyebrow">
-            RAW SURVEY DATA
-          </p>
-
-
-          <h2>
-            Data handoff is ready for the next step.
-          </h2>
-
-
-          <p>
-            Once a survey is complete, upload its CSV or raw
-            magnetometer file here for the geologist. The upload
-            endpoint is not yet exposed by the API, so this workspace
-            correctly keeps the file action unavailable until backend
-            storage is connected.
-          </p>
-
-
-          <button disabled>
-            Upload survey file
-          </button>
-
-        </section>
-
-      </ng-container>
 
 
     </ng-container>
+
+    </section>
 
   </main>
 

@@ -1,0 +1,35 @@
+<?kml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+<!-- File written using Surfer by Golden Software LLC. -->
+<Document>
+<Folder>
+  <name>Base(vector)-Kuivajarvi_area_utm.bna</name>
+  <Placemark>
+    <name>Object ID 13</name>
+    <Style>
+       <LineStyle>
+         <color>ff0000ff</color>
+         <width>1</width>
+       </LineStyle>
+       <PolyStyle>
+         <fill>0</fill>
+         <outline>1</outline>
+         <color>ff0000ff</color>
+       </PolyStyle>
+    </Style>
+      <Polygon>
+        <outerBoundaryIs>
+          <LinearRing>
+            <coordinates> 27.8505214614527503,68.6266435186380335,0
+              27.8241336585425358,68.617274558542718,0
+              27.8082980399781832,68.6232079355422684,0
+              27.8346862372627406,68.6325793663569215,0
+              27.8505214614527503,68.6266435186380335,0
+            </coordinates>
+          </LinearRing>
+        </outerBoundaryIs>
+      </Polygon>
+  </Placemark>
+</Folder>
+</Document>
+</kml>

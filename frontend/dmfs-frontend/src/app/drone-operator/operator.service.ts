@@ -15,19 +15,29 @@ export interface Survey {
   id: number; surveyCode: string; surveyName?: string; serviceRequestId: number; status: 'DRAFT' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED' | 'FAILED';
   startedAt?: string; endedAt?: string; startLatitude?: number; startLongitude?: number; endLatitude?: number; endLongitude?: number;
 }
-export interface SurveyData {
+export interface SurveyDataPackageFile {
   id: number;
-  surveyId: number;
-  surveyCode?: string;
   fileName: string;
-  filePath?: string;
-  fileType?: string;
-  fileSize?: number;
-  recordCount?: number;
-  uploadedById?: number;
-  uploadedByName?: string;
+  fileType: string;
+  fileExtension: string;
+  fileSize: number;
+  validationStatus: 'PENDING' | 'VALIDATING' | 'VALID' | 'INVALID';
+  validationMessage?: string;
   uploadedAt?: string;
 }
+
+export interface SurveyDataPackage {
+  id: number;
+  surveyId: number;
+  packageCode: string;
+  status: 'DRAFT' | 'VALIDATING' | 'VALID' | 'SUBMITTED' | 'QUEUED' | 'PROCESSING' | 'PROCESSED' | 'FAILED' | 'PROCESSING_FAILED';
+  files: SurveyDataPackageFile[];
+  createdAt?: string;
+  validatedAt?: string;
+  submittedAt?: string;
+  submittedBy?: number;
+}
+
 
 @Injectable({ providedIn: 'root' })
 export class OperatorService {
@@ -44,23 +54,25 @@ export class OperatorService {
   createSurvey(payload: object) { return this.http.post<Survey>(`${this.api}/surveys`, payload, this.options); }
   startSurvey(id: number) { return this.http.patch<Survey>(`${this.api}/surveys/${id}/start`, {}, this.options); }
   completeSurvey(id: number) { return this.http.patch<Survey>(`${this.api}/surveys/${id}/complete`, {}, this.options); }
-uploadSurveyData(
-  surveyId: number,
-  file: File
-) {
+uploadSurveyDataPackage(surveyId: number, files: File[]) {
   const formData = new FormData();
 
-  formData.append('file', file);
+  for (const file of files) {
+    formData.append('files', file);
+  }
 
-  return this.http.post<SurveyData>(
-    `${this.api}/surveys/${surveyId}/data`,
+  return this.http.post<SurveyDataPackage>(
+    `${this.api}/surveys/${surveyId}/data-packages`,
     formData,
     this.options
   );
 }
-surveyData(surveyId: number) {
-  return this.http.get<SurveyData[]>(
-    `${this.api}/surveys/${surveyId}/data`,
+
+submitSurveyDataPackage(packageId: number) {
+  return this.http.post<SurveyDataPackage>(
+    `${this.api}/surveys/data-packages/${packageId}/submit`,
+    {},
     this.options
   );
-}}
+}
+}

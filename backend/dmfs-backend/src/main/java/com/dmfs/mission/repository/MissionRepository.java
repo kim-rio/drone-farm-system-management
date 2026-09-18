@@ -30,4 +30,8 @@ public interface MissionRepository
     boolean existsByServiceRequest(
             ServiceRequest serviceRequest
     );
+
+    Optional<Mission> findByServiceRequest(
+            ServiceRequest serviceRequest
+    );
 }
