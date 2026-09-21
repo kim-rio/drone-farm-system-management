@@ -1,4 +1,4 @@
-﻿import { Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 
 import { superAdminGuard } from './guards/super-admin.guard';
 import { roleGuard } from './guards/role.guard';
@@ -182,7 +182,6 @@ export const routes: Routes = [
   }
 },
 
-<<<<<<< Updated upstream
 // Individual survey data package
 {
   path: 'drone-operator/surveys/:id/data',
@@ -193,9 +192,6 @@ export const routes: Routes = [
 },
 
 // Individual Field Survey
-=======
-// â­ Individual Field Survey
->>>>>>> Stashed changes
 {
   path: 'drone-operator/surveys/:id',
   canActivate: [roleGuard(['DRONE_OPERATOR'])],
@@ -220,6 +216,10 @@ export const routes: Routes = [
     import('./geologist/geologist.routes')
       .then(m => m.GEOLOGIST_ROUTES)
   },
+  
+
+
+  // ==========================================================
   // ==========================================================
   // CUSTOMER PORTAL
   // ==========================================================
@@ -248,8 +248,6 @@ export const routes: Routes = [
       import('./customer/customer-dashboard/customer-dashboard')
         .then(m => m.CustomerDashboard)
   },
-
-  // ==========================================================
   // FALLBACK
   // ==========================================================
 
@@ -257,5 +255,6 @@ export const routes: Routes = [
     path: '**',
     redirectTo: 'login'
   }
+
 ];
 
