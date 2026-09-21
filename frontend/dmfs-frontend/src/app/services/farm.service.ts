@@ -30,7 +30,7 @@ export class FarmService {
   private readonly http = inject(HttpClient);
 
   private readonly apiUrl =
-    'http://localhost:8080/api/farms';
+    '/api/farms';
 
   createFarm(
     clientId: number,

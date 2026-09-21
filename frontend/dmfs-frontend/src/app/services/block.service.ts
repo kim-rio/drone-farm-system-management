@@ -30,7 +30,7 @@ export class BlockService {
   private readonly http = inject(HttpClient);
 
   private readonly apiUrl =
-    'http://localhost:8080/api/blocks';
+    '/api/blocks';
 
   createBlock(
     farmId: number,

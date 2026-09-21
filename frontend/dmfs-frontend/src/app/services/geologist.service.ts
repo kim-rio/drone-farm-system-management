@@ -10,7 +10,7 @@ export interface GeologistReport { id: number; surveyId: number; surveyCode: str
 @Injectable({ providedIn: 'root' })
 export class GeologistService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:8080/api/geologist';
+  private readonly apiUrl = '/api/geologist';
   dashboard(): Observable<GeologistDashboard> { return this.http.get<GeologistDashboard>(`${this.apiUrl}/dashboard`, { withCredentials: true }); }
   surveys(): Observable<GeologistSurvey[]> { return this.http.get<GeologistSurvey[]>(`${this.apiUrl}/surveys`, { withCredentials: true }); }
   maps(status?: string): Observable<AnomalyMap[]> { return this.http.get<AnomalyMap[]>(`${this.apiUrl}/maps`, { params: status && status !== 'ALL' ? { status } : {}, withCredentials: true }); }
