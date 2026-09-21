@@ -7,7 +7,7 @@ import { AuthService } from '../../../services/auth.service';
 @Component({
   selector: 'app-survey-data',
   standalone: true,
-  imports: [CommonModule, RouterLink, DatePipe],
+  imports: [CommonModule, DatePipe],
   templateUrl: './survey-data.html',
   styleUrl: './survey-data.scss'
 })
