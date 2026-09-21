@@ -1,0 +1,157 @@
+<div class="activation-page">
+
+  <section class="activation-card">
+
+    <div class="brand">
+      <span class="eyebrow">DMFS CLIENT PORTAL</span>
+      <h1>Activate your account</h1>
+      <p>
+        Set up your portal access to view service requests
+        and make payments securely.
+      </p>
+    </div>
+
+
+    @if (loading) {
+
+      <div class="state">
+        Validating your invitation...
+      </div>
+
+    } @else if (errorMessage) {
+
+      <div class="alert">
+        {{ errorMessage }}
+      </div>
+
+      <button
+        type="button"
+        class="secondary"
+        (click)="goToLogin()">
+        Go to Login
+      </button>
+
+    } @else {
+
+      @if (invitation?.email) {
+
+        <div class="invitation-info">
+          <span>Email</span>
+          <strong>{{ invitation?.email }}</strong>
+        </div>
+
+      }
+
+      @if (invitation?.clientCode) {
+
+        <div class="invitation-info">
+          <span>Client</span>
+          <strong>{{ invitation?.clientCode }}</strong>
+        </div>
+
+      }
+
+
+      <form (ngSubmit)="activate()">
+
+        <div class="field-row">
+
+          <label>
+            First name
+
+            <input
+              type="text"
+              name="firstName"
+              [(ngModel)]="firstName"
+              autocomplete="given-name"
+              required
+            />
+
+          </label>
+
+          <label>
+            Last name
+
+            <input
+              type="text"
+              name="lastName"
+              [(ngModel)]="lastName"
+              autocomplete="family-name"
+              required
+            />
+
+          </label>
+
+        </div>
+
+
+        <label>
+          Password
+
+          <input
+            type="password"
+            name="password"
+            [(ngModel)]="password"
+            autocomplete="new-password"
+            minlength="8"
+            required
+          />
+
+          <small>
+            Use at least 8 characters.
+          </small>
+
+        </label>
+
+
+        <label>
+          Confirm password
+
+          <input
+            type="password"
+            name="confirmPassword"
+            [(ngModel)]="confirmPassword"
+            autocomplete="new-password"
+            required
+          />
+
+        </label>
+
+
+        @if (errorMessage) {
+          <div class="alert">
+            {{ errorMessage }}
+          </div>
+        }
+
+        @if (successMessage) {
+          <div class="success">
+            {{ successMessage }}
+          </div>
+        }
+
+
+        <button
+          type="submit"
+          class="primary"
+          [disabled]="activating">
+
+          @if (activating) {
+            Activating account...
+          } @else {
+            Activate account
+          }
+
+        </button>
+
+      </form>
+
+    }
+
+  </section>
+
+</div>
+
+
+
+

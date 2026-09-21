@@ -24,7 +24,8 @@ export class Login {
   login(): void {
 
     if (!this.email.trim() || !this.password.trim()) {
-      this.errorMessage = 'Please enter your email and password.';
+      this.errorMessage =
+        'Please enter your email and password.';
       return;
     }
 
@@ -54,6 +55,10 @@ export class Login {
             this.router.navigate(['/management']);
             break;
 
+          case 'CUSTOMER':
+            this.router.navigate(['/customer']);
+            break;
+
           case 'DRONE_OPERATOR':
             this.router.navigate(['/drone-operator']);
             break;
@@ -75,7 +80,8 @@ export class Login {
         this.loading = false;
 
         if (error?.status === 401) {
-          this.errorMessage = 'Invalid email or password.';
+          this.errorMessage =
+            'Invalid email or password.';
         } else {
           this.errorMessage =
             'Unable to connect to the server.';

@@ -4,6 +4,7 @@ import com.dmfs.service.entity.ServiceRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ServiceRequestRepository
         extends JpaRepository<ServiceRequest, Long> {
@@ -17,10 +18,22 @@ public interface ServiceRequestRepository
 
     long countByCustomerCompanyId(Long companyId);
 
-    long countByCustomerCompanyIdAndPaymentStatusIgnoreCase(Long companyId, String paymentStatus);
+    long countByCustomerCompanyIdAndPaymentStatusIgnoreCase(
+            Long companyId,
+            String paymentStatus
+    );
 
     long countByCustomerCompanyIdAndStatusIgnoreCase(
             Long companyId,
             String status
+    );
+
+    List<ServiceRequest> findByCustomerIdOrderByCreatedAtDesc(
+            Long customerId
+    );
+
+    Optional<ServiceRequest> findByIdAndCustomerId(
+            Long id,
+            Long customerId
     );
 }

@@ -22,8 +22,8 @@
       <button
         type="button"
         class="primary-button"
-        (click)="addFarm()"> Add Farm
-
+        (click)="addFarm()">
+        Add Farm
       </button>
 
     }
@@ -188,6 +188,152 @@
     </div>
 
 
+    <!-- PORTAL ACCESS -->
+
+    <section class="portal-section">
+
+      <div class="section-header">
+
+        <div>
+
+          <h2>
+            Portal Access
+          </h2>
+
+          <p>
+            Give this client secure access to their service requests and payments.
+          </p>
+
+        </div>
+
+        <button
+          type="button"
+          class="primary-button"
+          [disabled]="inviting"
+          (click)="inviteClient()">
+
+          @if (inviting) {
+            Creating Invitation...
+          } @else {
+            Invite Client
+          }
+
+        </button>
+
+      </div>
+
+
+      <div class="portal-card">
+
+        <div class="portal-email">
+
+          <span>
+            Login Email
+          </span>
+
+          <strong>
+            {{ client.email || '-' }}
+          </strong>
+
+        </div>
+
+
+        @if (inviteMessage) {
+
+          <div class="success-card">
+            {{ inviteMessage }}
+          </div>
+
+        }
+
+
+        @if (inviteErrorMessage) {
+
+          <div class="error-card">
+            {{ inviteErrorMessage }}
+          </div>
+
+        }
+
+
+        @if (activationUrl) {
+
+          <div class="activation-box">
+
+            <div>
+
+              <span>
+                Client Activation Link
+              </span>
+
+              <p>
+                Open this link to activate the CUSTOMER account and create the client's password.
+              </p>
+
+            </div>
+
+
+            <div class="activation-url">
+              {{ activationUrl }}
+            </div>
+
+
+            @if (activationExpiresAt) {
+
+              <small>
+                Expires:
+                {{ activationExpiresAt }}
+              </small>
+
+            }
+
+
+            <div class="activation-actions">
+
+              <button
+                type="button"
+                class="secondary-button"
+                (click)="copyActivationLink()">
+
+                Copy Link
+
+              </button>
+
+
+              <button
+                type="button"
+                class="primary-button"
+                (click)="openActivationLink()">
+
+                Open Activation
+
+              </button>
+
+            </div>
+
+          </div>
+
+        } @else {
+
+          <div class="portal-empty">
+
+            <strong>
+              No portal invitation yet
+            </strong>
+
+            <p>
+              Click "Invite Client" to create a secure one-time activation link.
+            </p>
+
+          </div>
+
+        }
+
+      </div>
+
+    </section>
+
+
     <!-- FARMS -->
 
     <div class="farms-section">
@@ -210,8 +356,8 @@
         <button
           type="button"
           class="secondary-button"
-          (click)="addFarm()"> Add Farm
-
+          (click)="addFarm()">
+          Add Farm
         </button>
 
       </div>
@@ -346,9 +492,7 @@
                   </span>
 
                   <strong>
-
                     {{ farm.latitude ?? '-' }}
-
                   </strong>
 
                 </div>
@@ -361,9 +505,7 @@
                   </span>
 
                   <strong>
-
                     {{ farm.longitude ?? '-' }}
-
                   </strong>
 
                 </div>
@@ -374,9 +516,7 @@
               @if (farm.description) {
 
                 <p class="farm-description">
-
                   {{ farm.description }}
-
                 </p>
 
               }
@@ -407,16 +547,3 @@
   </app-add-farm>
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

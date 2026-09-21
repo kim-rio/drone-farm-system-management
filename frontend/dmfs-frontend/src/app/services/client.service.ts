@@ -1,8 +1,10 @@
-import { Injectable, inject } from '@angular/core';
+﻿import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-export type ClientType = 'COMPANY' | 'INDIVIDUAL';
+export type ClientType =
+  | 'COMPANY'
+  | 'INDIVIDUAL';
 
 export type ClientStatus =
   | 'ACTIVE'
@@ -10,11 +12,8 @@ export type ClientStatus =
   | 'SUSPENDED';
 
 export interface Client {
-
   id: number;
-
   clientCode: string;
-
   type: ClientType;
 
   companyName?: string;
@@ -25,26 +24,20 @@ export interface Client {
   lastName?: string;
 
   email: string;
-
   phone?: string;
-
   address?: string;
 
   status: ClientStatus;
 
   companyId?: number;
-
   registeredBy?: number | null;
 
   createdAt?: string;
-
   updatedAt?: string | null;
 }
 
 export interface CreateClientRequest {
-
   clientCode: string;
-
   type: ClientType;
 
   companyName?: string;
@@ -55,13 +48,23 @@ export interface CreateClientRequest {
   lastName?: string;
 
   email: string;
-
   phone: string;
-
   address?: string;
 }
 
-export interface InitialFarmRequest { name: string; description?: string; latitude: number; longitude: number; areaHectares: number; }
+export interface InitialFarmRequest {
+  name: string;
+  description?: string;
+  latitude: number;
+  longitude: number;
+  areaHectares: number;
+}
+
+export interface PortalInviteResponse {
+  message?: string;
+  activationUrl: string;
+  expiresAt?: string;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -74,7 +77,6 @@ export class ClientService {
     'http://localhost:8080/api/clients';
 
   getClients(): Observable<Client[]> {
-
     return this.http.get<Client[]>(
       this.apiUrl,
       {
@@ -84,7 +86,6 @@ export class ClientService {
   }
 
   getClient(id: number): Observable<Client> {
-
     return this.http.get<Client>(
       `${this.apiUrl}/${id}`,
       {
@@ -96,7 +97,6 @@ export class ClientService {
   createClient(
     client: CreateClientRequest
   ): Observable<Client> {
-
     return this.http.post<Client>(
       this.apiUrl,
       client,
@@ -106,8 +106,20 @@ export class ClientService {
     );
   }
 
-  createClientWithInitialFarm(client: CreateClientRequest, farm: InitialFarmRequest): Observable<Client> {
-    return this.http.post<Client>(`${this.apiUrl}/with-initial-farm`, { client, farm }, { withCredentials: true });
+  createClientWithInitialFarm(
+    client: CreateClientRequest,
+    farm: InitialFarmRequest
+  ): Observable<Client> {
+    return this.http.post<Client>(
+      `${this.apiUrl}/with-initial-farm`,
+      {
+        client,
+        farm
+      },
+      {
+        withCredentials: true
+      }
+    );
   }
 
   updateClient(
@@ -116,7 +128,6 @@ export class ClientService {
       status: ClientStatus;
     }
   ): Observable<Client> {
-
     return this.http.put<Client>(
       `${this.apiUrl}/${id}`,
       client,
@@ -127,9 +138,23 @@ export class ClientService {
   }
 
   deleteClient(id: number): Observable<void> {
-
     return this.http.delete<void>(
       `${this.apiUrl}/${id}`,
+      {
+        withCredentials: true
+      }
+    );
+  }
+
+  invitePortal(
+    clientId: number,
+    email: string
+  ): Observable<PortalInviteResponse> {
+    return this.http.post<PortalInviteResponse>(
+      `${this.apiUrl}/${clientId}/portal-invite`,
+      {
+        email
+      },
       {
         withCredentials: true
       }

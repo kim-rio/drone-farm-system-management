@@ -1,4 +1,4 @@
-import { inject } from '@angular/core';
+﻿import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
@@ -31,6 +31,9 @@ export const roleGuard = (
 
       case 'MANAGEMENT':
         return router.createUrlTree(['/management']);
+
+      case 'CUSTOMER':
+        return router.createUrlTree(['/customer']);
 
       case 'DRONE_OPERATOR':
         return router.createUrlTree(['/drone-operator']);

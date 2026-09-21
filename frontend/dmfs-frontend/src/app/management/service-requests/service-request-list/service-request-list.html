@@ -149,15 +149,6 @@
 
           <div class="request-actions">
 
-            @if (request.paymentStatus !== 'PAID') {
-              <button
-                type="button"
-                class="primary"
-                (click)="markPaid(request)">
-                Mark Paid
-              </button>
-            }
-
             <button
               type="button"
               class="secondary"
@@ -192,3 +183,5 @@
   }
 
 </div>
+
+
