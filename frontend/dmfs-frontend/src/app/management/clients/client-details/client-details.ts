@@ -1,4 +1,4 @@
-﻿import {
+import {
   ChangeDetectorRef,
   Component,
   OnInit,
@@ -358,15 +358,20 @@ export class ClientDetails implements OnInit {
     this.cdr.detectChanges();
   }
 
-  farmCreated(): void {
+  farmCreated(farm: Farm): void {
 
     this.showAddFarm = false;
 
-    if (this.client?.id) {
-      this.loadFarms(this.client.id);
+    if (!this.client?.id || !farm.id) {
+      return;
     }
 
-    this.cdr.detectChanges();
+    this.router.navigate([
+      '/management/clients',
+      this.client.id,
+      'farms',
+      farm.id
+    ]);
   }
 
   // ==========================================

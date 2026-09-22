@@ -22,11 +22,18 @@ export interface CreateFarmRequest {
   areaHectares?: number;
 }
 
+export interface UpdateFarmRequest {
+  name: string;
+  description?: string;
+  latitude: number;
+  longitude: number;
+  areaHectares?: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class FarmService {
-
   private readonly http = inject(HttpClient);
 
   private readonly apiUrl =
@@ -36,49 +43,44 @@ export class FarmService {
     clientId: number,
     farm: CreateFarmRequest
   ): Observable<Farm> {
-
     return this.http.post<Farm>(
       `${this.apiUrl}/client/${clientId}`,
       farm,
-      {
-        withCredentials: true
-      }
+      { withCredentials: true }
+    );
+  }
+
+  updateFarm(
+    id: number,
+    farm: UpdateFarmRequest
+  ): Observable<Farm> {
+    return this.http.put<Farm>(
+      `${this.apiUrl}/${id}`,
+      farm,
+      { withCredentials: true }
     );
   }
 
   getClientFarms(
     clientId: number
   ): Observable<Farm[]> {
-
     return this.http.get<Farm[]>(
       `${this.apiUrl}/client/${clientId}`,
-      {
-        withCredentials: true
-      }
+      { withCredentials: true }
     );
   }
 
-  getFarm(
-    id: number
-  ): Observable<Farm> {
-
+  getFarm(id: number): Observable<Farm> {
     return this.http.get<Farm>(
       `${this.apiUrl}/${id}`,
-      {
-        withCredentials: true
-      }
+      { withCredentials: true }
     );
   }
 
-  deleteFarm(
-    id: number
-  ): Observable<void> {
-
+  deleteFarm(id: number): Observable<void> {
     return this.http.delete<void>(
       `${this.apiUrl}/${id}`,
-      {
-        withCredentials: true
-      }
+      { withCredentials: true }
     );
   }
 }

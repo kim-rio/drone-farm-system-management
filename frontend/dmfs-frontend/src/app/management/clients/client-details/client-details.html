@@ -1,4 +1,4 @@
-﻿<div class="page">
+<div class="page">
 
   <!-- HEADER -->
 
@@ -543,7 +543,7 @@
   <app-add-farm
     [clientId]="client.id"
     (closed)="closeAddFarm()"
-    (created)="farmCreated()">
+    (created)="farmCreated($event)">
   </app-add-farm>
 
 }

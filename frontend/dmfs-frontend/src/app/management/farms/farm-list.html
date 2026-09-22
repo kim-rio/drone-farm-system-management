@@ -1,4 +1,4 @@
-ï»¿<section class="farm-page">
+<section class="farm-page">
 
   <div class="page-header">
 
@@ -160,7 +160,7 @@
                   @if (item.farm.areaHectares !== null) {
                     {{ item.farm.areaHectares }} ha
                   } @else {
-                    â€”
+                    —
                   }
 
                 </td>
@@ -178,7 +178,7 @@
 
                   } @else {
 
-                    â€”
+                    —
 
                   }
 
@@ -187,13 +187,85 @@
 
                 <td>
 
-                  <button
-                    type="button"
-                    class="view-button"
-                    (click)="openFarm(item)"
-                  >
-                    View
-                  </button>
+                  <div class="action-buttons">
+
+                    <button
+                      type="button"
+                      class="action-button view-action"
+                      aria-label="View farm"
+                      title="View"
+                      (click)="openFarm(item)"
+                    >
+
+                      <svg
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                      >
+                        <path
+                          d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"
+                        />
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="2.5"
+                        />
+                      </svg>
+
+                    </button>
+
+
+                    <button
+                      type="button"
+                      class="action-button edit-action"
+                      aria-label="Edit farm"
+                      title="Edit"
+                      (click)="editFarm(item)"
+                    >
+
+                      <svg
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                      >
+                        <path
+                          d="M4 20h4L19.5 8.5a2.12 2.12 0 0 0-3-3L5 17v3Z"
+                        />
+                        <path
+                          d="m14.5 7.5 2 2"
+                        />
+                      </svg>
+
+                    </button>
+
+
+                    <button
+                      type="button"
+                      class="action-button delete-action"
+                      aria-label="Delete farm"
+                      title="Delete"
+                      (click)="deleteFarm(item)"
+                    >
+
+                      <svg
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                      >
+                        <path
+                          d="M4 7h16"
+                        />
+                        <path
+                          d="M10 11v6M14 11v6"
+                        />
+                        <path
+                          d="M6 7l1 13h10l1-13"
+                        />
+                        <path
+                          d="M9 7V4h6v3"
+                        />
+                      </svg>
+
+                    </button>
+
+                  </div>
 
                 </td>
 
@@ -212,13 +284,3 @@
   }
 
 </section>
-
-
-
-
-
-
-
-
-
-

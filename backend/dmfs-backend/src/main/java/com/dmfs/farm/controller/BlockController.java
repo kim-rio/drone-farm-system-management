@@ -25,7 +25,6 @@ public class BlockController {
             @PathVariable Long farmId,
             @RequestBody BlockRequest request
     ) {
-
         Block block = blockService.createBlock(
                 farmId,
                 request.name(),
@@ -45,7 +44,6 @@ public class BlockController {
     public ResponseEntity<List<BlockResponse>> getFarmBlocks(
             @PathVariable Long farmId
     ) {
-
         List<BlockResponse> blocks =
                 blockService.getFarmBlocks(farmId)
                         .stream()
@@ -60,11 +58,30 @@ public class BlockController {
     public ResponseEntity<BlockResponse> getBlock(
             @PathVariable Long id
     ) {
-
         return ResponseEntity.ok(
                 BlockResponse.from(
                         blockService.getBlock(id)
                 )
+        );
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN', 'MANAGEMENT')")
+    public ResponseEntity<BlockResponse> updateBlock(
+            @PathVariable Long id,
+            @RequestBody BlockRequest request
+    ) {
+        Block block = blockService.updateBlock(
+                id,
+                request.name(),
+                request.description(),
+                request.areaHectares(),
+                request.centerLatitude(),
+                request.centerLongitude()
+        );
+
+        return ResponseEntity.ok(
+                BlockResponse.from(block)
         );
     }
 
@@ -73,9 +90,7 @@ public class BlockController {
     public ResponseEntity<Void> deleteBlock(
             @PathVariable Long id
     ) {
-
         blockService.deleteBlock(id);
-
         return ResponseEntity.noContent().build();
     }
 

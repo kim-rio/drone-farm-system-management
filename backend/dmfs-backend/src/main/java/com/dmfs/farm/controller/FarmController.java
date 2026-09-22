@@ -68,6 +68,26 @@ public class FarmController {
         );
     }
 
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN', 'MANAGEMENT')")
+    public ResponseEntity<FarmResponse> updateFarm(
+            @PathVariable Long id,
+            @RequestBody FarmRequest request
+    ) {
+
+        Farm farm = farmService.updateFarm(
+                id,
+                request.name(),
+                request.description(),
+                request.latitude(),
+                request.longitude(),
+                request.areaHectares()
+        );
+
+        return ResponseEntity.ok(
+                FarmResponse.from(farm)
+        );
+    }
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN', 'MANAGEMENT')")
     public ResponseEntity<Void> deleteFarm(

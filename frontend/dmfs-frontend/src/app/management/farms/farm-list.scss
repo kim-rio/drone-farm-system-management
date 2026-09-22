@@ -1,4 +1,4 @@
-﻿:host {
+:host {
   display: block;
 }
 
@@ -38,8 +38,7 @@
   font-size: 13px;
 }
 
-.secondary-button,
-.view-button {
+.secondary-button {
   border: 1px solid #d5d5d3;
   background: #fff;
   color: #111;
@@ -49,8 +48,7 @@
   font-size: 12px;
 }
 
-.secondary-button:hover,
-.view-button:hover {
+.secondary-button:hover {
   background: #f7f7f5;
 }
 
@@ -169,8 +167,50 @@ td small {
   text-decoration: underline;
 }
 
-.view-button {
-  padding: 7px 12px;
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.action-button {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #dededb;
+  border-radius: 7px;
+  background: #fff;
+  color: #555;
+  cursor: pointer;
+  padding: 0;
+  transition:
+    background .15s ease,
+    border-color .15s ease,
+    color .15s ease;
+}
+
+.action-button svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.action-button:hover {
+  background: #f7f7f5;
+  border-color: #c9c9c5;
+  color: #111;
+}
+
+.delete-action:hover {
+  border-color: #e5b7b2;
+  background: #fdf3f2;
+  color: #a93226;
 }
 
 @media (max-width: 700px) {
@@ -178,6 +218,8 @@ td small {
     align-items: flex-start;
     flex-direction: column;
   }
+
+  .action-buttons {
+    gap: 5px;
+  }
 }
-
-
