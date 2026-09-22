@@ -43,6 +43,8 @@ export class RegisterCompany {
 
   submitting = false;
   error = '';
+  selectedLogo: File | null = null;
+  logoPreviewUrl: string | null = null;
 
   readonly companyForm = this.fb.group(
     {
@@ -155,6 +157,52 @@ export class RegisterCompany {
       this.admin.controls.confirmPassword.touched;
   }
 
+  onLogoSelected(event: Event): void {
+
+    const input = event.target as HTMLInputElement;
+
+    if (!input.files || input.files.length === 0) {
+      this.selectedLogo = null;
+      this.logoPreviewUrl = null;
+      return;
+    }
+
+    const file = input.files[0];
+
+    const allowedTypes = [
+      'image/png',
+      'image/jpeg',
+      'image/webp'
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      this.selectedLogo = null;
+      this.logoPreviewUrl = null;
+      this.error =
+        'Company logo must be PNG, JPEG, or WebP.';
+      input.value = '';
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      this.selectedLogo = null;
+      this.logoPreviewUrl = null;
+      this.error =
+        'Company logo must be 5 MB or smaller.';
+      input.value = '';
+      return;
+    }
+
+    this.error = '';
+    this.selectedLogo = file;
+
+    if (this.logoPreviewUrl) {
+      URL.revokeObjectURL(this.logoPreviewUrl);
+    }
+
+    this.logoPreviewUrl = URL.createObjectURL(file);
+  }
+
   goToDashboard(): void {
     this.router.navigate(['/super-admin']);
   }
@@ -210,9 +258,38 @@ export class RegisterCompany {
 
     this.service.createCompany(request).subscribe({
 
-      next: () => {
-        this.submitting = false;
-        this.router.navigate(['/super-admin/companies']);
+      next: (createdCompany) => {
+
+        if (!this.selectedLogo) {
+          this.submitting = false;
+          this.router.navigate(['/super-admin/companies']);
+          return;
+        }
+
+        this.service.uploadCompanyLogo(
+          createdCompany.id,
+          this.selectedLogo
+        ).subscribe({
+
+          next: () => {
+            this.submitting = false;
+            this.router.navigate(['/super-admin/companies']);
+          },
+
+          error: (err) => {
+            console.error(
+              'Company created, but logo upload failed:',
+              err
+            );
+
+            this.submitting = false;
+
+            this.error =
+              err?.error?.message ||
+              'Company was created, but the logo upload failed. You can upload the logo later from Edit Company.';
+          }
+
+        });
       },
 
       error: (err) => {

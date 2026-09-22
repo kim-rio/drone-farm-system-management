@@ -265,6 +265,109 @@
   font-size: 16px;
 }
 
+
+.company-logo-editor {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.company-logo-preview {
+  width: 96px;
+  height: 96px;
+  flex: 0 0 96px;
+  border: 1px solid #e3e3e1;
+  border-radius: 14px;
+  background: #f7f7f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.company-logo-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 8px;
+}
+
+.company-logo-placeholder {
+  color: #888;
+  font-size: 26px;
+  font-weight: 800;
+}
+
+.company-logo-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+  min-width: 240px;
+}
+
+.company-logo-controls input[type="file"] {
+  display: none;
+}
+
+.company-logo-change {
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid #d8d8d6;
+  border-radius: 8px;
+  background: #fff;
+  color: #333;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .15s ease, border-color .15s ease;
+}
+
+.company-logo-change:hover {
+  background: #f5f5f3;
+  border-color: #c8c8c5;
+}
+
+.company-logo-selected {
+  color: #333;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.company-logo-current {
+  color: #888;
+  font-size: 10px;
+}
+
+.company-logo-controls p {
+  margin: 0;
+  color: #999;
+  font-size: 9px;
+}
+
+@media (max-width: 600px) {
+
+  .company-logo-editor {
+    align-items: flex-start;
+    gap: 17px;
+  }
+
+  .company-logo-preview {
+    width: 78px;
+    height: 78px;
+    flex-basis: 78px;
+  }
+
+  .company-logo-controls {
+    min-width: 0;
+    flex: 1;
+  }
+
+}
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -417,7 +520,110 @@
     padding: 25px;
   }
 
-  .form-grid {
+  
+.company-logo-editor {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.company-logo-preview {
+  width: 96px;
+  height: 96px;
+  flex: 0 0 96px;
+  border: 1px solid #e3e3e1;
+  border-radius: 14px;
+  background: #f7f7f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.company-logo-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 8px;
+}
+
+.company-logo-placeholder {
+  color: #888;
+  font-size: 26px;
+  font-weight: 800;
+}
+
+.company-logo-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+  min-width: 240px;
+}
+
+.company-logo-controls input[type="file"] {
+  display: none;
+}
+
+.company-logo-change {
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid #d8d8d6;
+  border-radius: 8px;
+  background: #fff;
+  color: #333;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .15s ease, border-color .15s ease;
+}
+
+.company-logo-change:hover {
+  background: #f5f5f3;
+  border-color: #c8c8c5;
+}
+
+.company-logo-selected {
+  color: #333;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.company-logo-current {
+  color: #888;
+  font-size: 10px;
+}
+
+.company-logo-controls p {
+  margin: 0;
+  color: #999;
+  font-size: 9px;
+}
+
+@media (max-width: 600px) {
+
+  .company-logo-editor {
+    align-items: flex-start;
+    gap: 17px;
+  }
+
+  .company-logo-preview {
+    width: 78px;
+    height: 78px;
+    flex-basis: 78px;
+  }
+
+  .company-logo-controls {
+    min-width: 0;
+    flex: 1;
+  }
+
+}
+.form-grid {
     grid-template-columns: 1fr;
   }
 
