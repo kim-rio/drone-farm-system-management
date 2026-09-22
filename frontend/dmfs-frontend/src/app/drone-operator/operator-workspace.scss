@@ -148,3 +148,13 @@ h1 { font-size: 30px; letter-spacing: -1px; }
 @media (max-width: 1200px) { .sidebar { width: 220px; } .main-content { width: calc(100% - 220px); margin-left: 220px; } .page { padding-left: 25px; padding-right: 25px; } .metrics { grid-template-columns: repeat(2,1fr); } }
 @media (max-width: 800px) { .sidebar { width: 235px; box-shadow: 8px 0 25px rgba(0,0,0,.06); } .main-content,.shell:not(.sidebar-open) .main-content { width: 100%; margin-left: 0; } .page { padding: 24px 20px 34px; } .topbar { min-height: 64px; padding: 11px 20px; } }
 @media (max-width: 620px) { .sidebar { width: min(235px,82vw); } .top-user-details { display: none; } .page { padding: 20px 14px 30px; } .page-header { display: block; } .header-date { margin-top: 14px; text-align: left; } .hero { min-height: 0; padding: 24px; } .radar { display: none; } .mission-list,.survey-grid,.detail-grid { grid-template-columns: 1fr; } .row { grid-template-columns: 1fr auto; } .row > span:not(.status):not(:last-child),.row.head { display: none; } .action-box { align-items: flex-start; flex-direction: column; } .details { grid-template-columns: 1fr; } }
+
+/* COMPANY BRAND LOGO */
+.brand-logo {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+  border-radius: 9px;
+  display: block;
+  flex: 0 0 38px;
+}

@@ -1,6 +1,7 @@
 package com.dmfs.auth.security;
 
-import com.dmfs.auth.repository.UserRepository;
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -14,7 +15,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.List;
+import com.dmfs.auth.repository.UserRepository;
 
 @Configuration
 @EnableMethodSecurity
@@ -51,9 +52,10 @@ public class SecurityConfig {
                 new CorsConfiguration();
 
         configuration.setAllowedOrigins(List.of(
-                "http://localhost:4200",
-                "http://127.0.0.1:4200"
-        ));
+        "http://localhost:4200",
+        "http://127.0.0.1:4200",
+        "https://dronemining.jmsolutions.co.tz"
+));
 
         configuration.setAllowedMethods(List.of(
                 "GET",

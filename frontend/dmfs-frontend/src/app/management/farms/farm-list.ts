@@ -1,4 +1,4 @@
-﻿import {
+import {
   Component,
   OnInit,
   ChangeDetectorRef,
@@ -33,10 +33,18 @@ interface FarmWithClient {
 })
 export class FarmList implements OnInit {
 
-  private readonly clientService = inject(ClientService);
-  private readonly farmService = inject(FarmService);
-  private readonly router = inject(Router);
-  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly clientService =
+    inject(ClientService);
+
+  private readonly farmService =
+    inject(FarmService);
+
+  private readonly router =
+    inject(Router);
+
+  private readonly cdr =
+    inject(ChangeDetectorRef);
+
 
   farms: FarmWithClient[] = [];
 
@@ -44,127 +52,149 @@ export class FarmList implements OnInit {
 
   errorMessage = '';
 
+
   ngOnInit(): void {
     this.loadFarms();
   }
 
+
   loadFarms(): void {
 
     this.loading = true;
+
     this.errorMessage = '';
 
-    this.clientService.getClients().subscribe({
 
-      next: (clients: Client[]) => {
+    this.clientService
+      .getClients()
+      .subscribe({
 
-        if (!clients.length) {
-          this.farms = [];
-          this.loading = false;
-          this.cdr.detectChanges();
-          return;
-        }
+        next: (clients: Client[]) => {
 
-        let completed = 0;
+          if (!clients.length) {
 
-        const results: FarmWithClient[] = [];
+            this.farms = [];
 
-        for (const client of clients) {
+            this.loading = false;
 
-          if (!client.id) {
-            completed++;
+            this.cdr.detectChanges();
 
-            if (completed === clients.length) {
-              this.farms = results;
-              this.loading = false;
-              this.cdr.detectChanges();
-            }
-
-            continue;
+            return;
           }
 
-          this.farmService.getClientFarms(client.id).subscribe({
 
-            next: (farms: Farm[]) => {
+          let completed = 0;
 
-              for (const farm of farms) {
+          const results: FarmWithClient[] = [];
 
-                results.push({
-                  farm,
-                  client
-                });
 
-              }
+          for (const client of clients) {
+
+            if (!client.id) {
 
               completed++;
 
               if (completed === clients.length) {
 
                 this.farms = results;
+
                 this.loading = false;
 
                 this.cdr.detectChanges();
-
               }
 
-            },
-
-            error: (error: unknown) => {
-
-              console.error(
-                'FARMS LOAD ERROR:',
-                error
-              );
-
-              completed++;
-
-              if (completed === clients.length) {
-
-                this.farms = results;
-                this.loading = false;
-
-                this.cdr.detectChanges();
-
-              }
-
+              continue;
             }
 
-          });
 
+            this.farmService
+              .getClientFarms(client.id)
+              .subscribe({
+
+                next: (farms: Farm[]) => {
+
+                  for (const farm of farms) {
+
+                    results.push({
+                      farm,
+                      client
+                    });
+                  }
+
+
+                  completed++;
+
+
+                  if (completed === clients.length) {
+
+                    this.farms = results;
+
+                    this.loading = false;
+
+                    this.cdr.detectChanges();
+                  }
+                },
+
+
+                error: (error: unknown) => {
+
+                  console.error(
+                    'FARMS LOAD ERROR:',
+                    error
+                  );
+
+
+                  completed++;
+
+
+                  if (completed === clients.length) {
+
+                    this.farms = results;
+
+                    this.loading = false;
+
+                    this.cdr.detectChanges();
+                  }
+                }
+              });
+          }
+        },
+
+
+        error: (error: unknown) => {
+
+          console.error(
+            'CLIENT LOAD ERROR:',
+            error
+          );
+
+          this.loading = false;
+
+          this.errorMessage =
+            'Unable to load farms.';
+
+          this.cdr.detectChanges();
         }
-
-      },
-
-      error: (error: unknown) => {
-
-        console.error(
-          'CLIENT LOAD ERROR:',
-          error
-        );
-
-        this.loading = false;
-        this.errorMessage =
-          'Unable to load farms.';
-
-        this.cdr.detectChanges();
-
-      }
-
-    });
-
+      });
   }
+
 
   getClientName(client: Client): string {
 
     if (client.companyName?.trim()) {
+
       return client.companyName;
     }
+
 
     const name =
       `${client.firstName ?? ''} ${client.lastName ?? ''}`
         .trim();
 
+
     return name || client.clientCode;
   }
+
 
   openFarm(item: FarmWithClient): void {
 
@@ -174,8 +204,88 @@ export class FarmList implements OnInit {
       'farms',
       item.farm.id
     ]);
-
   }
+
+
+  editFarm(item: FarmWithClient): void {
+
+    this.router.navigate([
+      '/management/clients',
+      item.client.id,
+      'farms',
+      item.farm.id
+    ], {
+      queryParams: {
+        edit: 'true'
+      }
+    });
+  }
+
+
+  deleteFarm(item: FarmWithClient): void {
+
+    if (this.loading) {
+      return;
+    }
+
+
+    const farmName =
+      item.farm.name?.trim() || 'this farm';
+
+
+    const confirmed =
+      window.confirm(
+        `Delete "${farmName}"? This action cannot be undone.`
+      );
+
+
+    if (!confirmed) {
+      return;
+    }
+
+
+    this.loading = true;
+
+    this.errorMessage = '';
+
+    this.cdr.detectChanges();
+
+
+    this.farmService
+      .deleteFarm(item.farm.id)
+      .subscribe({
+
+        next: () => {
+
+          this.farms =
+            this.farms.filter(
+              current =>
+                current.farm.id !== item.farm.id
+            );
+
+          this.loading = false;
+
+          this.cdr.detectChanges();
+        },
+
+
+        error: (error: unknown) => {
+
+          console.error(
+            'FARM DELETE ERROR:',
+            error
+          );
+
+          this.loading = false;
+
+          this.errorMessage =
+            'Unable to delete farm. It may have related records.';
+
+          this.cdr.detectChanges();
+        }
+      });
+  }
+
 
   openClient(client: Client): void {
 
@@ -183,11 +293,13 @@ export class FarmList implements OnInit {
       '/management/clients',
       client.id
     ]);
-
   }
+
 
   backToDashboard(): void {
-    this.router.navigate(['/management']);
-  }
 
+    this.router.navigate([
+      '/management'
+    ]);
+  }
 }

@@ -220,6 +220,34 @@ export const routes: Routes = [
 
 
   // ==========================================================
+  // ==========================================================
+  // CUSTOMER PORTAL
+  // ==========================================================
+
+  // PUBLIC: client must activate before logging in.
+  {
+    path: 'customer/activate',
+    loadComponent: () =>
+      import('./customer/activate/activate')
+        .then(m => m.Activate)
+  },
+
+  // PROTECTED: only activated CUSTOMER users can access these.
+  {
+    path: 'customer/payments/return',
+    canActivate: [roleGuard(['CUSTOMER'])],
+    loadComponent: () =>
+      import('./customer/payment-return/payment-return')
+        .then(m => m.PaymentReturn)
+  },
+
+  {
+    path: 'customer',
+    canActivate: [roleGuard(['CUSTOMER'])],
+    loadComponent: () =>
+      import('./customer/customer-dashboard/customer-dashboard')
+        .then(m => m.CustomerDashboard)
+  },
   // FALLBACK
   // ==========================================================
 

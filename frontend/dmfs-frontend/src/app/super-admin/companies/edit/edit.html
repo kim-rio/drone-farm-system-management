@@ -134,6 +134,83 @@
 
           <section class="form-card">
 
+        <div class="card-header">
+          <div>
+            <span class="eyebrow">BRAND IDENTITY</span>
+            <h2>Company Logo</h2>
+            <p>Set the logo used across this company's dashboards.</p>
+          </div>
+        </div>
+
+        <div class="company-logo-editor">
+
+          <div class="company-logo-preview">
+
+            @if (logoPreviewUrl) {
+
+              <img
+                [src]="logoPreviewUrl"
+                alt="New company logo preview"
+              />
+
+            } @else if (company?.logoUrl) {
+
+              <img
+                [src]="company?.logoUrl"
+                alt="Current company logo"
+              />
+
+            } @else {
+
+              <span class="company-logo-placeholder">
+                {{ company?.name?.charAt(0) || 'C' }}
+              </span>
+
+            }
+
+          </div>
+
+          <div class="company-logo-controls">
+
+            <label
+              for="companyLogo"
+              class="company-logo-change"
+            >
+              Change Logo
+            </label>
+
+            <input
+              id="companyLogo"
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              (change)="onLogoSelected($event)"
+            />
+
+            @if (logoPreviewUrl) {
+
+              <span class="company-logo-selected">
+                New logo selected
+              </span>
+
+            } @else {
+
+              <span class="company-logo-current">
+                Current company logo
+              </span>
+
+            }
+
+            <p>
+              PNG, JPEG or WebP - Maximum 5 MB
+            </p>
+
+          </div>
+
+        </div>
+
+      </section>
+      <section class="form-card">
+
             <div class="section-heading">
               <p class="eyebrow">COMPANY INFORMATION</p>
               <h3>Company Details</h3>

@@ -18,6 +18,11 @@ import {
   timeout
 } from 'rxjs';
 
+import {
+  CompanyBrandingResponse,
+  CompanyBrandingService
+} from '../services/company-branding.service';
+
 import { AuthService } from '../services/auth.service';
 
 import {
@@ -42,6 +47,25 @@ export class OperatorWorkspace implements OnInit {
 
   private readonly api =
     inject(OperatorService);
+
+  private readonly brandingService =
+    inject(CompanyBrandingService);
+
+  branding: CompanyBrandingResponse = {
+    companyId: 0,
+    companyName: '',
+    logoUrl: null
+  };
+
+  private readonly brandingLoad =
+    this.brandingService.getBranding().subscribe({
+      next: branding => {
+        this.branding = branding;
+      },
+      error: error => {
+        console.warn('COMPANY BRANDING LOAD ERROR:', error);
+      }
+    });
 
   private readonly auth =
     inject(AuthService);

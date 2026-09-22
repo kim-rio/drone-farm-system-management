@@ -1,4 +1,4 @@
-﻿import { Injectable, inject } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 
@@ -19,27 +19,25 @@ export class AuthService {
   private readonly http = inject(HttpClient);
 
   private readonly apiUrl = '/api/auth';
+  private readonly storageKey = 'dmfs_current_user';
 
-  private readonly storageKey =
-    'dmfs_current_user';
+  private currentUser: LoginResponse | null = this.loadStoredUser();
 
-  private currentUser: LoginResponse | null =
-    this.loadStoredUser();
+  login(email: string, password: string): Observable<LoginResponse> {
 
-  login(
-    email: string,
-    password: string
-  ): Observable<LoginResponse> {
+    this.clearSession();
 
     return this.http.post<LoginResponse>(
       `${this.apiUrl}/login`,
       {
-        email: email,
-        password: password
+        email: email.trim().toLowerCase(),
+        password
+      },
+      {
+        withCredentials: true
       }
     ).pipe(
-      tap((user) => {
-
+      tap(user => {
         this.currentUser = user;
 
         localStorage.setItem(
@@ -66,60 +64,40 @@ export class AuthService {
 
     return this.http.post<void>(
       `${this.apiUrl}/logout`,
-      {}
+      {},
+      {
+        withCredentials: true
+      }
     ).pipe(
-      tap(() => {
-        this.clearSession();
-      })
+      tap(() => this.clearSession())
     );
   }
 
   clearSession(): void {
-
     this.currentUser = null;
-
-    localStorage.removeItem(
-      this.storageKey
-    );
+    localStorage.removeItem(this.storageKey);
   }
 
   private loadStoredUser(): LoginResponse | null {
 
     try {
-
-      const stored =
-        localStorage.getItem(this.storageKey);
+      const stored = localStorage.getItem(this.storageKey);
 
       if (!stored) {
         return null;
       }
 
-      const user =
-        JSON.parse(stored) as LoginResponse;
+      const user = JSON.parse(stored) as LoginResponse;
 
-      if (
-        !user ||
-        !user.userId ||
-        !user.email ||
-        !user.role
-      ) {
+      if (!user || !user.userId || !user.email || !user.role) {
         localStorage.removeItem(this.storageKey);
         return null;
       }
 
       return user;
 
-    } catch (error) {
-
-      console.error(
-        'Failed to restore stored user session:',
-        error
-      );
-
-      localStorage.removeItem(
-        this.storageKey
-      );
-
+    } catch {
+      localStorage.removeItem(this.storageKey);
       return null;
     }
   }

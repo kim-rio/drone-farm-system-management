@@ -228,13 +228,85 @@
 
         </section>
 
+        <!-- COMPANY LOGO -->
+
+        <section class="form-card">
+
+          <div class="section-heading">
+
+            <div>
+              <p class="eyebrow">STEP 02</p>
+
+              <h3>Company Logo</h3>
+
+              <p>
+                Upload the logo that will appear across this company's workspace.
+              </p>
+            </div>
+
+          </div>
+
+          <div class="logo-upload">
+
+            <div class="logo-preview">
+
+              @if (logoPreviewUrl) {
+
+                <img
+                  [src]="logoPreviewUrl"
+                  [alt]="companyForm.controls.company.controls.name.value || 'Company logo preview'"
+                />
+
+              } @else {
+
+                <div class="logo-placeholder">
+                  NO LOGO
+                </div>
+
+              }
+
+            </div>
+
+            <div class="logo-upload-content">
+
+              <label
+                for="companyLogo"
+                class="logo-upload-button"
+              >
+                Choose Logo
+              </label>
+
+              <input
+                id="companyLogo"
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                (change)="onLogoSelected($event)"
+              />
+
+              <p>
+                PNG, JPEG or WebP · Maximum 5 MB
+              </p>
+
+              @if (selectedLogo) {
+
+                <span class="logo-selected">
+                  {{ selectedLogo.name }}
+                </span>
+
+              }
+
+            </div>
+
+          </div>
+
+        </section>
         <!-- LOCATION -->
 
         <section class="form-card">
 
           <div class="section-heading">
             <div>
-              <p class="eyebrow">STEP 02</p>
+              <p class="eyebrow">STEP 03</p>
               <h3>Location</h3>
               <p>
                 Registered physical location of the subscriber company.
@@ -337,7 +409,7 @@
 
           <div class="section-heading">
             <div>
-              <p class="eyebrow">STEP 03</p>
+              <p class="eyebrow">STEP 04</p>
               <h3>Initial Company Admin</h3>
               <p>
                 Create the first administrator who will manage this company.

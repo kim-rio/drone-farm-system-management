@@ -1,0 +1,189 @@
+<div class="customer-page">
+
+  <header class="portal-header">
+
+    <div>
+      <p class="eyebrow">CLIENT PORTAL</p>
+
+      <h1>
+        Welcome{{ userName ? ', ' + userName : '' }}
+      </h1>
+
+      <p class="subtitle">
+        View your service requests and manage payments.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="logout"
+      (click)="logout()">
+      Sign out
+    </button>
+
+  </header>
+
+
+  @if (errorMessage) {
+    <div class="alert">
+      {{ errorMessage }}
+    </div>
+  }
+
+
+  @if (loading) {
+
+    <div class="state">
+      Loading your service requests...
+    </div>
+
+  } @else if (requests.length === 0) {
+
+    <section class="empty">
+
+      <div class="empty-icon">
+        —
+      </div>
+
+      <h2>No service requests yet</h2>
+
+      <p>
+        Your service requests will appear here once
+        they have been created by the service team.
+      </p>
+
+    </section>
+
+  } @else {
+
+    <section class="requests-section">
+
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">YOUR REQUESTS</p>
+          <h2>Service Requests</h2>
+        </div>
+
+        <span class="request-count">
+          {{ requests.length }}
+        </span>
+      </div>
+
+
+      <div class="request-list">
+
+        @for (request of requests; track request.id) {
+
+          <article class="request-card">
+
+            <div class="request-top">
+
+              <div>
+                <span class="request-number">
+                  REQUEST #{{ request.id }}
+                </span>
+
+                <h3>
+                  {{ request.serviceCatalogue.name || 'Service' }}
+                </h3>
+              </div>
+
+              <span
+                class="status"
+                [class.paid]="isPaid(request)"
+                [class.pending]="!isPaid(request)">
+                {{ getPaymentLabel(request) }}
+              </span>
+
+            </div>
+
+
+            <div class="details">
+
+              <div>
+                <span>Farm</span>
+                <strong>
+                  {{ request.farm.name || '—' }}
+                </strong>
+              </div>
+
+              <div>
+                <span>Block</span>
+                <strong>
+                  {{ request.farmBlock.name || '—' }}
+                </strong>
+              </div>
+
+              <div>
+                <span>Service status</span>
+                <strong>
+                  {{ request.status }}
+                </strong>
+              </div>
+
+              <div>
+                <span>Requested</span>
+                <strong>
+                  {{ request.requestedDate || '—' }}
+                </strong>
+              </div>
+
+              <div>
+                <span>Amount</span>
+                <strong class="amount">
+                  {{ request.amount ?? 0 | number:'1.2-2' }}
+                  TZS
+                </strong>
+              </div>
+
+              <div>
+                <span>Payment</span>
+                <strong
+                  [class.paid-text]="isPaid(request)">
+                  {{ getPaymentLabel(request) }}
+                </strong>
+              </div>
+
+            </div>
+
+
+            <div class="actions">
+
+              @if (!isPaid(request)) {
+
+                <button
+                  type="button"
+                  class="primary"
+                  [disabled]="payingRequestId === request.id"
+                  (click)="pay(request)">
+
+                  @if (payingRequestId === request.id) {
+                    Opening secure checkout...
+                  } @else {
+                    Pay Now
+                  }
+
+                </button>
+
+              } @else {
+
+                <span class="paid-badge">
+                  Payment verified
+                </span>
+
+              }
+
+            </div>
+
+          </article>
+
+        }
+
+      </div>
+
+    </section>
+
+  }
+
+</div>
+

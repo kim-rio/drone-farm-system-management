@@ -62,6 +62,13 @@ public class AdminCompanyService {
         SubscriberCompany company =
                 admin.getCompany();
 
+        String logoUrl =
+                company.getLogoPath() == null
+                        ? null
+                        : "/api/super-admin/companies/"
+                                + company.getId()
+                                + "/logo";
+
         return new CompanyResponse(
                 company.getId(),
                 company.getName(),
@@ -73,6 +80,7 @@ public class AdminCompanyService {
                 company.getRegion(),
                 company.getCity(),
                 company.getPhysicalAddress(),
+                logoUrl,
                 company.getStatus(),
                 company.getCreatedAt(),
                 company.getUpdatedAt()

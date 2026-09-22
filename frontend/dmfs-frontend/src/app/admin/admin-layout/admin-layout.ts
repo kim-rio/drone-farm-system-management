@@ -15,6 +15,10 @@ import {
 } from 'rxjs';
 
 import {
+  CompanyBrandingService,
+  CompanyBrandingResponse
+} from '../../services/company-branding.service';
+import {
   AuthService,
   LoginResponse
 } from '../../services/auth.service';
@@ -35,8 +39,15 @@ export class AdminLayout {
 
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
+  private readonly brandingService = inject(CompanyBrandingService);
 
   sidebarOpen = true;
+
+  branding: CompanyBrandingResponse = {
+    companyId: 0,
+    companyName: '',
+    logoUrl: null
+  };
 
   readonly user: LoginResponse | null =
     this.authService.getCurrentUser();

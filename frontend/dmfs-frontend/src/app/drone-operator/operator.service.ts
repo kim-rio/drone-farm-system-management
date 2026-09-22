@@ -42,7 +42,7 @@ export interface SurveyDataPackage {
 @Injectable({ providedIn: 'root' })
 export class OperatorService {
   private http = inject(HttpClient);
-  private api = 'http://localhost:8080/api';
+  private api = '/api';
   private options = { withCredentials: true };
 
   missions() { return this.http.get<Mission[]>(`${this.api}/missions/my`, this.options); }

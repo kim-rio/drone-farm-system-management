@@ -1,4 +1,4 @@
-﻿:host {
+:host {
   display: block;
   min-height: 100vh;
   background: #f7f7f5;
@@ -483,4 +483,12 @@
 
 }
 
-
+/* COMPANY BRAND LOGO */
+.brand-logo {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+  border-radius: 9px;
+  display: block;
+  flex: 0 0 38px;
+}

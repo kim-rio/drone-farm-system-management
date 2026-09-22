@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+﻿import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
@@ -46,13 +46,9 @@ export interface ServiceRequest {
   };
 
   requestedDate?: string;
-
   notes?: string;
-
   status: string;
-
   createdAt?: string;
-
   updatedAt?: string;
 
   controlNumber?: string;
@@ -62,27 +58,12 @@ export interface ServiceRequest {
 }
 
 export interface CreateServiceRequestPayload {
-
-  client: {
-    id: number;
-  };
-
-  farm: {
-    id: number;
-  };
-
-  farmBlock: {
-    id: number;
-  };
-
-  serviceCatalogue: {
-    id: number;
-  };
-
+  client: { id: number };
+  farm: { id: number };
+  farmBlock: { id: number };
+  serviceCatalogue: { id: number };
   requestedDate?: string;
-
   notes?: string;
-
   status?: string;
 }
 
@@ -104,11 +85,27 @@ export class ServiceRequestService {
     );
   }
 
-  getRequest(
-    id: number
-  ): Observable<ServiceRequest> {
+  getRequest(id: number): Observable<ServiceRequest> {
     return this.http.get<ServiceRequest>(
       `${this.apiUrl}/${id}`,
+      {
+        withCredentials: true
+      }
+    );
+  }
+
+  getCustomerRequests(): Observable<ServiceRequest[]> {
+    return this.http.get<ServiceRequest[]>(
+      '/api/customer/service-requests',
+      {
+        withCredentials: true
+      }
+    );
+  }
+
+  getCustomerRequest(id: number): Observable<ServiceRequest> {
+    return this.http.get<ServiceRequest>(
+      `/api/customer/service-requests/${id}`,
       {
         withCredentials: true
       }
@@ -148,26 +145,18 @@ export class ServiceRequestService {
       `${this.apiUrl}/${id}/status`,
       {},
       {
-        params: {
-          status
-        },
+        params: { status },
         withCredentials: true
       }
     );
   }
 
-  deleteRequest(
-    id: number
-  ): Observable<void> {
+  deleteRequest(id: number): Observable<void> {
     return this.http.delete<void>(
       `${this.apiUrl}/${id}`,
       {
         withCredentials: true
       }
     );
-  }
-
-  markPaid(id: number): Observable<any> {
-    return this.http.put(`/api/management/payments/${id}/paid`, {});
   }
 }

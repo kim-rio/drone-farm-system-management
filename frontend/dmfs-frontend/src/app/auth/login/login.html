@@ -1,16 +1,41 @@
-<div class="login-page">
+﻿<div class="login-page">
 
-  <div class="login-card">
+  <!-- ==========================================================
+       LOGIN SIDE
+       ========================================================== -->
+
+  <section class="login-panel">
 
     <div class="login-content">
 
-      <h1>DMFS</h1>
+      <!-- Temporary logo — replace with official logo later -->
+      <div class="brand">
 
-      <p class="subtitle">
-        Drone Farm Management System
-      </p>
+        <div class="brand-logo">
+          <span class="brand-logo-mark">D</span>
+        </div>
 
-      <h2>Sign in</h2>
+        <div class="brand-name">
+          DMFS
+        </div>
+
+        <div class="brand-subtitle">
+          Drone Farm Management System
+        </div>
+
+      </div>
+
+
+      <div class="login-header">
+
+        <h1>Welcome back</h1>
+
+        <p>
+          Sign in to continue to your workspace.
+        </p>
+
+      </div>
+
 
       <form class="login-form" (ngSubmit)="login()">
 
@@ -32,6 +57,7 @@
 
         </div>
 
+
         <div class="form-group">
 
           <label for="password">
@@ -50,15 +76,20 @@
 
         </div>
 
+
         @if (errorMessage) {
+
           <div class="error">
             {{ errorMessage }}
           </div>
+
         }
+
 
         <button
           type="submit"
-          [disabled]="loading">
+          [disabled]="loading"
+        >
 
           @if (loading) {
             Signing in...
@@ -72,6 +103,47 @@
 
     </div>
 
-  </div>
+  </section>
+
+
+  <!-- ==========================================================
+       VISUAL SIDE
+       ========================================================== -->
+
+  <section class="visual-panel">
+
+    <div class="world-stage">
+
+      <div class="ambient-ring ambient-ring-one"></div>
+      <div class="ambient-ring ambient-ring-two"></div>
+
+
+      <div class="globe">
+
+        <div class="globe-latitude latitude-one"></div>
+        <div class="globe-latitude latitude-two"></div>
+        <div class="globe-latitude latitude-three"></div>
+
+        <div class="globe-longitude longitude-one"></div>
+        <div class="globe-longitude longitude-two"></div>
+        <div class="globe-longitude longitude-three"></div>
+
+        <div class="continent continent-one"></div>
+        <div class="continent continent-two"></div>
+        <div class="continent continent-three"></div>
+
+        <div class="location-point point-one"></div>
+        <div class="location-point point-two"></div>
+        <div class="location-point point-three"></div>
+
+      </div>
+
+
+      <div class="orbit orbit-one"></div>
+      <div class="orbit orbit-two"></div>
+
+    </div>
+
+  </section>
 
 </div>

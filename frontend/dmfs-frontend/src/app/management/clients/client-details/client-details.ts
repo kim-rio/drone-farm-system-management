@@ -12,7 +12,8 @@ import {
 
 import {
   Client,
-  ClientService
+  ClientService,
+  PortalInviteResponse
 } from '../../../services/client.service';
 
 import {
@@ -59,6 +60,20 @@ export class ClientDetails implements OnInit {
   farmErrorMessage = '';
 
   showAddFarm = false;
+
+  // ==========================================
+  // PORTAL ACCESS
+  // ==========================================
+
+  inviting = false;
+
+  inviteMessage = '';
+
+  inviteErrorMessage = '';
+
+  activationUrl = '';
+
+  activationExpiresAt = '';
 
   ngOnInit(): void {
 
@@ -174,6 +189,136 @@ export class ClientDetails implements OnInit {
   }
 
   // ==========================================
+  // INVITE CLIENT TO PORTAL
+  // ==========================================
+
+  inviteClient(): void {
+
+    if (!this.client?.id) {
+      return;
+    }
+
+    const email =
+      this.client.email?.trim().toLowerCase();
+
+    if (!email) {
+
+      this.inviteErrorMessage =
+        'This client does not have an email address. Add an email before sending the portal invitation.';
+
+      this.inviteMessage = '';
+
+      this.activationUrl = '';
+
+      this.cdr.detectChanges();
+
+      return;
+    }
+
+    this.inviting = true;
+
+    this.inviteMessage = '';
+
+    this.inviteErrorMessage = '';
+
+    this.activationUrl = '';
+
+    this.activationExpiresAt = '';
+
+    this.clientService
+      .invitePortal(this.client.id, email)
+      .subscribe({
+
+        next: (response: PortalInviteResponse) => {
+
+          console.log(
+            'PORTAL INVITATION:',
+            response
+          );
+
+          this.inviting = false;
+
+          this.inviteMessage =
+            response.message ||
+            'Portal invitation created successfully.';
+
+          this.activationUrl =
+            response.activationUrl || '';
+
+          this.activationExpiresAt =
+            response.expiresAt || '';
+
+          this.cdr.detectChanges();
+        },
+
+        error: (error: unknown) => {
+
+          console.error(
+            'PORTAL INVITATION ERROR:',
+            error
+          );
+
+          this.inviting = false;
+
+          this.inviteErrorMessage =
+            'Unable to create the portal invitation.';
+
+          this.cdr.detectChanges();
+        }
+      });
+  }
+
+  // ==========================================
+  // COPY ACTIVATION LINK
+  // ==========================================
+
+  copyActivationLink(): void {
+
+    if (!this.activationUrl) {
+      return;
+    }
+
+    navigator.clipboard
+      .writeText(this.activationUrl)
+      .then(() => {
+
+        this.inviteMessage =
+          'Activation link copied to clipboard.';
+
+        this.cdr.detectChanges();
+      })
+      .catch((error: unknown) => {
+
+        console.error(
+          'COPY ACTIVATION LINK ERROR:',
+          error
+        );
+
+        this.inviteErrorMessage =
+          'Unable to copy the activation link.';
+
+        this.cdr.detectChanges();
+      });
+  }
+
+  // ==========================================
+  // OPEN ACTIVATION LINK
+  // ==========================================
+
+  openActivationLink(): void {
+
+    if (!this.activationUrl) {
+      return;
+    }
+
+    window.open(
+      this.activationUrl,
+      '_blank',
+      'noopener,noreferrer'
+    );
+  }
+
+  // ==========================================
   // OPEN FARM DETAILS
   // ==========================================
 
@@ -213,15 +358,20 @@ export class ClientDetails implements OnInit {
     this.cdr.detectChanges();
   }
 
-  farmCreated(): void {
+  farmCreated(farm: Farm): void {
 
     this.showAddFarm = false;
 
-    if (this.client?.id) {
-      this.loadFarms(this.client.id);
+    if (!this.client?.id || !farm.id) {
+      return;
     }
 
-    this.cdr.detectChanges();
+    this.router.navigate([
+      '/management/clients',
+      this.client.id,
+      'farms',
+      farm.id
+    ]);
   }
 
   // ==========================================

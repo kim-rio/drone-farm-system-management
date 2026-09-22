@@ -5,7 +5,7 @@ export interface Operation { id:number; clientName:string; farmName:string; bloc
 export interface OperatorSurvey { id:number; surveyCode:string; surveyName:string; clientName:string; farmName:string; blockName:string; status:string; startedAt?:string; completedAt?:string; equipmentUsed?:string; }
 export interface CompleteSurvey { equipmentUsed:string; minLatitude:number; minLongitude:number; maxLatitude:number; maxLongitude:number; }
 @Injectable({providedIn:'root'}) export class DroneOperatorService {
- private readonly http=inject(HttpClient); private readonly api='http://localhost:8080/api/drone-operator';
+ private readonly http=inject(HttpClient); private readonly api='/api/drone-operator';
  operations():Observable<Operation[]>{return this.http.get<Operation[]>(`${this.api}/operations`,{withCredentials:true});}
  accept(id:number):Observable<OperatorSurvey>{return this.http.post<OperatorSurvey>(`${this.api}/operations/${id}/accept`,{},{withCredentials:true});}
  reject(id:number,reason:string):Observable<void>{return this.http.post<void>(`${this.api}/operations/${id}/reject`,{reason},{withCredentials:true});}

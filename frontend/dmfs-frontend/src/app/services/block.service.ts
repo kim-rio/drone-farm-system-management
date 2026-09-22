@@ -22,59 +22,65 @@ export interface CreateBlockRequest {
   centerLongitude?: number;
 }
 
+export interface UpdateBlockRequest {
+  name: string;
+  description?: string;
+  areaHectares?: number;
+  centerLatitude?: number;
+  centerLongitude?: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class BlockService {
-
   private readonly http = inject(HttpClient);
 
   private readonly apiUrl =
-    'http://localhost:8080/api/blocks';
+    '/api/blocks';
 
   createBlock(
     farmId: number,
     block: CreateBlockRequest
   ): Observable<Block> {
-
     return this.http.post<Block>(
       `${this.apiUrl}/farm/${farmId}`,
       block,
-      {
-        withCredentials: true
-      }
+      { withCredentials: true }
+    );
+  }
+
+  updateBlock(
+    id: number,
+    block: UpdateBlockRequest
+  ): Observable<Block> {
+    return this.http.put<Block>(
+      `${this.apiUrl}/${id}`,
+      block,
+      { withCredentials: true }
     );
   }
 
   getFarmBlocks(
     farmId: number
   ): Observable<Block[]> {
-
     return this.http.get<Block[]>(
       `${this.apiUrl}/farm/${farmId}`,
-      {
-        withCredentials: true
-      }
+      { withCredentials: true }
     );
   }
 
   getBlock(id: number): Observable<Block> {
-
     return this.http.get<Block>(
       `${this.apiUrl}/${id}`,
-      {
-        withCredentials: true
-      }
+      { withCredentials: true }
     );
   }
 
   deleteBlock(id: number): Observable<void> {
-
     return this.http.delete<void>(
       `${this.apiUrl}/${id}`,
-      {
-        withCredentials: true
-      }
+      { withCredentials: true }
     );
   }
 }

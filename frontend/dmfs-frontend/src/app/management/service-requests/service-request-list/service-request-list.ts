@@ -1,4 +1,4 @@
-import {
+﻿import {
   Component,
   OnInit,
   inject,
@@ -271,26 +271,6 @@ export class ServiceRequestList implements OnInit {
         }
       });
   }
-
-
-
-  markPaid(request: ServiceRequest): void {
-    this.errorMessage = '';
-
-    this.requestService.markPaid(request.id).subscribe({
-      next: (updated) => {
-        request.paymentStatus = 'PAID';
-        request.paidAt = updated?.paidAt;
-        this.successMessage = `Request #${request.id} marked as paid.`;
-        this.cdr.detectChanges();
-      },
-      error: (error) => {
-        console.error('PAYMENT UPDATE ERROR:', error);
-        this.errorMessage = 'Unable to mark payment as paid.';
-        this.cdr.detectChanges();
-      }
-    });
-  }
   /* ==============================
      DELETE
      ============================== */
@@ -343,3 +323,6 @@ export class ServiceRequestList implements OnInit {
       });
   }
 }
+
+
+
