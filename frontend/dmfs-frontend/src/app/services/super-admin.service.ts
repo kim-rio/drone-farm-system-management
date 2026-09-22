@@ -30,6 +30,7 @@ export interface CompanyResponse {
   region: string;
   city: string;
   physicalAddress: string;
+  logoUrl: string | null;
   status: CompanyStatus;
   createdAt: string;
   updatedAt: string;
@@ -105,6 +106,21 @@ export class SuperAdminService {
     return this.http.put<CompanyResponse>(
       `${this.baseUrl}/companies/${id}`,
       request
+    );
+  }
+
+  uploadCompanyLogo(
+    id: number,
+    file: File
+  ): Observable<CompanyResponse> {
+
+    const formData = new FormData();
+
+    formData.append('file', file);
+
+    return this.http.post<CompanyResponse>(
+      `${this.baseUrl}/companies/${id}/logo`,
+      formData
     );
   }
 

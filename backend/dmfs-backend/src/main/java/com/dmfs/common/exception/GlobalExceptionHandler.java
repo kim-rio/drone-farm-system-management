@@ -40,6 +40,8 @@ public class GlobalExceptionHandler {
             Exception exception
     ) {
 
+        exception.printStackTrace();
+
         return buildResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "An unexpected error occurred while processing the request."

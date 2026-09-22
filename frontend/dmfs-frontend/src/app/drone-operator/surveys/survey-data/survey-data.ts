@@ -3,6 +3,10 @@ import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Mission, OperatorService, Survey, SurveyDataPackage } from '../../operator.service';
 import { AuthService } from '../../../services/auth.service';
+import {
+  CompanyBrandingService,
+  CompanyBrandingResponse
+} from '../../../services/company-branding.service';
 
 @Component({
   selector: 'app-survey-data',
@@ -14,6 +18,7 @@ import { AuthService } from '../../../services/auth.service';
 export class SurveyData implements OnInit {
   private readonly api = inject(OperatorService);
   private readonly auth = inject(AuthService);
+  private readonly brandingService = inject(CompanyBrandingService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly cdr = inject(ChangeDetectorRef);
@@ -22,6 +27,12 @@ export class SurveyData implements OnInit {
   mission?: Mission;
 
   sidebarOpen = true;
+
+  branding: CompanyBrandingResponse = {
+    companyId: 0,
+    companyName: '',
+    logoUrl: null
+  };
 
   menuItems = [
     { label: 'Dashboard', route: '/drone-operator' },

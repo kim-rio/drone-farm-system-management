@@ -2,6 +2,10 @@ import { Component, inject } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { AuthService, LoginResponse } from '../services/auth.service';
 import { ManagementDashboardService } from './management-dashboard.service';
+import {
+  CompanyBrandingResponse,
+  CompanyBrandingService
+} from '../services/company-branding.service';
 
 interface ManagementMenuItem {
   label: string;
@@ -34,6 +38,23 @@ export class Management {
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
   private readonly dashboardService = inject(ManagementDashboardService);
+  private readonly brandingService = inject(CompanyBrandingService);
+
+  branding: CompanyBrandingResponse = {
+    companyId: 0,
+    companyName: '',
+    logoUrl: null
+  };
+
+  private readonly brandingLoad =
+    this.brandingService.getBranding().subscribe({
+      next: branding => {
+        this.branding = branding;
+      },
+      error: error => {
+        console.warn('COMPANY BRANDING LOAD ERROR:', error);
+      }
+    });
 
   dashboard: ManagementDashboard = {
     clients: 0,

@@ -310,3 +310,13 @@
     display: none;
   }
 }
+
+/* COMPANY BRAND LOGO */
+.brand-logo {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+  border-radius: 9px;
+  display: block;
+  flex: 0 0 38px;
+}

@@ -7,12 +7,25 @@
   <aside class="sidebar">
 
     <div class="brand">
-      <div class="brand-mark">DM</div>
-      <div class="brand-text">
-        <strong>DMFS</strong>
-        <span>DRONE OPERATOR</span>
-      </div>
+
+  @if (branding.logoUrl) {
+    <img
+      class="brand-logo"
+      [src]="branding.logoUrl"
+      [alt]="branding.companyName + ' logo'"
+    >
+  } @else {
+    <div class="brand-mark">
+      {{ branding.companyName ? branding.companyName.charAt(0).toUpperCase() : 'C' }}
     </div>
+  }
+
+  <div class="brand-text">
+    <strong>{{ branding.companyName || 'Company' }}</strong>
+    <span>DRONE OPERATOR</span>
+  </div>
+
+</div>
 
     <nav class="navigation">
       @for (item of menuItems; track item.route) {

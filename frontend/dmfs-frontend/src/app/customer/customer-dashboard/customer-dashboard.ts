@@ -1,4 +1,4 @@
-﻿import {
+import {
   ChangeDetectorRef,
   Component,
   OnInit,
@@ -20,6 +20,11 @@ import {
 
 import { AuthService } from '../../services/auth.service';
 
+import {
+  CompanyBrandingResponse,
+  CompanyBrandingService
+} from '../../services/company-branding.service';
+
 @Component({
   selector: 'app-customer-dashboard',
   standalone: true,
@@ -34,6 +39,25 @@ export class CustomerDashboard implements OnInit {
 
   private readonly paymentService =
     inject(PaymentService);
+
+  private readonly brandingService =
+    inject(CompanyBrandingService);
+
+  branding: CompanyBrandingResponse = {
+    companyId: 0,
+    companyName: '',
+    logoUrl: null
+  };
+
+  private readonly brandingLoad =
+    this.brandingService.getBranding().subscribe({
+      next: branding => {
+        this.branding = branding;
+      },
+      error: error => {
+        console.warn('COMPANY BRANDING LOAD ERROR:', error);
+      }
+    });
 
   private readonly authService =
     inject(AuthService);

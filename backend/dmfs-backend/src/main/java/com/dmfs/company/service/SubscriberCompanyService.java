@@ -13,6 +13,7 @@ import com.dmfs.company.repository.SubscriberCompanyRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -22,15 +23,18 @@ public class SubscriberCompanyService {
     private final SubscriberCompanyRepository companyRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final CompanyLogoStorageService logoStorageService;
 
     public SubscriberCompanyService(
             SubscriberCompanyRepository companyRepository,
             UserRepository userRepository,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder,
+            CompanyLogoStorageService logoStorageService
     ) {
         this.companyRepository = companyRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.logoStorageService = logoStorageService;
     }
 
     @Transactional
@@ -171,6 +175,36 @@ public class SubscriberCompanyService {
     }
 
     @Transactional
+    public CompanyResponse updateLogo(
+            Long id,
+            MultipartFile file
+    ) {
+
+        SubscriberCompany company =
+                companyRepository.findById(id)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Subscriber company not found"
+                                )
+                        );
+
+        String oldLogoPath = company.getLogoPath();
+
+        String newLogoPath =
+                logoStorageService.store(file, id);
+
+        company.setLogoPath(newLogoPath);
+
+        company = companyRepository.save(company);
+
+        if (oldLogoPath != null && !oldLogoPath.isBlank()) {
+            logoStorageService.delete(oldLogoPath);
+        }
+
+        return toResponse(company);
+    }
+
+    @Transactional
     public CompanyResponse changeStatus(
             Long id,
             ChangeCompanyStatusRequest request
@@ -206,6 +240,17 @@ public class SubscriberCompanyService {
         return setStatus(id, CompanyStatus.EXPIRED);
     }
 
+    @Transactional(readOnly = true)
+    public SubscriberCompany getCompanyEntity(Long id) {
+
+        return companyRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Subscriber company not found"
+                        )
+                );
+    }
+
     private CompanyResponse setStatus(
             Long id,
             CompanyStatus status
@@ -230,6 +275,13 @@ public class SubscriberCompanyService {
             SubscriberCompany company
     ) {
 
+        String logoUrl =
+                company.getLogoPath() == null
+                        ? null
+                        : "/api/super-admin/companies/"
+                        + company.getId()
+                        + "/logo";
+
         return new CompanyResponse(
                 company.getId(),
                 company.getName(),
@@ -241,6 +293,7 @@ public class SubscriberCompanyService {
                 company.getRegion(),
                 company.getCity(),
                 company.getPhysicalAddress(),
+                logoUrl,
                 company.getStatus(),
                 company.getCreatedAt(),
                 company.getUpdatedAt()

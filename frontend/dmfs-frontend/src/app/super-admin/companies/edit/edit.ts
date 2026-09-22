@@ -32,6 +32,8 @@ export class EditCompany implements OnInit {
   loading = true;
   submitting = false;
   error = '';
+  selectedLogo: File | null = null;
+  logoPreviewUrl = '';
 
   readonly companyForm = this.fb.group({
     name: ['', [
@@ -236,6 +238,67 @@ export class EditCompany implements OnInit {
     ]);
   }
 
+  onLogoSelected(event: Event): void {
+
+    const input =
+      event.target as HTMLInputElement;
+
+    const file =
+      input.files?.[0] ?? null;
+
+    this.error = '';
+
+    if (!file) {
+      this.selectedLogo = null;
+      this.logoPreviewUrl = '';
+      return;
+    }
+
+    const allowedTypes = [
+      'image/png',
+      'image/jpeg',
+      'image/webp'
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      this.selectedLogo = null;
+      this.logoPreviewUrl = '';
+
+      input.value = '';
+
+      this.error =
+        'Company logo must be PNG, JPEG, or WebP.';
+
+      this.cdr.detectChanges();
+
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      this.selectedLogo = null;
+      this.logoPreviewUrl = '';
+
+      input.value = '';
+
+      this.error =
+        'Company logo must be 5 MB or smaller.';
+
+      this.cdr.detectChanges();
+
+      return;
+    }
+
+    this.selectedLogo = file;
+
+    if (this.logoPreviewUrl) {
+      URL.revokeObjectURL(this.logoPreviewUrl);
+    }
+
+    this.logoPreviewUrl =
+      URL.createObjectURL(file);
+
+    this.cdr.detectChanges();
+  }
   submit(): void {
 
     this.error = '';
@@ -324,14 +387,64 @@ export class EditCompany implements OnInit {
           updated
         );
 
-        this.submitting = false;
+        if (!this.selectedLogo) {
 
-        this.cdr.detectChanges();
+          this.submitting = false;
 
-        this.router.navigate([
-          '/super-admin/companies',
-          updated.id
-        ]);
+          this.cdr.detectChanges();
+
+          this.router.navigate([
+            '/super-admin/companies',
+            updated.id
+          ]);
+
+          return;
+        }
+
+        console.log(
+          'Uploading company logo:',
+          this.selectedLogo.name
+        );
+
+        this.service.uploadCompanyLogo(
+          updated.id,
+          this.selectedLogo
+        ).subscribe({
+
+          next: (logoUpdated) => {
+
+            console.log(
+              'Company logo uploaded:',
+              logoUpdated
+            );
+
+            this.submitting = false;
+
+            this.cdr.detectChanges();
+
+            this.router.navigate([
+              '/super-admin/companies',
+              logoUpdated.id
+            ]);
+          },
+
+          error: (err) => {
+
+            console.error(
+              'Failed to upload company logo:',
+              err
+            );
+
+            this.submitting = false;
+
+            this.error =
+              err?.error?.message ||
+              'Company details were saved, but the logo upload failed.';
+
+            this.cdr.detectChanges();
+          }
+
+        });
       },
 
       error: (err) => {

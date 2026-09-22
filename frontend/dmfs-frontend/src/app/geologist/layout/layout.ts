@@ -1,6 +1,10 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import {
+  CompanyBrandingResponse,
+  CompanyBrandingService
+} from '../../services/company-branding.service';
 
 interface NavItem {
   label: string;
@@ -19,6 +23,25 @@ const MOBILE_BREAKPOINT = 900;
   styleUrl: './layout.scss'
 })
 export class Layout {
+
+  private readonly brandingService =
+    inject(CompanyBrandingService);
+
+  branding: CompanyBrandingResponse = {
+    companyId: 0,
+    companyName: '',
+    logoUrl: null
+  };
+
+  private readonly brandingLoad =
+    this.brandingService.getBranding().subscribe({
+      next: branding => {
+        this.branding = branding;
+      },
+      error: error => {
+        console.warn('COMPANY BRANDING LOAD ERROR:', error);
+      }
+    });
   navItems: NavItem[] = [
     { label: 'Dashboard', path: 'dashboard', icon: 'grid' },
     { label: 'Survey History', path: 'survey-history', icon: 'clock' },

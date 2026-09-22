@@ -7,16 +7,27 @@
     [class.open]="isMobile && mobileOpen"
   >
     <div class="brand">
-      <div class="brand-icon">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M3 20l6-11 4 6 3-5 5 10H3z" stroke-linejoin="round" stroke-linecap="round" />
-        </svg>
-      </div>
-      <div class="brand-text" *ngIf="isMobile || !desktopCollapsed">
-        <div class="brand-name">GeoExplore</div>
-        <div class="brand-sub">Mineral Exploration</div>
-      </div>
+
+  @if (branding.logoUrl) {
+    <img
+      class="brand-logo"
+      [src]="branding.logoUrl"
+      [alt]="branding.companyName + ' logo'"
+    >
+  } @else {
+    <div class="brand-mark">
+      {{ branding.companyName ? branding.companyName.charAt(0).toUpperCase() : 'C' }}
     </div>
+  }
+
+  <div class="brand-text" *ngIf="isMobile || !desktopCollapsed">
+    <div class="brand-name">
+      {{ branding.companyName || 'Company' }}
+    </div>
+    <div class="brand-sub">Mineral Exploration</div>
+  </div>
+
+</div>
 
     <ul class="nav">
       <li *ngFor="let item of navItems">
@@ -89,7 +100,7 @@
             <path d="M3 20l6-11 4 6 3-5 5 10H3z" stroke-linejoin="round" stroke-linecap="round" />
           </svg>
         </div>
-        <span class="app-name">GeoExplore</span>
+        <span class="app-name">{{ branding.companyName || 'Company' }}</span>
       </div>
 
       <div class="topbar-right">

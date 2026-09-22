@@ -1,10 +1,15 @@
-﻿import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   AuthService,
   LoginResponse
 } from '../../services/auth.service';
+
+import {
+  CompanyBrandingService,
+  CompanyBrandingResponse
+} from '../../services/company-branding.service';
 
 interface WorkspaceItem {
   label: string;
@@ -24,11 +29,18 @@ export class RoleWorkspace implements OnInit {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly authService = inject(AuthService);
+  private readonly brandingService = inject(CompanyBrandingService);
 
   user: LoginResponse | null =
     this.authService.getCurrentUser();
 
   sidebarOpen = true;
+
+  branding: CompanyBrandingResponse = {
+    companyId: 0,
+    companyName: '',
+    logoUrl: null
+  };
 
   role = '';
 
@@ -47,6 +59,15 @@ export class RoleWorkspace implements OnInit {
   }
 
   ngOnInit(): void {
+
+    this.brandingService.getBranding().subscribe({
+      next: branding => {
+        this.branding = branding;
+      },
+      error: error => {
+        console.warn('COMPANY BRANDING LOAD ERROR:', error);
+      }
+    });
 
     const data = this.route.snapshot.data;
 

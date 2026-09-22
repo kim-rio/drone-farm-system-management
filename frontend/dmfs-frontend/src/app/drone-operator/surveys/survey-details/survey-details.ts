@@ -17,6 +17,10 @@ import {
 } from '../../operator.service';
 
 import { AuthService } from '../../../services/auth.service';
+import {
+  CompanyBrandingService,
+  CompanyBrandingResponse
+} from '../../../services/company-branding.service';
 
 @Component({
   selector: 'app-survey-details',
@@ -33,6 +37,7 @@ export class SurveyDetails implements OnInit {
 
   private readonly api = inject(OperatorService);
   private readonly auth = inject(AuthService);
+  private readonly brandingService = inject(CompanyBrandingService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly cdr = inject(ChangeDetectorRef);
@@ -40,6 +45,12 @@ export class SurveyDetails implements OnInit {
   survey?: Survey;
 
   sidebarOpen = true;
+
+  branding: CompanyBrandingResponse = {
+    companyId: 0,
+    companyName: '',
+    logoUrl: null
+  };
 
   menuItems = [
     { label: 'Dashboard', route: '/drone-operator' },

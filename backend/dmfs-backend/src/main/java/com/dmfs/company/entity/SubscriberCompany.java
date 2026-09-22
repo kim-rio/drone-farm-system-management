@@ -39,6 +39,9 @@ public class SubscriberCompany {
     @Column(name = "physical_address", nullable = false, length = 255)
     private String physicalAddress;
 
+    @Column(name = "logo_path", length = 500)
+    private String logoPath;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     private CompanyStatus status = CompanyStatus.ACTIVE;
@@ -62,6 +65,10 @@ public class SubscriberCompany {
 
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -136,6 +143,14 @@ public class SubscriberCompany {
         this.physicalAddress = physicalAddress;
     }
 
+    public String getLogoPath() {
+        return logoPath;
+    }
+
+    public void setLogoPath(String logoPath) {
+        this.logoPath = logoPath;
+    }
+
     public CompanyStatus getStatus() {
         return status;
     }
@@ -148,7 +163,15 @@ public class SubscriberCompany {
         return createdAt;
     }
 
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }
