@@ -1,0 +1,48 @@
+{
+  "survey": {
+    "input_file": "output\\uploads\\35d254fd151e4dcd80eda6ff80421d92.uav",
+    "records": 77952,
+    "valid_records": 77952,
+    "removed_records": 0
+  },
+  "magnetic": {
+    "source_column": "fitt",
+    "processing": "Final supplied TMI retained; survey-relative residual generated."
+  },
+  "coordinate_system": {
+    "crs": "EPSG:25835",
+    "cell_size_m": 12.5
+  },
+  "igrf": {
+    "survey_year": 2021.33,
+    "latitude": 68.62490882043693,
+    "longitude": 27.82939215254644,
+    "declination_deg": 14.279857864156295,
+    "inclination_deg": 78.18066442247552,
+    "total_intensity_nt": 54067.2739771529
+  },
+  "products": {
+    "processed_csv": "output\\processed\\35d254fd151e4dcd80eda6ff80421d92_processed.csv",
+    "grid_csv": "output\\processed\\35d254fd151e4dcd80eda6ff80421d92_processed_grid.csv",
+    "feature_csv": "output\\processed\\35d254fd151e4dcd80eda6ff80421d92_processed_features.csv",
+    "feature_stack": "output\\processed\\35d254fd151e4dcd80eda6ff80421d92_processed_feature_stack.tif",
+    "preview_map": "output\\processed\\35d254fd151e4dcd80eda6ff80421d92_processed_rtp_map.png",
+    "anomaly_geojson": "output\\processed\\35d254fd151e4dcd80eda6ff80421d92_processed_anomalies.geojson"
+  },
+  "feature_layers": [
+    "TMI",
+    "RTP",
+    "Residual_TMI",
+    "Regional_TMI",
+    "VD1",
+    "VD2",
+    "HoriG",
+    "TotG",
+    "AnalyticSignal",
+    "TiltG"
+  ],
+  "anomalies": {
+    "count": 0,
+    "candidates": []
+  }
+}
