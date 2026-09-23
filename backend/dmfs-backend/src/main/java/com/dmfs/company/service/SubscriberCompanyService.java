@@ -15,7 +15,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.text.Normalizer;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 public class SubscriberCompanyService {
@@ -62,22 +64,34 @@ public class SubscriberCompanyService {
             );
         }
 
-        SubscriberCompany company = new SubscriberCompany();
+        SubscriberCompany company =
+                new SubscriberCompany();
 
         company.setName(request.getName());
+
+        company.setWorkspaceSlug(
+                generateWorkspaceSlug(
+                        request.getName()
+                )
+        );
+
         company.setRegistrationNumber(
                 request.getRegistrationNumber()
         );
+
         company.setTin(request.getTin());
         company.setEmail(request.getEmail());
         company.setPhone(request.getPhone());
         company.setCountry(request.getCountry());
         company.setRegion(request.getRegion());
         company.setCity(request.getCity());
-        company.setPhysicalAddress(request.getPhysicalAddress());
+        company.setPhysicalAddress(
+                request.getPhysicalAddress()
+        );
         company.setStatus(CompanyStatus.ACTIVE);
 
-        company = companyRepository.save(company);
+        company =
+                companyRepository.save(company);
 
         User admin = new User();
 
@@ -169,7 +183,8 @@ public class SubscriberCompanyService {
                 request.getPhysicalAddress()
         );
 
-        company = companyRepository.save(company);
+        company =
+                companyRepository.save(company);
 
         return toResponse(company);
     }
@@ -188,17 +203,26 @@ public class SubscriberCompanyService {
                                 )
                         );
 
-        String oldLogoPath = company.getLogoPath();
+        String oldLogoPath =
+                company.getLogoPath();
 
         String newLogoPath =
-                logoStorageService.store(file, id);
+                logoStorageService.store(
+                        file,
+                        id
+                );
 
         company.setLogoPath(newLogoPath);
 
-        company = companyRepository.save(company);
+        company =
+                companyRepository.save(company);
 
-        if (oldLogoPath != null && !oldLogoPath.isBlank()) {
-            logoStorageService.delete(oldLogoPath);
+        if (oldLogoPath != null
+                && !oldLogoPath.isBlank()) {
+
+            logoStorageService.delete(
+                    oldLogoPath
+            );
         }
 
         return toResponse(company);
@@ -218,30 +242,44 @@ public class SubscriberCompanyService {
                                 )
                         );
 
-        company.setStatus(request.getStatus());
+        company.setStatus(
+                request.getStatus()
+        );
 
-        company = companyRepository.save(company);
+        company =
+                companyRepository.save(company);
 
         return toResponse(company);
     }
 
     @Transactional
     public CompanyResponse activate(Long id) {
-        return setStatus(id, CompanyStatus.ACTIVE);
+        return setStatus(
+                id,
+                CompanyStatus.ACTIVE
+        );
     }
 
     @Transactional
     public CompanyResponse suspend(Long id) {
-        return setStatus(id, CompanyStatus.SUSPENDED);
+        return setStatus(
+                id,
+                CompanyStatus.SUSPENDED
+        );
     }
 
     @Transactional
     public CompanyResponse expire(Long id) {
-        return setStatus(id, CompanyStatus.EXPIRED);
+        return setStatus(
+                id,
+                CompanyStatus.EXPIRED
+        );
     }
 
     @Transactional(readOnly = true)
-    public SubscriberCompany getCompanyEntity(Long id) {
+    public SubscriberCompany getCompanyEntity(
+            Long id
+    ) {
 
         return companyRepository.findById(id)
                 .orElseThrow(() ->
@@ -266,9 +304,77 @@ public class SubscriberCompanyService {
 
         company.setStatus(status);
 
-        company = companyRepository.save(company);
+        company =
+                companyRepository.save(company);
 
         return toResponse(company);
+    }
+
+    private String generateWorkspaceSlug(
+            String companyName
+    ) {
+
+        String base =
+                Normalizer.normalize(
+                        companyName == null
+                                ? ""
+                                : companyName,
+                        Normalizer.Form.NFD
+                )
+                .replaceAll(
+                        "\\p{M}",
+                        ""
+                )
+                .toLowerCase(Locale.ROOT)
+                .replaceAll(
+                        "[^a-z0-9]+",
+                        "-"
+                )
+                .replaceAll(
+                        "^-+|-+$",
+                        ""
+                );
+
+        if (base.isBlank()) {
+            base = "company";
+        }
+
+        if (base.length() > 80) {
+            base = base.substring(0, 80)
+                    .replaceAll("-+$", "");
+        }
+
+        String slug = base;
+        int suffix = 2;
+
+        while (companyRepository
+                .existsByWorkspaceSlug(slug)) {
+
+            String suffixText =
+                    "-" + suffix;
+
+            int maxBaseLength =
+                    100 - suffixText.length();
+
+            String shortenedBase =
+                    base.length() > maxBaseLength
+                            ? base.substring(
+                                    0,
+                                    maxBaseLength
+                            ).replaceAll(
+                                    "-+$",
+                                    ""
+                            )
+                            : base;
+
+            slug =
+                    shortenedBase
+                    + suffixText;
+
+            suffix++;
+        }
+
+        return slug;
     }
 
     private CompanyResponse toResponse(

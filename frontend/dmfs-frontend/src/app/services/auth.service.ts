@@ -1,6 +1,12 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+﻿import { Injectable, inject } from '@angular/core';
+import {
+  HttpClient
+} from '@angular/common/http';
+
+import {
+  Observable,
+  tap
+} from 'rxjs';
 
 export interface LoginResponse {
   token: null;
@@ -16,28 +22,45 @@ export interface LoginResponse {
 })
 export class AuthService {
 
-  private readonly http = inject(HttpClient);
+  private readonly http =
+    inject(HttpClient);
 
-  private readonly apiUrl = '/api/auth';
-  private readonly storageKey = 'dmfs_current_user';
+  private readonly apiUrl =
+    '/api/auth';
 
-  private currentUser: LoginResponse | null = this.loadStoredUser();
+  private readonly storageKey =
+    'dmfs_current_user';
 
-  login(email: string, password: string): Observable<LoginResponse> {
+  private currentUser:
+    LoginResponse | null =
+      this.loadStoredUser();
+
+  login(
+    email: string,
+    password: string
+  ): Observable<LoginResponse> {
 
     this.clearSession();
 
+    const body = {
+      email:
+        email
+          .trim()
+          .toLowerCase(),
+
+      password
+    };
+
     return this.http.post<LoginResponse>(
       `${this.apiUrl}/login`,
-      {
-        email: email.trim().toLowerCase(),
-        password
-      },
+      body,
       {
         withCredentials: true
       }
     ).pipe(
+
       tap(user => {
+
         this.currentUser = user;
 
         localStorage.setItem(
@@ -48,7 +71,9 @@ export class AuthService {
     );
   }
 
-  getCurrentUser(): LoginResponse | null {
+  getCurrentUser():
+    LoginResponse | null {
+
     return this.currentUser;
   }
 
@@ -56,11 +81,15 @@ export class AuthService {
     return this.currentUser !== null;
   }
 
-  hasRole(role: string): boolean {
+  hasRole(
+    role: string
+  ): boolean {
+
     return this.currentUser?.role === role;
   }
 
-  logout(): Observable<void> {
+  logout():
+    Observable<void> {
 
     return this.http.post<void>(
       `${this.apiUrl}/logout`,
@@ -69,35 +98,63 @@ export class AuthService {
         withCredentials: true
       }
     ).pipe(
-      tap(() => this.clearSession())
+
+      tap(() => {
+        this.clearSession();
+      })
     );
   }
 
   clearSession(): void {
+
     this.currentUser = null;
-    localStorage.removeItem(this.storageKey);
+
+    localStorage.removeItem(
+      this.storageKey
+    );
   }
 
-  private loadStoredUser(): LoginResponse | null {
+  private loadStoredUser():
+    LoginResponse | null {
 
     try {
-      const stored = localStorage.getItem(this.storageKey);
+
+      const stored =
+        localStorage.getItem(
+          this.storageKey
+        );
 
       if (!stored) {
         return null;
       }
 
-      const user = JSON.parse(stored) as LoginResponse;
+      const user =
+        JSON.parse(
+          stored
+        ) as LoginResponse;
 
-      if (!user || !user.userId || !user.email || !user.role) {
-        localStorage.removeItem(this.storageKey);
+      if (
+        !user ||
+        !user.userId ||
+        !user.email ||
+        !user.role
+      ) {
+
+        localStorage.removeItem(
+          this.storageKey
+        );
+
         return null;
       }
 
       return user;
 
     } catch {
-      localStorage.removeItem(this.storageKey);
+
+      localStorage.removeItem(
+        this.storageKey
+      );
+
       return null;
     }
   }

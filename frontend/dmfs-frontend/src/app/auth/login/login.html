@@ -1,43 +1,60 @@
 ﻿<div class="login-page">
 
-  <!-- ==========================================================
-       LOGIN SIDE
-       ========================================================== -->
-
   <section class="login-panel">
 
     <div class="login-content">
 
-      <!-- Temporary logo — replace with official logo later -->
       <div class="brand">
 
-        <div class="brand-logo">
-          <span class="brand-logo-mark">D</span>
-        </div>
+        @if (branding) {
 
-        <div class="brand-name">
-          DMFS
-        </div>
+          <div class="brand-logo">
 
-        <div class="brand-subtitle">
-          Drone Farm Management System
-        </div>
+            @if (branding.logoUrl) {
+
+              <img
+                [src]="branding.logoUrl"
+                [alt]="branding.companyName + ' logo'"
+              />
+
+            } @else {
+
+              <span class="brand-logo-mark">
+                {{ branding.companyName.charAt(0).toUpperCase() }}
+              </span>
+
+            }
+
+          </div>
+
+          <div class="brand-name">
+            {{ branding.companyName }}
+          </div>
+
+        }
 
       </div>
-
 
       <div class="login-header">
 
-        <h1>Welcome back</h1>
-
-        <p>
-          Sign in to continue to your workspace.
-        </p>
+        <h1>
+          Welcome back
+        </h1>
 
       </div>
 
+      @if (errorMessage) {
 
-      <form class="login-form" (ngSubmit)="login()">
+        <div class="error">
+          {{ errorMessage }}
+        </div>
+
+      }
+
+      <form
+        class="login-form"
+        (ngSubmit)="login()"
+      >
 
         <div class="form-group">
 
@@ -57,7 +74,6 @@
 
         </div>
 
-
         <div class="form-group">
 
           <label for="password">
@@ -75,16 +91,6 @@
           />
 
         </div>
-
-
-        @if (errorMessage) {
-
-          <div class="error">
-            {{ errorMessage }}
-          </div>
-
-        }
-
 
         <button
           type="submit"
@@ -105,18 +111,12 @@
 
   </section>
 
-
-  <!-- ==========================================================
-       VISUAL SIDE
-       ========================================================== -->
-
   <section class="visual-panel">
 
     <div class="world-stage">
 
       <div class="ambient-ring ambient-ring-one"></div>
       <div class="ambient-ring ambient-ring-two"></div>
-
 
       <div class="globe">
 
@@ -137,7 +137,6 @@
         <div class="location-point point-three"></div>
 
       </div>
-
 
       <div class="orbit orbit-one"></div>
       <div class="orbit orbit-two"></div>

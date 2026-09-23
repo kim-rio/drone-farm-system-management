@@ -15,5 +15,9 @@ public interface SubscriberCompanyRepository
             String registrationNumber
     );
 
+    boolean existsByWorkspaceSlug(String workspaceSlug);
+
+    Optional<SubscriberCompany> findByWorkspaceSlug(String workspaceSlug);
+
     long countByStatus(CompanyStatus status);
 }

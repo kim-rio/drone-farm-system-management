@@ -4,6 +4,7 @@ import com.dmfs.auth.dto.LoginRequest;
 import com.dmfs.auth.dto.LoginResponse;
 import com.dmfs.auth.service.AuthService;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,15 +22,21 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(
             @RequestBody LoginRequest request,
+            HttpServletRequest httpRequest,
             HttpServletResponse response
     ) {
 
-        LoginResponse loginResponse = authService.login(request);
+        LoginResponse loginResponse =
+                authService.login(
+                        request,
+                        httpRequest
+                );
 
-        Cookie cookie = new Cookie(
-                "access_token",
-                loginResponse.getToken()
-        );
+        Cookie cookie =
+                new Cookie(
+                        "access_token",
+                        loginResponse.getToken()
+                );
 
         cookie.setHttpOnly(true);
         cookie.setSecure(false);
@@ -40,7 +47,9 @@ public class AuthController {
 
         loginResponse.setToken(null);
 
-        return ResponseEntity.ok(loginResponse);
+        return ResponseEntity.ok(
+                loginResponse
+        );
     }
 
     @PostMapping("/logout")
@@ -48,10 +57,11 @@ public class AuthController {
             HttpServletResponse response
     ) {
 
-        Cookie cookie = new Cookie(
-                "access_token",
-                null
-        );
+        Cookie cookie =
+                new Cookie(
+                        "access_token",
+                        null
+                );
 
         cookie.setHttpOnly(true);
         cookie.setSecure(false);
@@ -60,6 +70,7 @@ public class AuthController {
 
         response.addCookie(cookie);
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.noContent()
+                .build();
     }
 }

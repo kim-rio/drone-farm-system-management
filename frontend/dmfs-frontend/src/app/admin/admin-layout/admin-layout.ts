@@ -18,6 +18,7 @@ import {
   CompanyBrandingService,
   CompanyBrandingResponse
 } from '../../services/company-branding.service';
+
 import {
   AuthService,
   LoginResponse
@@ -37,22 +38,24 @@ interface AdminMenuItem {
 })
 export class AdminLayout {
 
-  private readonly router = inject(Router);
-  private readonly authService = inject(AuthService);
-  private readonly brandingService = inject(CompanyBrandingService);
+  private readonly router =
+    inject(Router);
+
+  private readonly authService =
+    inject(AuthService);
+
+  private readonly brandingService =
+    inject(CompanyBrandingService);
 
   sidebarOpen = true;
 
-  branding: CompanyBrandingResponse = {
-    companyId: 0,
-    companyName: '',
-    logoUrl: null
-  };
+  branding: CompanyBrandingResponse | null = null;
 
   readonly user: LoginResponse | null =
     this.authService.getCurrentUser();
 
-  readonly initials = this.buildInitials();
+  readonly initials =
+    this.buildInitials();
 
   readonly menuItems: AdminMenuItem[] = [
     {
@@ -66,48 +69,94 @@ export class AdminLayout {
     {
       label: 'Services',
       route: '/admin/services'
-    },
+    }
   ];
 
-  activeRoute = this.router.url;
+  activeRoute =
+    this.router.url;
 
   constructor() {
+
+    this.loadBranding();
+
     this.router.events
       .pipe(
         filter(
-          event => event instanceof NavigationEnd
+          event =>
+            event instanceof NavigationEnd
         ),
         startWith(null)
       )
       .subscribe(() => {
-        this.activeRoute = this.router.url;
+
+        this.activeRoute =
+          this.router.url;
+
       });
+
+  }
+
+  private loadBranding(): void {
+
+    this.brandingService
+      .getBranding()
+      .subscribe({
+
+        next: branding => {
+
+          this.branding =
+            branding;
+
+        },
+
+        error: error => {
+
+          console.error(
+            'ADMIN BRANDING ERROR:',
+            error
+          );
+
+        }
+
+      });
+
   }
 
   toggleSidebar(): void {
-    this.sidebarOpen = !this.sidebarOpen;
+
+    this.sidebarOpen =
+      !this.sidebarOpen;
+
   }
 
   navigate(route: string): void {
+
     if (this.activeRoute === route) {
       return;
     }
 
     this.router.navigateByUrl(route);
+
   }
 
   isActive(route: string): boolean {
+
     if (route === '/admin') {
+
       return (
         this.activeRoute === '/admin' ||
         this.activeRoute === '/admin/'
       );
+
     }
 
-    return this.activeRoute.startsWith(route);
+    return this.activeRoute
+      .startsWith(route);
+
   }
 
   private buildInitials(): string {
+
     if (!this.user) {
       return 'AD';
     }
@@ -119,16 +168,33 @@ export class AdminLayout {
       this.user.lastName?.charAt(0) ?? '';
 
     return `${first}${last}`.toUpperCase();
+
   }
 
   logout(): void {
-    this.authService.logout().subscribe({
-      next: () => {
-        this.router.navigate(['/login']);
-      },
-      error: () => {
-        this.router.navigate(['/login']);
-      }
-    });
+
+    this.authService
+      .logout()
+      .subscribe({
+
+        next: () => {
+
+          this.router.navigate(
+            ['/login']
+          );
+
+        },
+
+        error: () => {
+
+          this.router.navigate(
+            ['/login']
+          );
+
+        }
+
+      });
+
   }
+
 }

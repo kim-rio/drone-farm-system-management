@@ -15,6 +15,9 @@ public class SubscriberCompany {
     @Column(nullable = false, length = 150)
     private String name;
 
+    @Column(name = "workspace_slug", nullable = false, unique = true, length = 100)
+    private String workspaceSlug;
+
     @Column(name = "registration_number", nullable = false, unique = true, length = 100)
     private String registrationNumber;
 
@@ -77,6 +80,14 @@ public class SubscriberCompany {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getWorkspaceSlug() {
+        return workspaceSlug;
+    }
+
+    public void setWorkspaceSlug(String workspaceSlug) {
+        this.workspaceSlug = workspaceSlug;
     }
 
     public String getRegistrationNumber() {

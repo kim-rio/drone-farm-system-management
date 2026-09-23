@@ -1,4 +1,4 @@
-<div
+﻿<div
   class="dashboard"
   [class.sidebar-open]="sidebarOpen"
 >
@@ -7,24 +7,39 @@
 
     <div class="brand">
 
-  @if (branding.logoUrl) {
-    <img
-      class="brand-logo"
-      [src]="branding.logoUrl"
-      [alt]="branding.companyName + ' logo'"
-    >
-  } @else {
-    <div class="brand-mark">
-      {{ branding.companyName ? branding.companyName.charAt(0).toUpperCase() : 'C' }}
+      @if (branding) {
+
+        @if (branding.logoUrl) {
+
+          <img
+            class="brand-logo"
+            [src]="branding.logoUrl"
+            [alt]="branding.companyName + ' logo'"
+          >
+
+        } @else {
+
+          <div class="brand-mark">
+            {{ branding.companyName.charAt(0).toUpperCase() }}
+          </div>
+
+        }
+
+        <div class="brand-text">
+
+          <strong>
+            {{ branding.companyName }}
+          </strong>
+
+          <span>
+            COMPANY ADMIN
+          </span>
+
+        </div>
+
+      }
+
     </div>
-  }
-
-  <div class="brand-text">
-    <strong>{{ branding.companyName || 'Company' }}</strong>
-    <span>COMPANY ADMIN</span>
-  </div>
-
-</div>
 
     <nav class="navigation">
 
@@ -39,8 +54,13 @@
           [class.active]="isActive(item.route)"
           (click)="navigate(item.route)"
         >
+
           <span class="nav-indicator"></span>
-          <span>{{ item.label }}</span>
+
+          <span>
+            {{ item.label }}
+          </span>
+
         </button>
 
       }
@@ -64,7 +84,9 @@
             {{ user?.firstName }} {{ user?.lastName }}
           </strong>
 
-          <span>Company Admin Account</span>
+          <span>
+            Company Admin Account
+          </span>
 
         </div>
 
@@ -76,7 +98,9 @@
         (click)="logout()"
       >
 
-        <span class="logout-circle">?</span>
+        <span class="logout-circle">
+          ?
+        </span>
 
         <span class="logout-text">
           Logout
@@ -123,7 +147,9 @@
               {{ user?.firstName }} {{ user?.lastName }}
             </strong>
 
-            <span>ADMIN</span>
+            <span>
+              ADMIN
+            </span>
 
           </div>
 
@@ -142,5 +168,3 @@
   </main>
 
 </div>
-
-
