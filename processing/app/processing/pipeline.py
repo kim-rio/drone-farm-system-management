@@ -4,7 +4,8 @@ import json
 import numpy as np
 
 from app.models.processing_result import (
-    ProcessingResult
+    ProcessingResult,
+    AnomalyCandidate
 )
 
 from app.processing.uav_parser import (
@@ -357,7 +358,7 @@ class SurveyProcessingPipeline:
             )
 
             # =================================================
-            # 14. ASSIGN REAL COORDINATES
+            # 14. ASSIGN REAL PROJECTED COORDINATES
             # =================================================
 
             anomalies = (
@@ -370,7 +371,81 @@ class SurveyProcessingPipeline:
             )
 
             # =================================================
-            # 15. SAVE ANOMALIES AS GEOJSON
+            # 15. CREATE API ANOMALY CANDIDATES
+            # =================================================
+            #
+            # These are returned directly in the FastAPI
+            # ProcessingResult so the frontend/backend can
+            # consume the candidates without having to parse
+            # the report JSON.
+            #
+            # Coordinates here are EPSG:25835:
+            #
+            #     easting
+            #     northing
+            #
+            # Leaflet should NOT use these directly as
+            # latitude/longitude. The GeoJSON generated below
+            # contains EPSG:4326 coordinates for the map.
+            # =================================================
+
+            candidates = [
+
+                AnomalyCandidate(
+
+                    id=anomaly.id,
+
+                    easting=float(
+                        anomaly.easting
+                    ),
+
+                    northing=float(
+                        anomaly.northing
+                    ),
+
+                    peak_residual_nT=float(
+                        anomaly.peak_residual_nt
+                    ),
+
+                    max_analytic_signal=float(
+                        anomaly.max_analytic_signal
+                    ),
+
+                    area_m2=float(
+                        anomaly.area_m2
+                    ),
+
+                    equivalent_radius_m=float(
+                        anomaly.equivalent_radius_m
+                    ),
+
+                    estimated_depth_m=float(
+                        anomaly.estimated_depth_m
+                    ),
+
+                    pixel_x=int(
+                        anomaly.pixel_x
+                    ),
+
+                    pixel_y=int(
+                        anomaly.pixel_y
+                    ),
+
+                    interpretation_status=(
+                        "CANDIDATE"
+                    ),
+
+                    requires_geologist_review=(
+                        True
+                    )
+                )
+
+                for anomaly
+                in anomalies[:20]
+            ]
+
+            # =================================================
+            # 16. SAVE ANOMALIES AS GEOJSON
             # =================================================
 
             anomaly_geojson_path = (
@@ -386,7 +461,7 @@ class SurveyProcessingPipeline:
             )
 
             # =================================================
-            # 16. CREATE MULTI-BAND GEOTIFF
+            # 17. CREATE MULTI-BAND GEOTIFF
             # =================================================
 
             geotiff_path = (
@@ -395,7 +470,7 @@ class SurveyProcessingPipeline:
             )
 
             # =================================================
-            # 17. CREATE MAP PREVIEW
+            # 18. CREATE MAP PREVIEW
             # =================================================
 
             preview_path = (
@@ -414,7 +489,7 @@ class SurveyProcessingPipeline:
             )
 
             # =================================================
-            # 18. CREATE PROCESSING REPORT
+            # 19. CREATE PROCESSING REPORT
             # =================================================
 
             report = {
@@ -627,7 +702,7 @@ class SurveyProcessingPipeline:
                 )
 
             # =================================================
-            # 19. RETURN RESULT
+            # 20. RETURN RESULT
             # =================================================
 
             return ProcessingResult(
@@ -722,6 +797,8 @@ class SurveyProcessingPipeline:
                 anomaly_count=(
                     len(anomalies)
                 ),
+
+                candidates=candidates,
 
                 warnings=warnings
             )

@@ -97,9 +97,120 @@
           </div>
           <button class="ghost-btn">Full screen</button>
         </div>
-        <div class="map-placeholder"><img [src]="mapFileUrl(selected!.id)" alt="Generated magnetic anomaly map" /></div>
+        <div class="map-wrapper">
+            
+          <div
+            id="anomaly-map"
+            class="anomaly-map">
+          </div>
+        
+          <div
+            class="map-loading"
+            *ngIf="mapLoading">
+        
+            Loading anomaly map...
+          </div>
+        
+          <div
+            class="map-error"
+            *ngIf="mapError">
+        
+            {{ mapError }}
+        
+          </div>
+            
+        </div>
       </div>
-    </div>
+      <div
+       class="candidate-panel"
+       *ngIf="selectedCandidate">
+        
+        <div class="candidate-panel-header">
+         <div>
+              <div class="info-label">
+               Selected candidate
+             </div>
+              <div class="candidate-title">
+               Anomaly #{{ selectedCandidate.id }}
+             </div>
+          </div>
+          <button
+             type="button"
+             class="candidate-close"
+             (click)="selectedCandidate = null">
+                     ×
+            </button>
+        </div>
+               
+        <div class="candidate-grid">
+               
+            <div>
+               <div class="info-label">
+                 Peak residual
+               </div>
+          
+               <div class="info-value">
+                 {{ selectedCandidate.peak_residual_nT | number:'1.2-2' }}
+                 nT
+               </div>
+           </div>
+          
+            <div>
+               <div class="info-label">
+                 Analytic signal
+               </div>
+          
+               <div class="info-value">
+                 {{ selectedCandidate.max_analytic_signal | number:'1.2-2' }}
+               </div>
+            </div>
+          
+            <div>
+               <div class="info-label">
+                 Area
+               </div>
+          
+               <div class="info-value">
+                 {{ selectedCandidate.area_m2 | number:'1.2-2' }}
+                 m²
+               </div>
+           </div>
+          
+            <div>
+               <div class="info-label">
+                 Equivalent radius
+               </div>
+          
+               <div class="info-value">
+                 {{ selectedCandidate.equivalent_radius_m | number:'1.2-2' }}
+                 m
+               </div>
+            </div>
+          
+            <div>
+               <div class="info-label">
+                 Estimated depth
+               </div>
+          
+               <div class="info-value">
+                 {{ selectedCandidate.estimated_depth_m | number:'1.2-2' }}
+                 m
+               </div>
+            </div>
+          
+            <div>
+               <div class="info-label">
+                 Status
+               </div>
+          
+               <div class="candidate-status">
+                 CANDIDATE
+               </div>
+            </div>
+          
+        </div>
+       
+      </div>
 
     <div class="detail-right">
       <div class="card">
