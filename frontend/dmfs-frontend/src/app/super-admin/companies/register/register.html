@@ -1,4 +1,4 @@
-<div class="register-page">
+﻿<div class="register-page">
 
   <aside class="sidebar">
 
@@ -147,7 +147,34 @@
 
             </div>
 
-            <div class="field">
+                        <div class="field">
+
+              <label for="workspaceSlug">
+                Workspace URL Slug
+                <span>*</span>
+              </label>
+
+              <input
+                id="workspaceSlug"
+                type="text"
+                formControlName="workspaceSlug"
+                placeholder="e.g. kimrio"
+                [class.invalid]="fieldInvalid(company.controls.workspaceSlug)"
+              />
+
+              @if (fieldInvalid(company.controls.workspaceSlug)) {
+                <small>
+                  Use lowercase letters, numbers, and single hyphens only.
+                </small>
+              } @else {
+                <small>
+                  Login URL:
+                  {{ company.controls.workspaceSlug.value || 'your-slug' }}.localhost:4200/login
+                </small>
+              }
+
+            </div>
+<div class="field">
 
               <label for="registrationNumber">
                 Registration Number
@@ -284,7 +311,7 @@
               />
 
               <p>
-                PNG, JPEG or WebP · Maximum 5 MB
+                PNG, JPEG or WebP Â· Maximum 5 MB
               </p>
 
               @if (selectedLogo) {
@@ -564,3 +591,6 @@
   </main>
 
 </div>
+
+
+

@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
+﻿import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -39,6 +39,11 @@ export class EditCompany implements OnInit {
     name: ['', [
       Validators.required,
       Validators.maxLength(150)
+    ]],
+    workspaceSlug: ['', [
+      Validators.required,
+      Validators.maxLength(100),
+      Validators.pattern(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
     ]],
 
     registrationNumber: ['', [
@@ -130,6 +135,7 @@ export class EditCompany implements OnInit {
 
         this.companyForm.patchValue({
           name: company.name ?? '',
+          workspaceSlug: company.workspaceSlug ?? '',
           registrationNumber:
             company.registrationNumber ?? '',
           tin: company.tin ?? '',
@@ -330,6 +336,11 @@ export class EditCompany implements OnInit {
         this.companyForm.controls.name.value!
           .trim(),
 
+      workspaceSlug:
+        this.companyForm.controls.workspaceSlug.value!
+          .trim()
+          .toLowerCase(),
+
       registrationNumber:
         this.companyForm.controls
           .registrationNumber.value!
@@ -466,3 +477,9 @@ export class EditCompany implements OnInit {
     });
   }
 }
+
+
+
+
+
+

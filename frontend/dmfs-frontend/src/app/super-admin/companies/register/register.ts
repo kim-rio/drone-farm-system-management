@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+﻿import { Component, inject } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -52,6 +52,11 @@ export class RegisterCompany {
         name: ['', [
           Validators.required,
           Validators.maxLength(150)
+        ]],
+        workspaceSlug: ['', [
+          Validators.required,
+          Validators.maxLength(100),
+          Validators.pattern(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
         ]],
 
         registrationNumber: ['', [
@@ -228,6 +233,8 @@ export class RegisterCompany {
 
     const request: CreateCompanyRequest = {
       name: this.company.controls.name.value!.trim(),
+      workspaceSlug:
+        this.company.controls.workspaceSlug.value!.trim().toLowerCase(),
       registrationNumber:
         this.company.controls.registrationNumber.value!.trim(),
       tin:
@@ -308,4 +315,10 @@ export class RegisterCompany {
     });
   }
 }
+
+
+
+
+
+
 

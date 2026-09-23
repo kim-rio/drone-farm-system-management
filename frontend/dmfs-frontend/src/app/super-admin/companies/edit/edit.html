@@ -1,4 +1,4 @@
-<div class="edit-page">
+﻿<div class="edit-page">
 
   <aside class="sidebar">
 
@@ -233,7 +233,28 @@
                 }
               </div>
 
-              <div class="field">
+                            <div class="field">
+                <label>Workspace URL Slug *</label>
+
+                <input
+                  type="text"
+                  formControlName="workspaceSlug"
+                  placeholder="e.g. kimrio"
+                  [class.invalid]="fieldInvalid(companyForm.controls.workspaceSlug)"
+                />
+
+                @if (fieldInvalid(companyForm.controls.workspaceSlug)) {
+                  <small>
+                    Use lowercase letters, numbers, and single hyphens only.
+                  </small>
+                } @else {
+                  <small>
+                    Login URL:
+                    {{ companyForm.controls.workspaceSlug.value || 'your-slug' }}.localhost:4200/login
+                  </small>
+                }
+              </div>
+<div class="field">
                 <label>Registration Number *</label>
 
                 <input
@@ -375,3 +396,6 @@
   </main>
 
 </div>
+
+
+
