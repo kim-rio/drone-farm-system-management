@@ -142,4 +142,56 @@ public class CreateCompanyRequest {
     public void setInitialAdmin(InitialAdminRequest initialAdmin) {
         this.initialAdmin = initialAdmin;
     }
+
+    public static class InitialAdminRequest {
+
+        @NotBlank(message = "Admin first name is required")
+        @Size(max = 100, message = "Admin first name must not exceed 100 characters")
+        private String firstName;
+
+        @NotBlank(message = "Admin last name is required")
+        @Size(max = 100, message = "Admin last name must not exceed100 characters")
+        private String lastName;
+
+        @NotBlank(message = "Admin email is required")
+        @Email(message = "Invalid admin email address")
+        @Size(max = 100, message = "Admin email must not exceed 100characters")
+        private String email;
+
+        @NotBlank(message = "Admin password is required")
+        @Size(min = 8, max = 100, message = "Admin password must bebetween 8 and 100 characters")
+        private String password;
+
+        public String getFirstName() {
+            return firstName;
+        }
+
+        public void setFirstName(String firstName) {
+            this.firstName = firstName;
+        }
+
+        public String getLastName() {
+            return lastName;
+        }
+
+        public void setLastName(String lastName) {
+            this.lastName = lastName;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
+        }
+    }
 }

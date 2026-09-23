@@ -72,6 +72,7 @@ public class AdminCompanyService {
         return new CompanyResponse(
                 company.getId(),
                 company.getName(),
+                company.getWorkspaceSlug(),
                 company.getRegistrationNumber(),
                 company.getTin(),
                 company.getEmail(),
@@ -87,3 +88,4 @@ public class AdminCompanyService {
         );
     }
 }
+
