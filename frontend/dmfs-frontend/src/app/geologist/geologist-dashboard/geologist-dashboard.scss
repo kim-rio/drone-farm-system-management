@@ -1,342 +1,272 @@
 :host {
   display: block;
   min-height: 100%;
-  max-width: 1600px;
-  margin: 0 auto;
-  padding: 28px 32px 40px;
-
-  background: #ffffff;
-  color: #000000;
+  background: #f7f7f5;
+  color: #111827;
 }
 
+* {
+  box-sizing: border-box;
+}
 
-/* =========================================================
-   HEAD
-   ========================================================= */
+.geologist-page {
+  width: min(1400px, 100%);
+  margin: 0 auto;
+  padding: 32px;
+}
 
-.eyebrow {
+.page-header {
+  margin-bottom: 26px;
+}
+
+.eyebrow,
+.card-eyebrow {
+  display: inline-block;
+  margin-bottom: 8px;
+  color: #6b7280;
   font-size: 11px;
-  letter-spacing: .06em;
-  color: #15803d;
-  font-weight: 700;
+  font-weight: 800;
+  letter-spacing: .12em;
   text-transform: uppercase;
 }
 
-h1 {
-  font-size: clamp(25px, 2.2vw, 32px);
-  line-height: 1.1;
-  letter-spacing: -1px;
-  margin: 4px 0 6px;
-  color: #000000;
+.page-header h1 {
+  margin: 0;
+  font-size: clamp(28px, 3vw, 40px);
+  line-height: 1.05;
+  letter-spacing: -.035em;
 }
 
-.subtitle {
-  font-size: 13.5px;
+.page-header p {
+  margin: 9px 0 0;
   color: #6b7280;
-  margin-bottom: 20px;
+  font-size: 14px;
 }
 
-
-/* =========================================================
-   STATISTICS
-   ========================================================= */
-
-.stats {
+.stats-grid {
   display: grid;
-  grid-template-columns:
-    repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 18px;
+}
 
-  gap: 14px;
-  margin-bottom: 22px;
+.stat-card,
+.dashboard-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 4px 18px rgba(15, 23, 42, .04);
 }
 
 .stat-card {
-  background: #ffffff;
-
-  border: 1px solid #d1d5db;
-  border-radius: 10px;
-
-  padding: 16px;
-
-  display: flex;
-  align-items: flex-start;
-
-  gap: 12px;
-
-  position: relative;
-  overflow: hidden;
-
-  transition:
-    border-color .18s ease,
-    transform .18s ease;
-}
-
-.stat-card:hover {
-  border-color: #16a34a;
-  transform: translateY(-1px);
-}
-
-.stat-card::after {
-  content: "";
-
-  position: absolute;
-
-  left: 0;
-  right: 0;
-  bottom: 0;
-
-  height: 3px;
-
-  background: #16a34a;
-}
-
-
-.stat-icon {
-  width: 38px;
-  height: 38px;
-
-  border-radius: 10px;
-
   display: flex;
   align-items: center;
-  justify-content: center;
-
-  flex-shrink: 0;
-
-  background: #dcfce7;
-  color: #15803d;
-
-  border: 1px solid #16a34a;
-}
-
-.stat-number {
-  font-size: 21px;
-  font-weight: 700;
-  line-height: 1;
-  color: #000000;
-}
-
-.stat-label {
-  font-size: 13px;
-  font-weight: 600;
-  margin-top: 6px;
-  color: #000000;
-}
-
-.stat-sub {
-  font-size: 11.5px;
-  color: #6b7280;
-  margin-top: 2px;
-}
-
-
-/* =========================================================
-   PANEL
-   ========================================================= */
-
-.panel {
-  background: #ffffff;
-
-  border: 1px solid #d1d5db;
-  border-radius: 10px;
-
+  gap: 14px;
   padding: 20px;
+  min-height: 104px;
 }
 
-.panel-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-
-  gap: 12px;
-  margin-bottom: 16px;
+.stat-icon {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  background: #f3f4f6;
+  color: #374151;
 }
 
-.panel-title {
-  font-size: 15px;
-  font-weight: 700;
-  color: #000000;
+.stat-icon svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
-.panel-sub {
-  font-size: 12.5px;
+.stat-title {
+  display: block;
   color: #6b7280;
-  margin-top: 3px;
+  font-size: 12px;
+  font-weight: 700;
 }
 
-.view-all {
-  font-size: 12.5px;
-  color: #15803d;
+.stat-value {
+  display: block;
+  margin-top: 7px;
+  font-size: 30px;
+  line-height: 1;
+  letter-spacing: -.035em;
+}
 
-  font-weight: 600;
+.stat-description {
+  display: block;
+  margin-top: 7px;
+  color: #6b7280;
+  font-size: 12px;
+}
 
+.dashboard-card {
+  overflow: hidden;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 22px;
+  border-bottom: 1px solid #eef0f3;
+}
+
+.card-header h2 {
+  margin: 0;
+  font-size: 17px;
+  letter-spacing: -.02em;
+}
+
+.text-button {
+  border: 0;
+  background: transparent;
+  color: #374151;
+  font-size: 12px;
+  font-weight: 750;
   text-decoration: none;
-  white-space: nowrap;
+  cursor: pointer;
 }
 
-.view-all:hover {
-  color: #16a34a;
+.text-button:hover {
+  color: #111827;
 }
-
-
-/* =========================================================
-   SURVEY GRID
-   ========================================================= */
 
 .survey-grid {
   display: grid;
-
-  grid-template-columns:
-    repeat(auto-fit, minmax(240px, 1fr));
-
-  gap: 14px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  padding: 18px 22px 22px;
 }
 
 .survey-card {
-  background: #ffffff;
-
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-
-  padding: 14px 14px 12px;
-
-  border-top: 3px solid #16a34a;
-
-  transition:
-    border-color .18s ease,
-    transform .18s ease;
+  display: flex;
+  flex-direction: column;
+  min-height: 220px;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 11px;
+  background: #fff;
+  transition: background .15s ease, border-color .15s ease, transform .15s ease;
 }
 
 .survey-card:hover {
-  border-color: #16a34a;
+  background: #fafafa;
+  border-color: #d1d5db;
   transform: translateY(-1px);
 }
-
-
-/* =========================================================
-   SURVEY CONTENT
-   ========================================================= */
 
 .survey-top {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-
-  font-size: 12px;
-  margin-bottom: 6px;
+  align-items: flex-start;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #eef0f3;
 }
 
-.survey-id {
+.survey-top strong {
+  font-size: 12px;
+}
+
+.survey-top span {
+  color: #6b7280;
+  font-size: 10px;
+  text-align: right;
+}
+
+.survey-card h3 {
+  margin: 15px 0 13px;
+  font-size: 14px;
+  line-height: 1.35;
+  letter-spacing: -.01em;
+}
+
+.survey-details {
+  display: grid;
+  gap: 10px;
+}
+
+.survey-details div {
   display: flex;
   align-items: center;
-
-  gap: 6px;
-
-  font-weight: 700;
-  color: #000000;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 9px;
+  border-bottom: 1px solid #eef0f3;
 }
 
-.pulse {
-  width: 7px;
-  height: 7px;
-
-  border-radius: 50%;
-
-  background: #16a34a;
+.survey-details div:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
 }
 
-.survey-time {
+.survey-details span {
   color: #6b7280;
+  font-size: 11px;
 }
 
-.survey-title {
-  font-size: 13.5px;
-  font-weight: 600;
-
-  margin-bottom: 8px;
-
-  color: #000000;
+.survey-details strong {
+  max-width: 65%;
+  font-size: 11px;
+  text-align: right;
+  overflow-wrap: anywhere;
 }
-
-.survey-meta {
-  font-size: 12px;
-  color: #6b7280;
-
-  margin-bottom: 3px;
-}
-
-
-/* =========================================================
-   BUTTON
-   ========================================================= */
 
 .survey-footer {
-  margin-top: 12px;
+  margin-top: auto;
+  padding-top: 14px;
 }
 
-.view-map-btn {
-  font-size: 12px;
-  font-weight: 600;
-
-  color: #ffffff;
-  background: #16a34a;
-
-  border: 1px solid #16a34a;
-  border-radius: 6px;
-
-  padding: 7px 12px;
-
-  cursor: pointer;
-
-  transition:
-    background .18s ease,
-    border-color .18s ease;
+.review-button {
+  padding: 0;
 }
 
-.view-map-btn:hover {
-  background: #15803d;
-  border-color: #15803d;
-}
-
-
-/* =========================================================
-   EMPTY
-   ========================================================= */
-
-.empty {
-  padding: 28px;
-
-  text-align: center;
-
+.empty-state {
+  grid-column: 1 / -1;
+  padding: 28px 22px;
   color: #6b7280;
-
-  border: 1px dashed #d1d5db;
-  border-radius: 8px;
-
-  background: #ffffff;
+  font-size: 13px;
+  text-align: center;
 }
 
-
-/* =========================================================
-   RESPONSIVE
-   ========================================================= */
-
-@media (max-width: 800px) {
-
-  :host {
-    padding: 23px 20px 34px;
+@media (max-width: 1000px) {
+  .survey-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-
 }
 
-@media (max-width: 600px) {
+@media (max-width: 900px) {
+  .geologist-page {
+    padding: 24px;
+  }
+}
 
-  :host {
-    padding: 19px 14px 30px;
+@media (max-width: 640px) {
+  .geologist-page {
+    padding: 16px;
   }
 
-  .panel-head {
-    flex-direction: column;
+  .stats-grid,
+  .survey-grid {
+    grid-template-columns: 1fr;
   }
 
+  .card-header {
+    align-items: flex-start;
+  }
+
+  .survey-details div {
+    align-items: flex-start;
+  }
 }

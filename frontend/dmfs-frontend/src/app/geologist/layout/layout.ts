@@ -1,31 +1,33 @@
-import { Component, HostListener, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { Component, inject } from '@angular/core';
+import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
+import { filter, startWith } from 'rxjs';
 import {
   CompanyBrandingResponse,
   CompanyBrandingService
 } from '../../services/company-branding.service';
+import {
+  AuthService,
+  LoginResponse
+} from '../../services/auth.service';
 
-interface NavItem {
+interface GeologistMenuItem {
   label: string;
-  path: string;
-  icon: string;
-  badge?: boolean;
+  route: string;
 }
-
-const MOBILE_BREAKPOINT = 900;
 
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet],
   templateUrl: './layout.html',
   styleUrl: './layout.scss'
 })
 export class Layout {
+  private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
+  private readonly brandingService = inject(CompanyBrandingService);
 
-  private readonly brandingService =
-    inject(CompanyBrandingService);
+  sidebarOpen = true;
 
   branding: CompanyBrandingResponse = {
     companyId: 0,
@@ -33,49 +35,65 @@ export class Layout {
     logoUrl: null
   };
 
-  private readonly brandingLoad =
-    this.brandingService.getBranding().subscribe({
-      next: branding => {
-        this.branding = branding;
-      },
-      error: error => {
-        console.warn('COMPANY BRANDING LOAD ERROR:', error);
-      }
-    });
-  navItems: NavItem[] = [
-    { label: 'Dashboard', path: 'dashboard', icon: 'grid' },
-    { label: 'Survey History', path: 'survey-history', icon: 'clock' },
-    { label: 'Anomaly Map Review', path: 'anomaly-map-review', icon: 'map', badge: true },
-    { label: 'AI Reports', path: 'ai-reports', icon: 'file' }
+  readonly user: LoginResponse | null = this.authService.getCurrentUser();
+  readonly initials = this.buildInitials();
+
+  readonly menuItems: GeologistMenuItem[] = [
+    { label: 'Dashboard', route: '/geologist/dashboard' },
+    { label: 'Survey History', route: '/geologist/survey-history' },
+    { label: 'Anomaly Map Review', route: '/geologist/anomaly-map-review' },
+    { label: 'AI Reports', route: '/geologist/ai-reports' }
   ];
 
-  isMobile = window.innerWidth < MOBILE_BREAKPOINT;
+  activeRoute = this.router.url;
 
-  // Desktop: sidebar is open by default, user can collapse it to an icon rail.
-  desktopCollapsed = false;
+  constructor() {
+    this.brandingService.getBranding().subscribe({
+      next: branding => this.branding = branding,
+      error: error => console.warn('COMPANY BRANDING LOAD ERROR:', error)
+    });
 
-  // Mobile: sidebar is closed by default, opens as an overlay drawer.
-  mobileOpen = false;
-
-  @HostListener('window:resize')
-  onResize(): void {
-    this.isMobile = window.innerWidth < MOBILE_BREAKPOINT;
-    if (!this.isMobile) {
-      this.mobileOpen = false;
-    }
+    this.router.events
+      .pipe(
+        filter(event => event instanceof NavigationEnd),
+        startWith(null)
+      )
+      .subscribe(() => {
+        this.activeRoute = this.router.url;
+      });
   }
 
   toggleSidebar(): void {
-    if (this.isMobile) {
-      this.mobileOpen = !this.mobileOpen;
-    } else {
-      this.desktopCollapsed = !this.desktopCollapsed;
-    }
+    this.sidebarOpen = !this.sidebarOpen;
   }
 
-  closeMobileNav(): void {
-    if (this.isMobile) {
-      this.mobileOpen = false;
+  navigate(route: string): void {
+    if (this.activeRoute === route) {
+      return;
     }
+    this.router.navigateByUrl(route);
+  }
+
+  isActive(route: string): boolean {
+    return this.activeRoute === route ||
+      (route !== '/geologist/dashboard' && this.activeRoute.startsWith(route));
+  }
+
+  private buildInitials(): string {
+    if (!this.user) {
+      return 'GL';
+    }
+
+    const first = this.user.firstName?.charAt(0) ?? '';
+    const last = this.user.lastName?.charAt(0) ?? '';
+
+    return `${first}${last}`.toUpperCase() || 'GL';
+  }
+
+  logout(): void {
+    this.authService.logout().subscribe({
+      next: () => this.router.navigate(['/login']),
+      error: () => this.router.navigate(['/login'])
+    });
   }
 }
