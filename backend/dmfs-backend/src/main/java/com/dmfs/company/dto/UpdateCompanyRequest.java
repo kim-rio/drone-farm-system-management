@@ -2,6 +2,7 @@ package com.dmfs.company.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public class UpdateCompanyRequest {
@@ -9,6 +10,14 @@ public class UpdateCompanyRequest {
     @NotBlank(message = "Company name is required")
     @Size(max = 150, message = "Company name must not exceed 150 characters")
     private String name;
+
+    @NotBlank(message = "Workspace slug is required")
+    @Size(max = 100, message = "Workspace slug must not exceed 100 characters")
+    @Pattern(
+            regexp = "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+            message = "Workspace slug may contain only lowercase letters, numbers, and single hyphens"
+    )
+    private String workspaceSlug;
 
     @NotBlank(message = "Registration number is required")
     @Size(max = 100, message = "Registration number must not exceed 100 characters")
@@ -48,6 +57,14 @@ public class UpdateCompanyRequest {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getWorkspaceSlug() {
+        return workspaceSlug;
+    }
+
+    public void setWorkspaceSlug(String workspaceSlug) {
+        this.workspaceSlug = workspaceSlug;
     }
 
     public String getRegistrationNumber() {

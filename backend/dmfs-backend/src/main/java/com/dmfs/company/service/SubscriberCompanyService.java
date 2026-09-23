@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.text.Normalizer;
 import java.util.List;
 import java.util.Locale;
 
@@ -41,6 +40,15 @@ public class SubscriberCompanyService {
 
     @Transactional
     public CompanyResponse create(CreateCompanyRequest request) {
+
+        String workspaceSlug =
+                normalizeWorkspaceSlug(request.getWorkspaceSlug());
+
+        if (companyRepository.existsByWorkspaceSlug(workspaceSlug)) {
+            throw new RuntimeException(
+                    "Company workspace slug already exists"
+            );
+        }
 
         if (companyRepository.existsByRegistrationNumber(
                 request.getRegistrationNumber()
@@ -68,17 +76,10 @@ public class SubscriberCompanyService {
                 new SubscriberCompany();
 
         company.setName(request.getName());
-
-        company.setWorkspaceSlug(
-                generateWorkspaceSlug(
-                        request.getName()
-                )
-        );
-
+        company.setWorkspaceSlug(workspaceSlug);
         company.setRegistrationNumber(
                 request.getRegistrationNumber()
         );
-
         company.setTin(request.getTin());
         company.setEmail(request.getEmail());
         company.setPhone(request.getPhone());
@@ -158,6 +159,22 @@ public class SubscriberCompanyService {
                                 )
                         );
 
+        String workspaceSlug =
+                normalizeWorkspaceSlug(
+                        request.getWorkspaceSlug()
+                );
+
+        if (!company.getWorkspaceSlug()
+                .equals(workspaceSlug)
+                && companyRepository.existsByWorkspaceSlug(
+                        workspaceSlug
+                )) {
+
+            throw new RuntimeException(
+                    "Company workspace slug already exists"
+            );
+        }
+
         if (!company.getRegistrationNumber()
                 .equals(request.getRegistrationNumber())
                 && companyRepository.existsByRegistrationNumber(
@@ -170,6 +187,7 @@ public class SubscriberCompanyService {
         }
 
         company.setName(request.getName());
+        company.setWorkspaceSlug(workspaceSlug);
         company.setRegistrationNumber(
                 request.getRegistrationNumber()
         );
@@ -310,71 +328,41 @@ public class SubscriberCompanyService {
         return toResponse(company);
     }
 
-    private String generateWorkspaceSlug(
-            String companyName
+    private String normalizeWorkspaceSlug(
+            String workspaceSlug
     ) {
 
-        String base =
-                Normalizer.normalize(
-                        companyName == null
-                                ? ""
-                                : companyName,
-                        Normalizer.Form.NFD
-                )
-                .replaceAll(
-                        "\\p{M}",
-                        ""
-                )
-                .toLowerCase(Locale.ROOT)
-                .replaceAll(
-                        "[^a-z0-9]+",
-                        "-"
-                )
-                .replaceAll(
-                        "^-+|-+$",
-                        ""
-                );
-
-        if (base.isBlank()) {
-            base = "company";
+        if (workspaceSlug == null) {
+            throw new RuntimeException(
+                    "Company workspace slug is required"
+            );
         }
 
-        if (base.length() > 80) {
-            base = base.substring(0, 80)
-                    .replaceAll("-+$", "");
+        String normalized =
+                workspaceSlug.trim()
+                        .toLowerCase(Locale.ROOT);
+
+        if (normalized.isBlank()) {
+            throw new RuntimeException(
+                    "Company workspace slug is required"
+            );
         }
 
-        String slug = base;
-        int suffix = 2;
-
-        while (companyRepository
-                .existsByWorkspaceSlug(slug)) {
-
-            String suffixText =
-                    "-" + suffix;
-
-            int maxBaseLength =
-                    100 - suffixText.length();
-
-            String shortenedBase =
-                    base.length() > maxBaseLength
-                            ? base.substring(
-                                    0,
-                                    maxBaseLength
-                            ).replaceAll(
-                                    "-+$",
-                                    ""
-                            )
-                            : base;
-
-            slug =
-                    shortenedBase
-                    + suffixText;
-
-            suffix++;
+        if (!normalized.matches(
+                "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        )) {
+            throw new RuntimeException(
+                    "Workspace slug may contain only lowercase letters, numbers, and single hyphens"
+            );
         }
 
-        return slug;
+        if (normalized.length() > 100) {
+            throw new RuntimeException(
+                    "Workspace slug must not exceed 100 characters"
+            );
+        }
+
+        return normalized;
     }
 
     private CompanyResponse toResponse(
@@ -391,6 +379,7 @@ public class SubscriberCompanyService {
         return new CompanyResponse(
                 company.getId(),
                 company.getName(),
+                company.getWorkspaceSlug(),
                 company.getRegistrationNumber(),
                 company.getTin(),
                 company.getEmail(),

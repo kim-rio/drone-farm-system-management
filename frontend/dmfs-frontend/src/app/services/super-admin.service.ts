@@ -22,6 +22,7 @@ export interface InitialAdminRequest {
 export interface CompanyResponse {
   id: number;
   name: string;
+  workspaceSlug: string;
   registrationNumber: string;
   tin: string | null;
   email: string;
@@ -40,6 +41,7 @@ export type CompanyStatus = 'ACTIVE' | 'SUSPENDED' | 'EXPIRED';
 
 export interface CreateCompanyRequest {
   name: string;
+  workspaceSlug: string;
   registrationNumber: string;
   tin?: string;
   email: string;
@@ -53,6 +55,7 @@ export interface CreateCompanyRequest {
 
 export interface UpdateCompanyRequest {
   name: string;
+  workspaceSlug: string;
   registrationNumber: string;
   tin?: string;
   email: string;
@@ -145,3 +148,4 @@ export class SuperAdminService {
     );
   }
 }
+

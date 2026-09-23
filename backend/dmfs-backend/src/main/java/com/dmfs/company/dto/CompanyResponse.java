@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 public record CompanyResponse(
         Long id,
         String name,
+        String workspaceSlug,
         String registrationNumber,
         String tin,
         String email,
