@@ -83,9 +83,7 @@ export class Admin implements OnInit {
 
   private loadStaff(): void {
     this.staffService.getStaff().subscribe({
-
       next: (staff: StaffMember[]) => {
-
         this.dashboardStats.set([
           {
             title: 'Total Staff',
@@ -102,8 +100,7 @@ export class Admin implements OnInit {
         ]);
       },
 
-      error: (error) => {
-
+      error: error => {
         console.error(
           'Unable to load staff:',
           error
@@ -117,15 +114,12 @@ export class Admin implements OnInit {
   }
 
   private loadCompany(): void {
-
     this.companyService.getCompany().subscribe({
-
       next: (company: Company) => {
         this.company.set(company);
       },
 
-      error: (error) => {
-
+      error: error => {
         console.error(
           'Unable to load company:',
           error
@@ -141,14 +135,12 @@ export class Admin implements OnInit {
   }
 
   getProgressOffset(progress: number): number {
-
     const circumference = 301.59;
 
-    const safeProgress =
-      Math.min(
-        Math.max(progress, 0),
-        100
-      );
+    const safeProgress = Math.min(
+      Math.max(progress, 0),
+      100
+    );
 
     return circumference -
       (
@@ -159,20 +151,21 @@ export class Admin implements OnInit {
   }
 
   manageStaff(): void {
-    this.router.navigate([
-      '/admin/staff'
-    ]);
+    this.router.navigate(['/admin/staff']);
   }
+
   openServices(): void {
     this.router.navigate(['/admin/services']);
   }
 
-
-openReports(): void {
-    this.router.navigate([
-      '/'
-    ]);
+  openReports(): void {
+    /*
+     * Reports are not implemented in the Admin workspace yet.
+     * Keep this method until the Reports route is introduced,
+     * rather than navigating to the platform root.
+     */
+    console.info(
+      'Admin reports are not implemented yet.'
+    );
   }
 }
-
-

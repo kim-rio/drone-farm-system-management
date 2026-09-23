@@ -1,69 +1,173 @@
-<div class="admin-page">
+ï»¿<div class="admin-page">
 
   <header class="page-header">
-    <div>
+
+    <div class="page-heading">
       <span class="eyebrow">COMPANY ADMINISTRATION</span>
-      <h1>Admin Dashboard</h1>
-      <p>Manage your company's staff, services and reports.</p>
+
+      <h1>
+        Admin Dashboard
+      </h1>
+
+      <p>
+        Manage your company's staff, services and company operations.
+      </p>
     </div>
+
   </header>
 
+
   @if (errorMessage()) {
-    <div class="error-banner">
+
+    <div class="message message-error">
       {{ errorMessage() }}
     </div>
+
   }
 
+
+  <!-- QUICK ACTIONS -->
+
   <section class="quick-actions">
-    <button type="button" class="action-card" (click)="manageStaff()">
-      <div class="action-icon">+</div>
-      <div>
-        <strong>Manage Staff</strong>
-        <span>Create, activate and manage company staff.</span>
-      </div>
+
+    <button
+      type="button"
+      class="quick-action"
+      (click)="manageStaff()">
+
+      <strong>
+        Manage Staff
+      </strong>
+
+      <span>
+        Create, activate and manage company staff.
+      </span>
+
     </button>
 
-    <button type="button" class="action-card" (click)="openReports()">
-      <div class="action-icon">?</div>
-      <div>
-        <strong>View Reports</strong>
-        <span>Review company operational reports.</span>
-      </div>
+
+    <button
+      type="button"
+      class="quick-action"
+      (click)="openServices()">
+
+      <strong>
+        Service Catalogue
+      </strong>
+
+      <span>
+        Manage the services available to customers.
+      </span>
+
     </button>
+
   </section>
 
-  <section class="stats-grid">
+
+  <!-- METRICS -->
+
+  <section class="metric-grid">
+
     @for (stat of dashboardStats(); track stat.title) {
-      <article class="stat-card">
-        <div class="stat-content">
-          <span class="stat-title">{{ stat.title }}</span>
-          <strong class="stat-value">{{ stat.value }}</strong>
-          <span class="stat-description">{{ stat.description }}</span>
+
+      <article class="metric-card">
+
+        <div class="metric-top">
+          <span>{{ stat.title }}</span>
         </div>
+
+        <strong>
+          {{ stat.value }}
+        </strong>
+
+        <small>
+          {{ stat.description }}
+        </small>
+
       </article>
+
     }
+
+
+    <article class="metric-card">
+
+      <div class="metric-top">
+        <span>Inactive Staff</span>
+      </div>
+
+      <strong>
+        {{ inactiveStaff() }}
+      </strong>
+
+      <small>
+        Staff members currently inactive
+      </small>
+
+    </article>
+
+
+    <article class="metric-card">
+
+      <div class="metric-top">
+        <span>Staff Activity</span>
+      </div>
+
+      <strong>
+        {{ activeStaffProgress() }}%
+      </strong>
+
+      <small>
+        Current active staff ratio
+      </small>
+
+    </article>
+
   </section>
 
-  <section class="dashboard-grid">
 
-    <article class="dashboard-card staff-card">
-      <div class="card-header">
+  <!-- OVERVIEW -->
+
+  <section class="content-grid">
+
+
+    <!-- STAFF -->
+
+    <article class="panel">
+
+      <div class="panel-header">
+
         <div>
-          <span class="card-eyebrow">STAFF</span>
-          <h2>Staff Overview</h2>
+
+          <span class="panel-eyebrow">
+            STAFF
+          </span>
+
+          <h2>
+            Staff Overview
+          </h2>
+
         </div>
 
         <button
           type="button"
           class="text-button"
           (click)="manageStaff()">
+
           Manage Staff
+
         </button>
+
       </div>
 
-      <div class="progress-area">
+
+      <div class="staff-overview">
+
         <div class="progress-ring">
-          <svg viewBox="0 0 120 120">
+
+          <svg
+            viewBox="0 0 120 120"
+            aria-hidden="true">
+
             <circle
               class="progress-track"
               cx="60"
@@ -76,17 +180,31 @@
               cx="60"
               cy="60"
               r="48"
-              [attr.stroke-dashoffset]="getProgressOffset(activeStaffProgress())">
+              [attr.stroke-dashoffset]="
+                getProgressOffset(activeStaffProgress())
+              ">
             </circle>
+
           </svg>
 
+
           <div class="progress-label">
-            <strong>{{ activeStaffProgress() }}%</strong>
-            <span>Active</span>
+
+            <strong>
+              {{ activeStaffProgress() }}%
+            </strong>
+
+            <span>
+              Active
+            </span>
+
           </div>
+
         </div>
 
+
         <div class="staff-summary">
+
           <div>
             <span>Total Staff</span>
             <strong>{{ dashboardStats()[0].value }}</strong>
@@ -101,68 +219,106 @@
             <span>Inactive Staff</span>
             <strong>{{ inactiveStaff() }}</strong>
           </div>
+
         </div>
+
       </div>
+
     </article>
 
-    <article class="dashboard-card company-card">
-      <div class="card-header">
+
+    <!-- COMPANY -->
+
+    <article class="panel">
+
+      <div class="panel-header">
+
         <div>
-          <span class="card-eyebrow">COMPANY</span>
-          <h2>Company Overview</h2>
+
+          <span class="panel-eyebrow">
+            COMPANY
+          </span>
+
+          <h2>
+            Company Overview
+          </h2>
+
         </div>
+
       </div>
 
+
       @if (company()) {
+
         <div class="company-details">
 
           <div class="detail-row">
             <span>Company Name</span>
-            <strong>{{ company()?.name || '—' }}</strong>
+            <strong>{{ company()?.name || 'â€”' }}</strong>
           </div>
 
           <div class="detail-row">
             <span>Registration Number</span>
-            <strong>{{ company()?.registrationNumber || '—' }}</strong>
+            <strong>
+              {{ company()?.registrationNumber || 'â€”' }}
+            </strong>
           </div>
 
           <div class="detail-row">
             <span>TIN</span>
-            <strong>{{ company()?.tin || '—' }}</strong>
+            <strong>{{ company()?.tin || 'â€”' }}</strong>
           </div>
 
           <div class="detail-row">
             <span>Status</span>
-            <strong>{{ company()?.status || '—' }}</strong>
+            <strong>{{ company()?.status || 'â€”' }}</strong>
           </div>
 
           <div class="detail-row">
             <span>Email</span>
-            <strong>{{ company()?.email || '—' }}</strong>
+            <strong>{{ company()?.email || 'â€”' }}</strong>
           </div>
 
           <div class="detail-row">
             <span>Phone</span>
-            <strong>{{ company()?.phone || '—' }}</strong>
+            <strong>{{ company()?.phone || 'â€”' }}</strong>
           </div>
 
         </div>
+
       } @else {
+
         <div class="empty-state">
           Company information unavailable.
         </div>
+
       }
+
     </article>
 
   </section>
 
-  <section class="dashboard-card administration-card">
-    <div class="card-header">
+
+  <!-- ADMINISTRATION -->
+
+  <section class="panel administration-panel">
+
+    <div class="panel-header">
+
       <div>
-        <span class="card-eyebrow">ADMINISTRATION</span>
-        <h2>Company Administration</h2>
+
+        <span class="panel-eyebrow">
+          ADMINISTRATION
+        </span>
+
+        <h2>
+          Company Administration
+        </h2>
+
       </div>
+
     </div>
+
 
     <div class="administration-grid">
 
@@ -170,28 +326,51 @@
         type="button"
         class="admin-link"
         (click)="manageStaff()">
-        <strong>Staff</strong>
-        <span>Manage company staff and their roles.</span>
+
+        <strong>
+          Staff
+        </strong>
+
+        <small>
+          Manage company staff and their roles.
+        </small>
+
       </button>
+
 
       <button
         type="button"
         class="admin-link"
         (click)="openServices()">
-        <strong>Services</strong>
-        <span>Manage the company's service catalogue.</span>
+
+        <strong>
+          Services
+        </strong>
+
+        <small>
+          Manage the company's service catalogue.
+        </small>
+
       </button>
+
 
       <button
         type="button"
         class="admin-link"
         (click)="openReports()">
-        <strong>Reports</strong>
-        <span>Review available company reports.</span>
+
+        <strong>
+          Reports
+        </strong>
+
+        <small>
+          Review available company reports.
+        </small>
+
       </button>
 
     </div>
+
   </section>
 
 </div>
-

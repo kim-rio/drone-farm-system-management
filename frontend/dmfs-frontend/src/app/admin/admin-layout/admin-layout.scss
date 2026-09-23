@@ -1,6 +1,16 @@
-:host {
+﻿:host {
   display: block;
   min-height: 100vh;
+
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
   background: #f7f7f5;
   color: #111;
 }
@@ -11,12 +21,14 @@
 
 .dashboard {
   min-height: 100vh;
+  display: flex;
+
   background: #f7f7f5;
+  color: #111;
 }
 
-/* =========================
-   SIDEBAR
-   ========================= */
+
+/* SIDEBAR */
 
 .sidebar {
   position: fixed;
@@ -46,7 +58,8 @@
   padding: 0 8px 24px;
 }
 
-.brand-mark {
+.brand-mark,
+.brand-logo {
   width: 34px;
   height: 34px;
   flex: 0 0 34px;
@@ -55,12 +68,30 @@
   align-items: center;
   justify-content: center;
 
-  border-radius: 8px;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.brand-mark {
   background: #111;
   color: #fff;
 
   font-size: 10px;
   font-weight: 800;
+}
+
+.brand-logo {
+  background: #f1f1ef;
+  object-fit: contain;
+}
+
+.brand-logo {
+  width: 34px;
+  height: 34px;
+}
+
+.brand-logo[src] {
+  object-fit: contain;
 }
 
 .brand-text {
@@ -70,13 +101,19 @@
 .brand-text strong {
   display: block;
 
+  overflow: hidden;
+
   font-size: 14px;
   line-height: 1.2;
-  letter-spacing: -0.2px;
+  letter-spacing: -.2px;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .brand-text span {
   display: block;
+
   margin-top: 4px;
 
   color: #999;
@@ -85,6 +122,9 @@
   line-height: 1.2;
   letter-spacing: 1px;
 }
+
+
+/* NAVIGATION */
 
 .navigation {
   display: flex;
@@ -105,12 +145,14 @@
   padding: 0 11px;
 
   border: 0;
-  border-radius: 7px;
+  border-radius: 12px;
 
   background: transparent;
   color: #666;
 
   text-align: left;
+
+  font: inherit;
   font-size: 11px;
   font-weight: 500;
 
@@ -136,7 +178,7 @@
   height: 16px;
   flex: 0 0 3px;
 
-  border-radius: 3px;
+  border-radius: 12px;
   background: transparent;
 }
 
@@ -144,12 +186,12 @@
   background: #fff;
 }
 
-/* =========================
-   SIDEBAR ACCOUNT
-   ========================= */
+
+/* SIDEBAR ACCOUNT */
 
 .sidebar-bottom {
   margin-top: auto;
+
   padding-top: 16px;
 
   border-top: 1px solid #eeeeec;
@@ -163,11 +205,6 @@
   gap: 9px;
 
   padding: 4px 7px;
-
-  border: 0;
-  background: transparent;
-
-  text-align: left;
 }
 
 .account-avatar {
@@ -179,7 +216,8 @@
   align-items: center;
   justify-content: center;
 
-  border-radius: 50%;
+  border-radius: 12px;
+
   background: #eeeeec;
   color: #111;
 
@@ -198,12 +236,14 @@
 
   font-size: 10px;
   line-height: 1.3;
+
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .account-details span {
   display: block;
+
   margin-top: 3px;
 
   color: #999;
@@ -211,6 +251,9 @@
   font-size: 8px;
   line-height: 1.2;
 }
+
+
+/* LOGOUT */
 
 .logout {
   width: 100%;
@@ -224,10 +267,12 @@
   padding: 8px;
 
   border: 0;
-  border-radius: 7px;
+  border-radius: 12px;
 
   background: transparent;
-  color: #555;
+  color: #666;
+
+  font: inherit;
 
   cursor: pointer;
 
@@ -251,12 +296,9 @@
   justify-content: center;
 
   border: 1px solid #d5d5d3;
-  border-radius: 50%;
+  border-radius: 12px;
 
   background: #fff;
-  color: #111;
-
-  font-size: 13px;
 }
 
 .logout-text {
@@ -264,13 +306,13 @@
   font-weight: 600;
 }
 
-/* =========================
-   MAIN CONTENT
-   ========================= */
+
+/* MAIN */
 
 .main-content {
   width: calc(100% - 240px);
   min-height: 100vh;
+
   margin-left: 240px;
 
   display: flex;
@@ -286,57 +328,32 @@
   margin-left: 0;
 }
 
-/* =========================
-   TOPBAR
-   ========================= */
+
+/* TOPBAR */
 
 .topbar {
-  width: 100%;
+  width: calc(100% - 64px);
   min-height: 68px;
 
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
 
+  margin: 32px 32px 0;
   padding: 12px 28px;
 
   background: #fff;
-  border-bottom: 1px solid #e5e5e3;
 
+  border: 1px solid #e5e5e3;
+  border-radius: 12px;
+
+  box-sizing: border-box;
   flex-shrink: 0;
-}
-
-.topbar-left {
-  display: flex;
-  align-items: center;
-}
-
-.open-menu-button {
-  width: 36px;
-  height: 36px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  border: 1px solid #d9d9d7;
-  border-radius: 8px;
-
-  background: #fff;
-  color: #111;
-
-  cursor: pointer;
-  font-size: 16px;
-}
-
-.open-menu-button:hover {
-  background: #f1f1ef;
 }
 
 .topbar-right {
   display: flex;
   align-items: center;
-  margin-left: auto;
 }
 
 .top-user {
@@ -358,12 +375,17 @@
   align-items: center;
   justify-content: center;
 
-  border-radius: 50%;
+  border-radius: 12px;
+
   background: #111;
   color: #fff;
 
   font-size: 10px;
   font-weight: 700;
+}
+
+.top-user-details {
+  min-width: 0;
 }
 
 .top-user-details strong {
@@ -375,6 +397,7 @@
 
 .top-user-details span {
   display: block;
+
   margin-top: 2px;
 
   color: #999;
@@ -382,28 +405,26 @@
   font-size: 8px;
 }
 
-/* =========================
-   PAGE CONTENT
-   ========================= */
+
+/* PAGE */
 
 .page {
   width: 100%;
   max-width: 1600px;
 
   margin: 0 auto;
-  padding: 28px 32px 40px;
+
+  padding: 32px;
 }
 
-/* Prevent child pages from breaking the shell */
 .page > * {
   min-width: 0;
 }
 
-/* =========================
-   RESPONSIVE
-   ========================= */
 
-@media (max-width: 1100px) {
+/* RESPONSIVE */
+
+@media (max-width: 1200px) {
 
   .sidebar {
     width: 220px;
@@ -414,18 +435,27 @@
     margin-left: 220px;
   }
 
+  .topbar {
+    width: calc(100% - 48px);
+    margin-left: 24px;
+    margin-right: 24px;
+  }
+
   .page {
-    padding: 26px 24px 36px;
+    padding: 24px;
   }
 
 }
+
 
 @media (max-width: 800px) {
 
   .sidebar {
     width: 235px;
 
-    box-shadow: 8px 0 25px rgba(0, 0, 0, .06);
+    box-shadow:
+      8px 0 25px
+      rgba(0, 0, 0, .06);
   }
 
   .main-content,
@@ -434,20 +464,21 @@
     margin-left: 0;
   }
 
-  .dashboard.sidebar-open .main-content {
-    margin-left: 0;
-  }
-
   .topbar {
+    width: calc(100% - 40px);
+
     min-height: 64px;
+
+    margin: 20px 20px 0;
     padding: 11px 20px;
   }
 
   .page {
-    padding: 24px 20px 34px;
+    padding: 23px 20px;
   }
 
 }
+
 
 @media (max-width: 600px) {
 
@@ -456,39 +487,50 @@
   }
 
   .topbar {
+    width: calc(100% - 32px);
+
+    min-height: 64px;
+
+    margin: 16px 16px 0;
     padding: 10px 14px;
   }
 
-  .page {
-    padding: 20px 14px 30px;
+  .top-user {
+    padding-left: 10px;
   }
 
   .top-user-details {
     display: none;
   }
 
+  .top-avatar {
+    width: 34px;
+    height: 34px;
+    flex-basis: 34px;
+  }
+
+  .page {
+    padding: 19px 16px;
+  }
+
 }
 
+
 @media (max-width: 390px) {
+
+  .topbar {
+    width: calc(100% - 22px);
+
+    margin-left: 11px;
+    margin-right: 11px;
+
+    padding-left: 11px;
+    padding-right: 11px;
+  }
 
   .page {
     padding-left: 11px;
     padding-right: 11px;
   }
 
-  .topbar {
-    padding-left: 11px;
-    padding-right: 11px;
-  }
-
-}
-
-/* COMPANY BRAND LOGO */
-.brand-logo {
-  width: 38px;
-  height: 38px;
-  object-fit: contain;
-  border-radius: 9px;
-  display: block;
-  flex: 0 0 38px;
 }

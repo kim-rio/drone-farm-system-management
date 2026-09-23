@@ -1,4 +1,4 @@
-﻿<div
+<div
   class="dashboard"
   [class.sidebar-open]="sidebarOpen"
 >
@@ -7,46 +7,44 @@
 
     <div class="brand">
 
-      @if (branding) {
+      @if (branding?.logoUrl) {
 
-        @if (branding.logoUrl) {
+        <img
+          class="brand-logo"
+          [src]="branding?.logoUrl"
+          [alt]="(branding?.companyName || 'Company') + ' logo'"
+        >
 
-          <img
-            class="brand-logo"
-            [src]="branding.logoUrl"
-            [alt]="branding.companyName + ' logo'"
-          >
+      } @else {
 
-        } @else {
-
-          <div class="brand-mark">
-            {{ branding.companyName.charAt(0).toUpperCase() }}
-          </div>
-
-        }
-
-        <div class="brand-text">
-
-          <strong>
-            {{ branding.companyName }}
-          </strong>
-
-          <span>
-            COMPANY ADMIN
-          </span>
-
+        <div class="brand-mark">
+          {{
+            branding?.companyName
+              ? branding?.companyName?.charAt(0)?.toUpperCase()
+              : 'C'
+          }}
         </div>
 
       }
 
+      <div class="brand-text">
+
+        <strong>
+          {{ branding?.companyName || 'Company' }}
+        </strong>
+
+        <span>
+          COMPANY ADMIN
+        </span>
+
+      </div>
+
     </div>
+
 
     <nav class="navigation">
 
-      @for (
-        item of menuItems;
-        track item.route
-      ) {
+      @for (item of menuItems; track item.route) {
 
         <button
           type="button"
@@ -67,12 +65,10 @@
 
     </nav>
 
+
     <div class="sidebar-bottom">
 
-      <button
-        type="button"
-        class="account"
-      >
+      <div class="account">
 
         <div class="account-avatar">
           {{ initials }}
@@ -90,7 +86,8 @@
 
         </div>
 
-      </button>
+      </div>
+
 
       <button
         type="button"
@@ -98,9 +95,7 @@
         (click)="logout()"
       >
 
-        <span class="logout-circle">
-          ?
-        </span>
+        <span class="logout-circle"></span>
 
         <span class="logout-text">
           Logout
@@ -112,26 +107,10 @@
 
   </aside>
 
+
   <main class="main-content">
 
     <header class="topbar">
-
-      <div class="topbar-left">
-
-        @if (!sidebarOpen) {
-
-          <button
-            type="button"
-            class="open-menu-button"
-            (click)="toggleSidebar()"
-            aria-label="Open navigation"
-          >
-            ?
-          </button>
-
-        }
-
-      </div>
 
       <div class="topbar-right">
 
@@ -158,6 +137,7 @@
       </div>
 
     </header>
+
 
     <section class="page">
 

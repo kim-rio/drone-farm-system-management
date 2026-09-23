@@ -1,4 +1,4 @@
-﻿<div class="page-shell">
+<div class="page-shell">
 
   <header class="page-header">
 
@@ -18,26 +18,34 @@
 
     </div>
 
+
     <div class="header-actions">
 
       <button
         type="button"
         class="secondary-button"
         (click)="goBack()">
+
         ← Admin Dashboard
+
       </button>
+
 
       <button
         type="button"
         class="primary-button"
         (click)="openCreate()">
+
         + Add Service
+
       </button>
 
     </div>
 
   </header>
 
+
+  <!-- SUMMARY -->
 
   <section class="summary-grid">
 
@@ -84,12 +92,14 @@
 
   @if (errorMessage && !showForm) {
 
-    <div class="error-message">
+    <div class="message error">
       {{ errorMessage }}
     </div>
 
   }
 
+
+  <!-- CATALOGUE -->
 
   <section class="panel">
 
@@ -116,7 +126,7 @@
 
     @if (loading) {
 
-      <div class="empty-state">
+      <div class="state">
 
         <div class="loading-spinner"></div>
 
@@ -124,11 +134,15 @@
           Loading services...
         </h3>
 
+        <p>
+          Retrieving the company service catalogue.
+        </p>
+
       </div>
 
     } @else if (services.length === 0) {
 
-      <div class="empty-state">
+      <div class="state empty-state">
 
         <div class="empty-icon">
           +
@@ -139,117 +153,111 @@
         </h3>
 
         <p>
-          Add a service to define what your company can provide
-          to clients.
+          Add a service to define what your company can provide to clients.
         </p>
 
         <button
           type="button"
           class="primary-button"
           (click)="openCreate()">
+
           Add First Service
+
         </button>
 
       </div>
 
     } @else {
 
-      <div class="table">
+      <div class="table-scroll">
 
-        <div class="table-header">
+        <div class="table">
 
-          <span>Service</span>
-          <span>Category</span>
-          <span>Unit</span>
-          <span>Price</span>
-          <span>Min. Area</span>
-          <span>Duration</span>
-          <span>Status</span>
-          <span>Actions</span>
+          <div class="table-header">
+            <span>Service</span>
+            <span>Category</span>
+            <span>Price</span>
+            <span>Unit</span>
+            <span>Status</span>
+            <span>Actions</span>
+          </div>
 
-        </div>
+          @for (service of services; track service.id) {
 
+            <div class="table-row">
 
-        @for (service of services; track service.id) {
+              <div class="service-name">
+                <strong>{{ service.name }}</strong>
+              </div>
 
-          <div class="table-row">
-
-            <div class="service-name">
+              <span>
+                {{ service.category }}
+              </span>
 
               <strong>
-                {{ service.name }}
+                {{ service.standardPrice | number:'1.2-2' }}
               </strong>
 
               <span>
-                {{ service.description }}
+                {{ service.unitOfMeasurement }}
               </span>
 
-            </div>
+              <span
+                class="status"
+                [class.active]="service.status === 'ACTIVE'"
+                [class.inactive]="service.status === 'INACTIVE'"
+              >
+                <span class="status-dot"></span>
+                {{ service.status === 'ACTIVE' ? 'Active' : 'Inactive' }}
+              </span>
 
-
-            <span>
-              {{ service.category }}
-            </span>
-
-
-            <span>
-              {{ service.unitOfMeasurement }}
-            </span>
-
-
-            <strong>
-              {{ service.standardPrice | number:'1.2-2' }}
-            </strong>
-
-
-            <span>
-              {{ service.minimumArea | number:'1.0-2' }}
-            </span>
-
-
-            <span>
-              {{ service.estimatedDurationMinutes }} min
-            </span>
-
-
-            <span
-              class="status"
-              [class.active]="service.status === 'ACTIVE'"
-              [class.inactive]="service.status === 'INACTIVE'">
-
-              {{ service.status }}
-
-            </span>
-
-
-            <div class="actions">
-
-              <button
-                type="button"
-                class="action-button"
-                [disabled]="saving"
-                (click)="openEdit(service)">
-                Edit
-              </button>
-
-
-              @if (service.status === 'ACTIVE') {
+              <div class="actions">
 
                 <button
                   type="button"
-                  class="action-button danger"
+                  class="action-button icon-button"
+                  title="Edit service"
+                  aria-label="Edit service"
                   [disabled]="saving"
-                  (click)="deactivate(service)">
-                  Deactivate
+                  (click)="openEdit(service)"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 20h9"></path>
+                    <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
+                  </svg>
                 </button>
 
-              }
+                @if (service.status === 'ACTIVE') {
+
+                  <button
+                    type="button"
+                    class="action-button danger icon-button"
+                    title="Deactivate service"
+                    aria-label="Deactivate service"
+                    [disabled]="saving"
+                    (click)="deactivate(service)"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <rect
+                        x="5"
+                        y="5"
+                        width="14"
+                        height="14"
+                        rx="2"
+                      ></rect>
+                      <path d="M9 9l6 6M15 9l-6 6"></path>
+                    </svg>
+                  </button>
+
+                }
+
+              </div>
 
             </div>
 
-          </div>
+          }
 
-        }
+        </div>
 
       </div>
 
@@ -258,30 +266,34 @@
   </section>
 
 
+  <!-- CREATE / EDIT FORM -->
+
   @if (showForm) {
 
     <div class="modal-backdrop">
 
-      <section class="modal">
+      <section
+        class="modal"
+        role="dialog"
+        aria-modal="true">
 
-        <header class="modal-header">
+        <div class="modal-header">
 
           <div>
 
-            <span class="eyebrow">
-              SERVICE CATALOGUE
+            <span class="card-eyebrow">
+              {{ editingId === null ? 'NEW SERVICE' : 'EDIT SERVICE' }}
             </span>
 
             <h2>
-              {{
-                editingId === null
-                  ? 'Add Service'
-                  : 'Edit Service'
+              {{ editingId === null
+                ? 'Add Service'
+                : 'Edit Service'
               }}
             </h2>
 
             <p>
-              Define the service details and operational requirements.
+              Define the service, pricing and operational requirements.
             </p>
 
           </div>
@@ -290,22 +302,15 @@
           <button
             type="button"
             class="close-button"
-            [disabled]="saving"
             aria-label="Close"
+            [disabled]="saving"
             (click)="closeForm()">
+
             ×
+
           </button>
 
-        </header>
-
-
-        @if (errorMessage) {
-
-          <div class="form-error">
-            {{ errorMessage }}
-          </div>
-
-        }
+        </div>
 
 
         <form
@@ -314,20 +319,26 @@
           (ngSubmit)="save()">
 
 
+          <!-- BASIC INFORMATION -->
+
           <section class="form-section">
 
             <div class="section-heading">
 
-              <span>01</span>
+              <span>
+                01
+              </span>
 
               <div>
+
                 <h3>
                   Basic Information
                 </h3>
 
                 <p>
-                  Identify the service and describe what it provides.
+                  Define the service name and description.
                 </p>
+
               </div>
 
             </div>
@@ -338,16 +349,15 @@
               <label>
 
                 <span>
-                  Service Name *
+                  Service Name
                 </span>
 
                 <input
                   type="text"
                   name="name"
                   [(ngModel)]="form.name"
-                  placeholder="e.g. Mineral Exploration"
-                  maxlength="150"
-                  required>
+                  required
+                  placeholder="e.g. Aerial Survey">
 
               </label>
 
@@ -355,16 +365,15 @@
               <label>
 
                 <span>
-                  Category *
+                  Category
                 </span>
 
                 <input
                   type="text"
                   name="category"
                   [(ngModel)]="form.category"
-                  placeholder="e.g. Survey"
-                  maxlength="50"
-                  required>
+                  required
+                  placeholder="e.g. Agriculture">
 
               </label>
 
@@ -374,16 +383,15 @@
             <label>
 
               <span>
-                Description *
+                Description
               </span>
 
               <textarea
                 name="description"
                 [(ngModel)]="form.description"
-                rows="4"
-                maxlength="1000"
-                placeholder="Describe what this service includes..."
-                required>
+                required
+                rows="3"
+                placeholder="Describe what this service provides.">
               </textarea>
 
             </label>
@@ -391,20 +399,26 @@
           </section>
 
 
+          <!-- PRICING -->
+
           <section class="form-section">
 
             <div class="section-heading">
 
-              <span>02</span>
+              <span>
+                02
+              </span>
 
               <div>
+
                 <h3>
                   Pricing & Measurement
                 </h3>
 
                 <p>
-                  Define how the service is measured and charged.
+                  Configure the unit and standard pricing rules.
                 </p>
+
               </div>
 
             </div>
@@ -415,16 +429,15 @@
               <label>
 
                 <span>
-                  Area Unit *
+                  Unit of Measurement
                 </span>
 
                 <input
                   type="text"
                   name="unitOfMeasurement"
                   [(ngModel)]="form.unitOfMeasurement"
-                  placeholder="e.g. ha"
-                  maxlength="30"
-                  required>
+                  required
+                  placeholder="e.g. Hectare">
 
               </label>
 
@@ -432,7 +445,7 @@
               <label>
 
                 <span>
-                  Price per Unit *
+                  Standard Price
                 </span>
 
                 <input
@@ -441,7 +454,8 @@
                   [(ngModel)]="form.standardPrice"
                   min="0"
                   step="0.01"
-                  required>
+                  required
+                  placeholder="0.00">
 
               </label>
 
@@ -449,7 +463,7 @@
               <label>
 
                 <span>
-                  Minimum Area *
+                  Minimum Area
                 </span>
 
                 <input
@@ -458,7 +472,8 @@
                   [(ngModel)]="form.minimumArea"
                   min="0.01"
                   step="0.01"
-                  required>
+                  required
+                  placeholder="1">
 
               </label>
 
@@ -467,20 +482,26 @@
           </section>
 
 
+          <!-- OPERATIONS -->
+
           <section class="form-section">
 
             <div class="section-heading">
 
-              <span>03</span>
+              <span>
+                03
+              </span>
 
               <div>
+
                 <h3>
                   Operational Requirements
                 </h3>
 
                 <p>
-                  Select the personnel required to perform this service.
+                  Select the personnel required to deliver this service.
                 </p>
+
               </div>
 
             </div>
@@ -489,7 +510,7 @@
             <fieldset class="personnel-roles">
 
               <legend>
-                Required Personnel *
+                Required Personnel
               </legend>
 
 
@@ -501,16 +522,13 @@
                     type="button"
                     class="role-card"
                     [class.selected]="isPersonnelSelected(role.value)"
-                    [attr.aria-pressed]="isPersonnelSelected(role.value)"
                     (click)="togglePersonnelRole(role.value)">
 
                     <span class="role-check">
 
-                      {{
-                        isPersonnelSelected(role.value)
-                          ? '✓'
-                          : ''
-                      }}
+                      @if (isPersonnelSelected(role.value)) {
+                        ✓
+                      }
 
                     </span>
 
@@ -546,7 +564,7 @@
                 name="requiredEquipment"
                 [(ngModel)]="form.requiredEquipment"
                 rows="3"
-                placeholder="e.g. Drone, multispectral camera">
+                placeholder="List equipment required for this service.">
               </textarea>
 
             </label>
@@ -554,20 +572,26 @@
           </section>
 
 
+          <!-- EXECUTION -->
+
           <section class="form-section">
 
             <div class="section-heading">
 
-              <span>04</span>
+              <span>
+                04
+              </span>
 
               <div>
+
                 <h3>
                   Execution
                 </h3>
 
                 <p>
-                  Set the expected execution time and service status.
+                  Configure the expected duration and service status.
                 </p>
+
               </div>
 
             </div>
@@ -578,7 +602,7 @@
               <label>
 
                 <span>
-                  Estimated Duration *
+                  Estimated Duration
                 </span>
 
                 <div class="input-with-suffix">
@@ -589,7 +613,8 @@
                     [(ngModel)]="form.estimatedDurationMinutes"
                     min="1"
                     step="1"
-                    required>
+                    required
+                    placeholder="60">
 
                   <span>
                     minutes
@@ -608,7 +633,8 @@
 
                 <select
                   name="status"
-                  [(ngModel)]="form.status">
+                  [(ngModel)]="form.status"
+                  required>
 
                   <option value="ACTIVE">
                     Active
@@ -627,6 +653,15 @@
           </section>
 
 
+          @if (errorMessage) {
+
+            <div class="form-error">
+              {{ errorMessage }}
+            </div>
+
+          }
+
+
           <div class="form-actions">
 
             <button
@@ -634,7 +669,9 @@
               class="secondary-button"
               [disabled]="saving"
               (click)="closeForm()">
+
               Cancel
+
             </button>
 
 
@@ -644,13 +681,17 @@
               [disabled]="saving || serviceForm.invalid">
 
               @if (saving) {
+
                 Saving...
+
               } @else {
+
                 {{
                   editingId === null
                     ? 'Create Service'
                     : 'Save Changes'
                 }}
+
               }
 
             </button>
