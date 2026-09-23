@@ -1,0 +1,59 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          27.841012850218906,
+          68.63162077537726
+        ]
+      },
+      "properties": {
+        "id": 1,
+        "peak_residual_nT": 99.143,
+        "max_analytic_signal": 185.163,
+        "area_m2": 10468.75,
+        "equivalent_radius_m": 57.73,
+        "estimated_depth_m": 100.0
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          27.817755382930315,
+          68.6261292992015
+        ]
+      },
+      "properties": {
+        "id": 2,
+        "peak_residual_nT": 105.623,
+        "max_analytic_signal": 45.266,
+        "area_m2": 2500.0,
+        "equivalent_radius_m": 28.21,
+        "estimated_depth_m": 100.0
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          27.821496330755096,
+          68.62756863434859
+        ]
+      },
+      "properties": {
+        "id": 3,
+        "peak_residual_nT": 104.788,
+        "max_analytic_signal": 43.02,
+        "area_m2": 1562.5,
+        "equivalent_radius_m": 22.3,
+        "estimated_depth_m": 100.0
+      }
+    }
+  ]
+}

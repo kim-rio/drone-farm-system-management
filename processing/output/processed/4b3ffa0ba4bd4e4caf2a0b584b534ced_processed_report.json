@@ -1,0 +1,85 @@
+{
+  "survey": {
+    "input_file": "output\\uploads\\4b3ffa0ba4bd4e4caf2a0b584b534ced.uav",
+    "records": 77952,
+    "valid_records": 77952,
+    "removed_records": 0
+  },
+  "magnetic": {
+    "source_column": "fitt",
+    "processing": "Final supplied magnetic field retained. Survey-relative residual also generated."
+  },
+  "coordinate_system": {
+    "crs": "EPSG:25835",
+    "cell_size_m": 12.5
+  },
+  "igrf": {
+    "survey_year": 2021.33,
+    "latitude": 68.62490882043693,
+    "longitude": 27.82939215254644,
+    "declination_deg": 14.279857864156295,
+    "inclination_deg": 78.18066442247552,
+    "total_intensity_nt": 54067.2739771529
+  },
+  "feature_layers": [
+    "TMI",
+    "RTP",
+    "Residual_TMI",
+    "Regional_TMI",
+    "VD1",
+    "VD2",
+    "HoriG",
+    "TotG",
+    "AnalyticSignal",
+    "TiltG"
+  ],
+  "products": {
+    "processed_csv": "output\\processed\\4b3ffa0ba4bd4e4caf2a0b584b534ced_processed.csv",
+    "grid_csv": "output\\processed\\4b3ffa0ba4bd4e4caf2a0b584b534ced_processed_grid.csv",
+    "feature_csv": "output\\processed\\4b3ffa0ba4bd4e4caf2a0b584b534ced_processed_features.csv",
+    "feature_stack": "output\\processed\\4b3ffa0ba4bd4e4caf2a0b584b534ced_processed_feature_stack.tif",
+    "preview_map": "output\\processed\\4b3ffa0ba4bd4e4caf2a0b584b534ced_processed_rtp_map.png",
+    "anomaly_geojson": "output\\processed\\4b3ffa0ba4bd4e4caf2a0b584b534ced_processed_anomalies.geojson"
+  },
+  "anomalies": {
+    "count": 3,
+    "candidates": [
+      {
+        "id": 1,
+        "easting": 534196.931,
+        "northing": 7613520.826,
+        "peak_residual_nT": 99.143,
+        "max_analytic_signal": 185.163,
+        "area_m2": 10468.75,
+        "equivalent_radius_m": 57.73,
+        "estimated_depth_m": 253.12,
+        "interpretation_status": "CANDIDATE",
+        "requires_geologist_review": true
+      },
+      {
+        "id": 2,
+        "easting": 533259.431,
+        "northing": 7612895.826,
+        "peak_residual_nT": 105.623,
+        "max_analytic_signal": 45.266,
+        "area_m2": 2500.0,
+        "equivalent_radius_m": 28.21,
+        "estimated_depth_m": 300.0,
+        "interpretation_status": "CANDIDATE",
+        "requires_geologist_review": true
+      },
+      {
+        "id": 3,
+        "easting": 533409.431,
+        "northing": 7613058.326,
+        "peak_residual_nT": 104.788,
+        "max_analytic_signal": 43.02,
+        "area_m2": 1562.5,
+        "equivalent_radius_m": 22.3,
+        "estimated_depth_m": 300.0,
+        "interpretation_status": "CANDIDATE",
+        "requires_geologist_review": true
+      }
+    ]
+  }
+}
