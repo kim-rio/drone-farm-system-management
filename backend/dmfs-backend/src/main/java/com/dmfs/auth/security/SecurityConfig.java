@@ -51,10 +51,11 @@ public class SecurityConfig {
         CorsConfiguration configuration =
                 new CorsConfiguration();
 
-        configuration.setAllowedOrigins(List.of(
+        configuration.setAllowedOriginPatterns(List.of(
         "http://localhost:4200",
         "http://127.0.0.1:4200",
-        "https://dronemining.jmsolutions.co.tz"
+        "https://dronemining.jmsolutions.co.tz",
+        "https://*.dronemining.jmsolutions.co.tz"
 ));
 
         configuration.setAllowedMethods(List.of(
