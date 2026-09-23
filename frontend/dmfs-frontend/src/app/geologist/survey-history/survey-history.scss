@@ -1,43 +1,13 @@
-:host { display: block; }
-
-.eyebrow {
-  font-size: 11px; letter-spacing: .06em; color: var(--text-muted);
-  font-weight: 600; text-transform: uppercase;
-}
-h1 { font-size: 22px; margin: 4px 0 6px; }
-.subtitle { font-size: 13.5px; color: var(--text-secondary); margin-bottom: 20px; }
-
-.panel {
-  background: var(--bg-card);
-  border: 1px solid var(--border-c);
-  border-radius: 10px;
-  padding: 18px;
-}
-
+:host { display: block; color: #000; }
+.eyebrow { font-size: 11px; letter-spacing: .06em; color: #15803d; font-weight: 700; text-transform: uppercase; }
+h1 { font-size: 22px; margin: 4px 0 6px; color: #000; }
+.subtitle { font-size: 13.5px; color: #6b7280; margin-bottom: 20px; }
+.panel { background: #fff; border: 1px solid #d1d5db; border-radius: 8px; padding: 18px; }
 .row-list { display: flex; flex-direction: column; gap: 10px; }
-
-.row-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border: 1px solid var(--border-c);
-  border-radius: 8px;
-  padding: 12px 14px;
-}
-
-.row-title { font-size: 13.5px; font-weight: 600; }
-.row-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-
-.badge {
-  font-size: 11.5px;
-  font-weight: 600;
-  padding: 4px 10px;
-  border-radius: 20px;
-  background: #FAEFD8;
-  color: var(--ochre);
-
-  &.completed {
-    background: #E1EFEC;
-    color: var(--teal);
-  }
-}
+.row-item { display: flex; align-items: center; justify-content: space-between; gap: 14px; border: 1px solid #d1d5db; border-radius: 7px; padding: 12px 14px; background: #fff; }
+.row-item:hover { border-color: #16a34a; }
+.row-title { font-size: 13.5px; font-weight: 600; color: #000; }
+.row-sub { font-size: 12px; color: #6b7280; margin-top: 2px; }
+.badge { font-size: 11.5px; font-weight: 700; padding: 4px 10px; border-radius: 20px; background: #dcfce7; color: #15803d; border: 1px solid #16a34a; white-space: nowrap; }
+.badge:not(.completed) { background: #fff; color: #000; border-color: #000; }
+@media (max-width: 600px) { .row-item { align-items: flex-start; flex-direction: column; } }
