@@ -492,8 +492,6 @@ export class ServiceRequestDetails implements OnInit {
       notes:
         this.notes,
 
-      status:
-        this.request.status
     };
 
 
@@ -549,60 +547,6 @@ export class ServiceRequestDetails implements OnInit {
 
 
   /* ==============================
-     STATUS
-     ============================== */
-
-  changeStatus(
-    status: string
-  ): void {
-
-    if (!this.request) {
-      return;
-    }
-
-    this.errorMessage = '';
-
-    this.successMessage = '';
-
-
-    this.requestService
-      .updateStatus(
-        this.request.id,
-        status
-      )
-      .subscribe({
-
-        next: () => {
-
-          if (this.request) {
-
-            this.request.status =
-              status;
-          }
-
-          this.successMessage =
-            `Request status changed to ${status}.`;
-
-          this.cdr.detectChanges();
-        },
-
-        error: (error) => {
-
-          console.error(
-            'STATUS UPDATE ERROR:',
-            error
-          );
-
-          this.errorMessage =
-            'Unable to update request status.';
-
-          this.cdr.detectChanges();
-        }
-      });
-  }
-
-
-  /* ==============================
      DELETE
      ============================== */
 
@@ -614,7 +558,7 @@ export class ServiceRequestDetails implements OnInit {
 
     const confirmed =
       window.confirm(
-        `Delete service request #${this.request.id}?`
+        `Delete service request ${this.getRequestNumber()}?`
       );
 
     if (!confirmed) {
@@ -673,6 +617,17 @@ export class ServiceRequestDetails implements OnInit {
   /* ==============================
      Client DISPLAY
      ============================== */
+
+  getRequestNumber(): string {
+
+    if (!this.request) {
+      return 'SR-0000';
+    }
+
+    return this.request.requestNumber?.trim() ||
+      `SR-${String(this.request.id).padStart(4, '0')}`;
+  }
+
 
   getClientName(): string {
 

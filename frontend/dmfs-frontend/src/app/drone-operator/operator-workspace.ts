@@ -91,7 +91,8 @@ export class OperatorWorkspace implements OnInit {
   menuItems = [
     { label: 'Dashboard', route: '/drone-operator' },
     { label: 'My Missions', route: '/drone-operator/missions' },
-    { label: 'Field Surveys', route: '/drone-operator/surveys' }
+    { label: 'Field Surveys', route: '/drone-operator/surveys' },
+    { label: 'Agricultural Reports', route: '/drone-operator/agriculture-reports' }
   ];
 
 
@@ -400,9 +401,13 @@ export class OperatorWorkspace implements OnInit {
 
         this.busy = false;
 
-        // Mission is now IN_PROGRESS.
-        // Immediately open/create its field survey.
-        this.launchSurvey(updatedMission);
+        // Agriculture missions use their own field application report workflow.
+        if (updatedMission.category === 'AGRICULTURE') {
+          this.router.navigate(['/drone-operator/agriculture-reports/mission', updatedMission.id]);
+        } else {
+          // Mining missions retain the existing survey/data architecture.
+          this.launchSurvey(updatedMission);
+        }
       },
 
       error: error => {
@@ -590,6 +595,15 @@ export class OperatorWorkspace implements OnInit {
       }
 
     });
+  }
+
+
+  openAgricultureReport(missionId: number): void {
+    this.router.navigate(['/drone-operator/agriculture-reports/mission', missionId]);
+  }
+
+  openAgricultureReports(): void {
+    this.router.navigate(['/drone-operator/agriculture-reports']);
   }
 
 

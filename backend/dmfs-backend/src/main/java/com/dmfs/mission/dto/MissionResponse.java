@@ -13,6 +13,8 @@ public class MissionResponse {
 
     private MissionStatus status;
 
+    private String category;
+
     private LocalDate scheduledDate;
 
     private String notes;
@@ -66,6 +68,15 @@ public class MissionResponse {
 
     public void setStatus(MissionStatus status) {
         this.status = status;
+    }
+
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 
 

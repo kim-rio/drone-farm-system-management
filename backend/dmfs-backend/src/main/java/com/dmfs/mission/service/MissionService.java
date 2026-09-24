@@ -13,12 +13,15 @@ import com.dmfs.auth.entity.User;
 import com.dmfs.auth.repository.UserRepository;
 import com.dmfs.client.entity.Client;
 import com.dmfs.company.entity.SubscriberCompany;
+import com.dmfs.company.service.CompanyDocumentNumberService;
 import com.dmfs.farm.entity.Block;
 import com.dmfs.farm.entity.Farm;
 import com.dmfs.mission.dto.CreateMissionRequest;
 import com.dmfs.mission.dto.MissionResponse;
 import com.dmfs.mission.dto.UpdateMissionRequest;
 import com.dmfs.mission.entity.Mission;
+import com.dmfs.agriculture.entity.AgricultureReport;
+import com.dmfs.agriculture.repository.AgricultureReportRepository;
 import com.dmfs.mission.entity.MissionStatus;
 import com.dmfs.mission.repository.MissionRepository;
 import com.dmfs.service.entity.ServiceRequest;
@@ -30,15 +33,21 @@ public class MissionService {
     private final MissionRepository missionRepository;
     private final ServiceRequestRepository serviceRequestRepository;
     private final UserRepository userRepository;
+    private final AgricultureReportRepository agricultureReportRepository;
+    private final CompanyDocumentNumberService documentNumberService;
 
     public MissionService(
             MissionRepository missionRepository,
             ServiceRequestRepository serviceRequestRepository,
-            UserRepository userRepository
+            UserRepository userRepository,
+            AgricultureReportRepository agricultureReportRepository,
+            CompanyDocumentNumberService documentNumberService
     ) {
         this.missionRepository = missionRepository;
         this.serviceRequestRepository = serviceRequestRepository;
         this.userRepository = userRepository;
+        this.agricultureReportRepository = agricultureReportRepository;
+        this.documentNumberService = documentNumberService;
     }
 
 
@@ -136,6 +145,20 @@ public void completeMissionForServiceRequest(Long serviceRequestId) {
         );
     }
 
+    if ("AGRICULTURE".equals(mission.getCategory())) {
+        boolean finalized =
+                agricultureReportRepository
+                        .findByMission(mission)
+                        .map(report -> report.isFinalized())
+                        .orElse(false);
+
+        if (!finalized) {
+            throw new RuntimeException(
+                    "Agriculture mission requires a finalized field application report before completion"
+            );
+        }
+    }
+
     mission.setStatus(MissionStatus.COMPLETED);
 
     missionRepository.save(mission);
@@ -198,10 +221,13 @@ public void completeMissionForServiceRequest(Long serviceRequestId) {
 
         ServiceRequest serviceRequest =
                 serviceRequestRepository
-                        .findById(request.getServiceRequestId())
+                        .findByIdAndCustomerCompanyId(
+                                request.getServiceRequestId(),
+                                company.getId()
+                        )
                         .orElseThrow(() ->
                                 new RuntimeException(
-                                        "Service request not found"
+                                        "Service request not found for your company"
                                 )
                         );
 
@@ -214,6 +240,17 @@ public void completeMissionForServiceRequest(Long serviceRequestId) {
                 serviceRequest,
                 company
         );
+
+        String category = normalizeMissionCategory(request.getCategory());
+        String serviceCategory = normalizeMissionCategory(
+                serviceRequest.getServiceCatalogue().getCategory()
+        );
+
+        if (!category.equals(serviceCategory)) {
+            throw new IllegalArgumentException(
+                    "Mission category must match the selected service category"
+            );
+        }
 
 
         // -----------------------------------------------------
@@ -236,7 +273,7 @@ public void completeMissionForServiceRequest(Long serviceRequestId) {
         Mission mission = new Mission();
 
         mission.setMissionCode(
-                generateMissionCode()
+                documentNumberService.nextMissionNumber(company)
         );
 
         mission.setCompany(company);
@@ -248,6 +285,8 @@ public void completeMissionForServiceRequest(Long serviceRequestId) {
         mission.setCustomer(
                 serviceRequest.getCustomer()
         );
+
+        mission.setCategory(category);
 
         mission.setFarm(
                 serviceRequest.getFarm()
@@ -588,6 +627,14 @@ public List<MissionResponse.OperatorInfo> getDroneOperators() {
             );
         }
 
+        if (serviceRequest.getServiceCatalogue() == null
+                || serviceRequest.getServiceCatalogue().getCompany() == null
+                || !serviceRequest.getServiceCatalogue().getCompany().getId().equals(company.getId())) {
+            throw new RuntimeException(
+                    "Service request uses a service catalogue outside your company"
+            );
+        }
+
 
         Farm farm =
                 serviceRequest.getFarm();
@@ -726,6 +773,26 @@ public List<MissionResponse.OperatorInfo> getDroneOperators() {
     }
 
 
+    private String normalizeMissionCategory(String value) {
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Mission category is required"
+            );
+        }
+
+        String normalized = value.trim().toUpperCase();
+
+        if (!"MINING".equals(normalized)
+                && !"AGRICULTURE".equals(normalized)) {
+            throw new IllegalArgumentException(
+                    "Mission category must be MINING or AGRICULTURE"
+            );
+        }
+
+        return normalized;
+    }
+
+
     // =========================================================
     // COMPANY FROM AUTHENTICATED USER
     // =========================================================
@@ -788,24 +855,23 @@ public List<MissionResponse.OperatorInfo> getDroneOperators() {
         if (mission.getStatus() != expected) {
             throw new RuntimeException("Mission must be " + expected + " before it can be " + next);
         }
+
+        if (next == MissionStatus.COMPLETED
+                && "AGRICULTURE".equals(mission.getCategory())) {
+            boolean finalized = agricultureReportRepository
+                    .findByMission(mission)
+                    .map(report -> report.isFinalized())
+                    .orElse(false);
+
+            if (!finalized) {
+                throw new RuntimeException(
+                        "Agriculture mission requires a finalized field application report before completion"
+                );
+            }
+        }
+
         mission.setStatus(next);
         return toResponse(missionRepository.save(mission));
-    }
-
-
-    // =========================================================
-    // MISSION CODE
-    // =========================================================
-
-    private String generateMissionCode() {
-
-        long count =
-                missionRepository.count() + 1;
-
-        return String.format(
-                "MIS-%04d",
-                count
-        );
     }
 
 
@@ -850,6 +916,10 @@ public List<MissionResponse.OperatorInfo> getDroneOperators() {
 
         response.setStatus(
                 mission.getStatus()
+        );
+
+        response.setCategory(
+                mission.getCategory()
         );
 
         response.setScheduledDate(

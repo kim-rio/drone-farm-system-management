@@ -1,187 +1,148 @@
-﻿<div class="page">
+<div class="page">
 
   <div class="page-header">
     <div>
-      <p class="eyebrow">SERVICE MANAGEMENT</p>
+      <span class="eyebrow">SERVICE MANAGEMENT</span>
       <h1>Service Requests</h1>
-      <p>Manage client requests for services in the catalogue.</p>
+      <p>Review client service requests and their operational details.</p>
     </div>
 
     <button
       type="button"
-      class="primary"
+      class="primary-button"
       (click)="createRequest()">
       Create Request
     </button>
   </div>
 
   @if (successMessage) {
-    <div class="success">
+    <div class="success-message">
       {{ successMessage }}
     </div>
   }
 
   @if (errorMessage) {
-    <div class="alert">
+    <div class="error-message">
       {{ errorMessage }}
     </div>
   }
 
-  <div class="filters">
+  <section class="panel">
 
-    <div class="search">
-      <label for="search">Search</label>
+    <div class="panel-header">
+      <div>
+        <span class="eyebrow">REQUEST REGISTER</span>
+        <h2>Client Service Requests</h2>
+      </div>
 
-      <input
-        id="search"
-        type="text"
-        [(ngModel)]="searchTerm"
-        placeholder="Search client, farm, block or service..."
-      />
+      <span class="count">
+        {{ filteredRequests.length }}
+      </span>
     </div>
 
-    <div class="filter-group">
-      <label for="status">Status</label>
-
-      <select
-        id="status"
-        [(ngModel)]="selectedStatus">
-
-        <option value="ALL">All Statuses</option>
-        <option value="PENDING">Pending</option>
-        <option value="APPROVED">Approved</option>
-        <option value="IN_PROGRESS">In Progress</option>
-        <option value="COMPLETED">Completed</option>
-        <option value="CANCELLED">Cancelled</option>
-
-      </select>
+    <div class="search-row">
+      <div class="search-field">
+        <label for="search">Search requests</label>
+        <input
+          id="search"
+          type="text"
+          [(ngModel)]="searchTerm"
+          placeholder="Search request number, client, farm, block or service..."
+        />
+      </div>
     </div>
 
-  </div>
+    @if (loading) {
+      <div class="state">
+        Loading service requests...
+      </div>
+    } @else if (filteredRequests.length === 0) {
+      <div class="empty-state">
+        <strong>No service requests found</strong>
+        <p>Service requests created for this company will appear here.</p>
 
-  @if (loading) {
-    <div class="state">
-      Loading service requests...
-    </div>
-  }
+        @if (!searchTerm.trim()) {
+          <button
+            type="button"
+            class="secondary-button"
+            (click)="createRequest()">
+            Create Service Request
+          </button>
+        }
+      </div>
+    } @else {
 
-  @if (!loading && !errorMessage && filteredRequests.length === 0) {
-    <div class="empty">
-      <h2>No service requests found</h2>
-      <p>Create a service request to get started.</p>
+      <div class="request-list">
 
-      <button
-        type="button"
-        class="primary"
-        (click)="createRequest()">
-        Create Service Request
-      </button>
-    </div>
-  }
+        @for (request of filteredRequests; track request.id) {
 
-  @if (!loading && filteredRequests.length > 0) {
+          <article class="request-card">
 
-    <div class="request-list">
+            <div class="request-card-header">
+              <div class="request-heading">
+                <span class="request-number">
+                  {{ getRequestNumber(request) }}
+                </span>
 
-      @for (request of filteredRequests; track request.id) {
+                <h3>
+                  {{ request.serviceCatalogue?.name || 'Service Request' }}
+                </h3>
+              </div>
 
-        <article class="request-card">
-
-          <div class="request-main">
-
-            <div class="request-title">
-              <span class="request-number">
-                REQUEST #{{ request.id }}
-              </span>
-
-              <h2>
-                {{ request.serviceCatalogue.name || 'Service' }}
-              </h2>
+              <button
+                type="button"
+                class="view-button"
+                (click)="viewRequest(request)">
+                View Request
+              </button>
             </div>
 
-            <span
-              class="status"
-              [class.pending]="request.status === 'PENDING'"
-              [class.approved]="request.status === 'APPROVED'"
-              [class.progress]="request.status === 'IN_PROGRESS'"
-              [class.completed]="request.status === 'COMPLETED'"
-              [class.cancelled]="request.status === 'CANCELLED'">
-              {{ request.status }}
-            </span>
+            <div class="request-divider"></div>
 
-          </div>
+            <div class="request-details">
 
-          <div class="request-details">
+              <div class="detail">
+                <span>Client</span>
+                <strong>{{ getClientName(request) }}</strong>
+              </div>
 
-            <div class="detail">
-              <span>Client</span>
-              <strong>{{ getClientName(request) }}</strong>
+              <div class="detail">
+                <span>Farm</span>
+                <strong>{{ request.farm?.name || '-' }}</strong>
+              </div>
+
+              <div class="detail">
+                <span>Block</span>
+                <strong>{{ request.farmBlock?.name || '-' }}</strong>
+              </div>
+
+              <div class="detail">
+                <span>Requested</span>
+                <strong>{{ request.requestedDate || '-' }}</strong>
+              </div>
+
+              <div class="detail">
+                <span>Amount</span>
+                <strong>
+                  {{ request.amount ?? 0 | number:'1.2-2' }}
+                </strong>
+              </div>
+
+              <div class="detail">
+                <span>Payment</span>
+                <strong>{{ request.paymentStatus || 'PENDING' }}</strong>
+              </div>
+
             </div>
 
-            <div class="detail">
-              <span>Farm</span>
-              <strong>{{ request.farm.name || '-' }}</strong>
-            </div>
+          </article>
 
-            <div class="detail">
-              <span>Block</span>
-              <strong>{{ request.farmBlock.name || '-' }}</strong>
-            </div>
+        }
 
-            <div class="detail">
-              <span>Requested</span>
-              <strong>{{ request.requestedDate }}</strong>
-            </div>
+      </div>
 
-            <div class="detail">
-              <span>Amount</span>
-              <strong>
-                {{ request.amount ?? 0 | number:'1.2-2' }}
-              </strong>
-            </div>
+    }
 
-            <div class="detail">
-              <span>Payment</span>
-              <strong>{{ request.paymentStatus || 'PENDING' }}</strong>
-            </div>
-
-          </div>
-
-          <div class="request-actions">
-
-            <button
-              type="button"
-              class="secondary"
-              (click)="viewRequest(request)">
-              View
-            </button>
-
-            <select
-              class="status-select"
-              [value]="request.status"
-              (change)="updateStatus(
-                request,
-                $any($event.target).value
-              )">
-
-              <option value="PENDING">Pending</option>
-              <option value="APPROVED">Approved</option>
-              <option value="IN_PROGRESS">In Progress</option>
-              <option value="COMPLETED">Completed</option>
-              <option value="CANCELLED">Cancelled</option>
-
-            </select>
-
-          </div>
-
-        </article>
-
-      }
-
-    </div>
-
-  }
+  </section>
 
 </div>
-
-

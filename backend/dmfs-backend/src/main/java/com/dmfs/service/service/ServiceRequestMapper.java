@@ -34,7 +34,30 @@ public class ServiceRequestMapper {
         response.setStatus(
                 request.getStatus()
         );
-        response.setOperatorDecisionReason(request.getOperatorDecisionReason());
+
+        response.setRequestNumber(
+                request.getRequestNumber()
+        );
+
+        response.setControlNumber(
+                request.getControlNumber()
+        );
+
+        response.setAmount(
+                request.getAmount()
+        );
+
+        response.setPaymentStatus(
+                request.getPaymentStatus()
+        );
+
+        response.setPaidAt(
+                request.getPaidAt()
+        );
+
+        response.setOperatorDecisionReason(
+                request.getOperatorDecisionReason()
+        );
 
         response.setCreatedAt(
                 request.getCreatedAt()

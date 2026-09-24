@@ -6,6 +6,7 @@ export interface Mission {
   id: number;
   missionCode: string;
   status: string;
+  category: 'MINING' | 'AGRICULTURE';
   scheduledDate: string;
   notes?: string | null;
   createdAt?: string;
@@ -64,6 +65,7 @@ export interface DroneOperator {
 export interface CreateMissionPayload {
   serviceRequestId: number;
   operatorId: number;
+  category: 'MINING' | 'AGRICULTURE';
   scheduledDate: string;
   notes?: string;
 }

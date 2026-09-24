@@ -21,6 +21,11 @@ import {
 })
 export class ServiceCataloguePage implements OnInit {
 
+  readonly serviceCategories = [
+    { value: 'MINING', label: 'Mining', description: 'Geological, geophysical and mineral exploration services.' },
+    { value: 'AGRICULTURE', label: 'Agriculture', description: 'Farm, crop and agricultural drone services.' }
+  ];
+
   readonly personnelRoles = [
     {
       value: 'GEOLOGIST',
@@ -59,7 +64,7 @@ export class ServiceCataloguePage implements OnInit {
   private createEmptyForm() {
     return {
       name: '',
-      category: '',
+      category: 'MINING',
       description: '',
       status: 'ACTIVE' as 'ACTIVE' | 'INACTIVE',
       unitOfMeasurement: '',
@@ -169,7 +174,7 @@ export class ServiceCataloguePage implements OnInit {
     this.errorMessage = '';
 
     const name = this.form.name.trim();
-    const category = this.form.category.trim();
+    const category = this.form.category;
     const description = this.form.description.trim();
     const unit = this.form.unitOfMeasurement.trim();
     const equipment = this.form.requiredEquipment.trim();

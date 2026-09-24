@@ -55,7 +55,8 @@ export class SurveyDetails implements OnInit {
   menuItems = [
     { label: 'Dashboard', route: '/drone-operator' },
     { label: 'My Missions', route: '/drone-operator/missions' },
-    { label: 'Field Surveys', route: '/drone-operator/surveys' }
+    { label: 'Field Surveys', route: '/drone-operator/surveys' },
+    { label: 'Agricultural Reports', route: '/drone-operator/agriculture-reports' }
   ];
 
   loading = true;

@@ -1,0 +1,63 @@
+<div class="shell" [class.sidebar-open]="sidebarOpen">
+  <aside class="sidebar">
+    <div class="brand">
+      @if (branding.logoUrl) {
+        <img class="brand-logo" [src]="branding.logoUrl" [alt]="branding.companyName + ' logo'">
+      } @else {
+        <div class="brand-mark">{{ branding.companyName ? branding.companyName.charAt(0).toUpperCase() : 'C' }}</div>
+      }
+      <div class="brand-text">
+        <strong>{{ branding.companyName || 'Company' }}</strong>
+        <span>DRONE OPERATOR</span>
+      </div>
+    </div>
+
+    <nav class="navigation">
+      @for (item of menuItems; track item.route) {
+        <button type="button" class="nav-item" [class.active]="isActive(item.route)" (click)="navigate(item.route)">
+          <span class="nav-indicator"></span>
+          <span>{{ item.label }}</span>
+        </button>
+      }
+    </nav>
+
+    <div class="sidebar-bottom">
+      <button type="button" class="account">
+        <div class="account-avatar">{{ initials }}</div>
+        <div class="account-details">
+          <strong>{{ user?.firstName }} {{ user?.lastName }}</strong>
+          <span>Drone Operator Account</span>
+        </div>
+      </button>
+      <button type="button" class="logout" (click)="logout()">
+        <span class="logout-circle"></span>
+        <span class="logout-text">Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        @if (!fixedSidebar) {
+          <button type="button" class="menu-button" (click)="toggleSidebar()" [attr.aria-label]="sidebarOpen ? 'Hide navigation' : 'Show navigation'" [title]="sidebarOpen ? 'Hide navigation' : 'Show navigation'">
+            <span></span><span></span><span></span>
+          </button>
+        }
+      </div>
+      <div class="topbar-right">
+        <div class="top-user">
+          <div class="top-avatar">{{ initials }}</div>
+          <div class="top-user-details">
+            <strong>{{ user?.firstName }} {{ user?.lastName }}</strong>
+            <span>DRONE OPERATOR</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section class="page-content">
+      <ng-content></ng-content>
+    </section>
+  </main>
+</div>

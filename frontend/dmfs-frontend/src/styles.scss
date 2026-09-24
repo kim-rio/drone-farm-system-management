@@ -26,3 +26,27 @@ textarea,
 select {
   font: inherit;
 }
+
+
+@media print {
+  body.printing-report { background:#fff !important; }
+  body.printing-report app-operator-shell .sidebar,
+  body.printing-report app-operator-shell .topbar,
+  body.printing-report .reports-shell > .header,
+  body.printing-report .reports-shell > .summary,
+  body.printing-report .reports-shell > .table,
+  body.printing-report .reports-shell > .empty,
+  body.printing-report .reports-shell > .loading,
+  body.printing-report .reports-shell > .alert,
+  body.printing-report .report-modal .close,
+  body.printing-report .report-modal .report-actions { display:none !important; }
+  body.printing-report app-operator-shell .main-content { width:100% !important; margin:0 !important; }
+  body.printing-report app-operator-shell .page-content { max-width:none !important; padding:0 !important; }
+  body.printing-report .reports-shell { max-width:none !important; padding:0 !important; margin:0 !important; }
+  body.printing-report .backdrop { position:static !important; inset:auto !important; padding:0 !important; display:block !important; background:#fff !important; }
+  body.printing-report .report-modal { width:100% !important; max-height:none !important; overflow:visible !important; border:0 !important; border-radius:0 !important; box-shadow:none !important; }
+  body.printing-report .report-modal > header { padding:0 0 18px !important; }
+  body.printing-report .report-body { padding:18px 0 !important; }
+  body.printing-report .report-modal footer { padding:14px 0 0 !important; }
+  @page { size:A4; margin:14mm; }
+}

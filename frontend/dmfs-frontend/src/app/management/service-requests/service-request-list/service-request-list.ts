@@ -1,4 +1,4 @@
-﻿import {
+import {
   Component,
   OnInit,
   inject,
@@ -46,7 +46,6 @@ export class ServiceRequestList implements OnInit {
 
   searchTerm = '';
 
-  selectedStatus = 'ALL';
 
 
   ngOnInit(): void {
@@ -148,14 +147,24 @@ export class ServiceRequestList implements OnInit {
         farmName.includes(search) ||
         blockName.includes(search) ||
         serviceName.includes(search) ||
-        String(request.id).includes(search);
+        String(request.id).includes(search) ||
+        this.getRequestNumber(request).toLowerCase().includes(search);
 
-      const matchesStatus =
-        this.selectedStatus === 'ALL' ||
-        request.status === this.selectedStatus;
-
-      return matchesSearch && matchesStatus;
+      return matchesSearch;
     });
+  }
+
+
+  /* ==============================
+     REQUEST NUMBER
+     ============================== */
+
+  getRequestNumber(
+    request: ServiceRequest
+  ): string {
+
+    return request.requestNumber?.trim() ||
+      `SR-${String(request.id).padStart(4, '0')}`;
   }
 
 
@@ -189,20 +198,6 @@ export class ServiceRequestList implements OnInit {
 
 
   /* ==============================
-     STATUS
-     ============================== */
-
-  getStatusClass(
-    status: string
-  ): string {
-
-    return status
-      .toLowerCase()
-      .replace(/\s+/g, '-');
-  }
-
-
-  /* ==============================
      CREATE
      ============================== */
 
@@ -230,48 +225,6 @@ export class ServiceRequestList implements OnInit {
 
 
   /* ==============================
-     STATUS UPDATE
-     ============================== */
-
-  updateStatus(
-    request: ServiceRequest,
-    status: string
-  ): void {
-
-    this.errorMessage = '';
-
-    this.requestService
-      .updateStatus(
-        request.id,
-        status
-      )
-      .subscribe({
-
-        next: () => {
-
-          request.status = status;
-
-          this.successMessage =
-            `Request #${request.id} updated to ${status}.`;
-
-          this.cdr.detectChanges();
-        },
-
-        error: (error) => {
-
-          console.error(
-            'STATUS UPDATE ERROR:',
-            error
-          );
-
-          this.errorMessage =
-            'Unable to update request status.';
-
-          this.cdr.detectChanges();
-        }
-      });
-  }
-  /* ==============================
      DELETE
      ============================== */
 
@@ -281,7 +234,7 @@ export class ServiceRequestList implements OnInit {
 
     const confirmed =
       window.confirm(
-        `Delete service request #${request.id}?`
+        `Delete service request ${this.getRequestNumber(request)}?`
       );
 
     if (!confirmed) {
@@ -303,7 +256,7 @@ export class ServiceRequestList implements OnInit {
             );
 
           this.successMessage =
-            `Service request #${request.id} deleted successfully.`;
+            `Service request ${this.getRequestNumber(request)} deleted successfully.`;
 
           this.cdr.detectChanges();
         },

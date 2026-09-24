@@ -58,7 +58,6 @@ public class Mission {
     @Column(
             name = "mission_code",
             nullable = false,
-            unique = true,
             length = 40
     )
     private String missionCode;
@@ -151,6 +150,13 @@ public class Mission {
     /*
      * Planned date of field operation.
      */
+    @Column(
+            name = "category",
+            nullable = false,
+            length = 20
+    )
+    private String category;
+
     @Column(
             name = "scheduled_date"
     )
@@ -288,6 +294,15 @@ public class Mission {
 
     public void setDrone(Drone drone) {
         this.drone = drone;
+    }
+
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 
 

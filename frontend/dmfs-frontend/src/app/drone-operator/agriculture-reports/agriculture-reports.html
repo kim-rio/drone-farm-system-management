@@ -1,0 +1,61 @@
+<app-operator-shell [fixedSidebar]="true">
+<div class="reports-shell">
+  <header class="header">
+    <div><p class="eyebrow">FIELD REPORTING</p><h1>Agricultural Reports</h1><p>Completed agricultural application records generated from drone missions.</p></div>
+    <button class="secondary" (click)="back()">Dashboard</button>
+  </header>
+  @if(error){<div class="alert">{{error}}</div>}
+  @if(loading){<div class="loading">Loading agricultural reports…</div>} @else {
+    <section class="summary">
+      <div><span>Total Reports</span><strong>{{reports.length}}</strong></div>
+      <div><span>Finalized</span><strong>{{finalizedCount}}</strong></div>
+      <div><span>Latest</span><strong>{{reports.length ? (reports[0].applicationDate | date:'d MMM y') : '—'}}</strong></div>
+    </section>
+    @if(!reports.length){<div class="empty"><h2>No agricultural reports yet</h2><p>Reports will appear here after an agriculture mission is finalized.</p></div>}
+    @else {
+      <section class="table">
+        <div class="row head"><span>Report</span><span>Mission</span><span>Farm</span><span>Application</span><span>Status</span><span></span></div>
+        @for(r of reports; track r.id){
+          <button class="row" type="button" (click)="open(r)">
+            <span><strong>{{r.reportCode || 'Draft report'}}</strong><small>{{r.cropType || 'Crop not recorded'}}</small></span>
+            <span>{{r.missionCode}}</span>
+            <span>{{r.farmName}}<small>{{r.farmBlockName}}</small></span>
+            <span>{{r.applicationDate | date:'d MMM y'}}</span>
+            <span class="status" [class.finalized]="r.finalized">{{r.finalized ? 'Finalized':'Draft'}}</span>
+            <span class="chevron">›</span>
+          </button>
+        }
+      </section>
+    }
+  }
+
+  @if(selected){
+    <div class="backdrop" (click)="close()">
+      <article class="report-modal" (click)="$event.stopPropagation()">
+        <header><div><p class="company-name">{{ companyName }}</p><p class="eyebrow">AGRICULTURAL APPLICATION REPORT · {{selected.reportCode}}</p><h2>Agricultural Chemical Application Report</h2><p>{{selected.farmName}} · {{selected.farmBlockName}}</p></div><button class="icon-button close" type="button" aria-label="Close report" title="Close report" (click)="close()">×</button></header>
+        <div class="report-body">
+          <section><h3>General Information</h3><div class="grid"><div><small>Mission</small><strong>{{selected.missionCode}}</strong></div><div><small>Application Date</small><strong>{{selected.applicationDate | date:'d MMMM y'}}</strong></div><div><small>Operator</small><strong>{{selected.operatorName}}</strong></div><div><small>Operator License</small><strong>{{selected.operatorLicense || '—'}}</strong></div><div><small>Farm</small><strong>{{selected.farmName}}</strong></div><div><small>Block</small><strong>{{selected.farmBlockName}}</strong></div></div></section>
+          <section><h3>Crop & Target</h3><div class="grid"><div><small>Crop Type</small><strong>{{selected.cropType}}</strong></div><div><small>Growth Stage</small><strong>{{selected.growthStage || '—'}}</strong></div><div><small>Area Treated</small><strong>{{selected.totalAreaTreatedHa | number:'1.2-2'}} ha</strong></div><div class="wide"><small>Target Problem</small><strong>{{selected.targetProblem}}</strong></div></div></section>
+          <section><h3>Weather & Application Window</h3><div class="grid"><div><small>Time</small><strong>{{selected.applicationStartTime || '—'}} – {{selected.applicationEndTime || '—'}}</strong></div><div><small>Temperature</small><strong>{{selected.temperatureC ?? '—'}} °C</strong></div><div><small>Wind</small><strong>{{selected.windSpeedKmh ?? '—'}} km/h {{selected.windDirection || ''}}</strong></div><div><small>Humidity</small><strong>{{selected.relativeHumidity ?? '—'}}%</strong></div><div><small>Sky</small><strong>{{selected.skyConditions || '—'}}</strong></div><div><small>Rain Forecast</small><strong>{{selected.rainForecast || '—'}}</strong></div></div></section>
+          <section><h3>Product & Mixture</h3><div class="grid"><div><small>Trade Name</small><strong>{{selected.tradeName || '—'}}</strong></div><div><small>Registration</small><strong>{{selected.registrationNumber || '—'}}</strong></div><div class="wide"><small>Active Ingredient</small><strong>{{selected.activeIngredient || '—'}}</strong></div><div><small>Total Product</small><strong>{{selected.totalProductUsedL ?? '—'}} L</strong></div><div><small>Total Water</small><strong>{{selected.totalWaterVolumeL ?? '—'}} L</strong></div><div><small>Product Rate</small><strong>{{selected.productRateLHa ?? '—'}} L/ha</strong></div><div><small>Water Rate</small><strong>{{selected.waterRateLHa ?? '—'}} L/ha</strong></div><div class="wide"><small>Adjuvants / Notes</small><strong>{{selected.adjuvants || '—'}}</strong></div></div></section>
+          <section><h3>Equipment & Safety</h3><div class="grid"><div><small>Equipment</small><strong>{{selected.equipmentUsed || '—'}}</strong></div><div><small>Nozzle</small><strong>{{selected.nozzleType || '—'}}</strong></div><div><small>Droplet Size</small><strong>{{selected.dropletSizeMicrons ?? '—'}} microns</strong></div><div><small>PHI</small><strong>{{selected.preHarvestIntervalDays ?? '—'}} days</strong></div><div><small>REI</small><strong>{{selected.restrictedEntryIntervalHours ?? '—'}} hours</strong></div><div class="wide"><small>Buffer / Safety Notes</small><strong>{{selected.bufferZoneNotes || '—'}}</strong></div></div></section>
+          <section><h3>Post-Application Assessment</h3><div class="grid"><div><small>Coverage Quality</small><strong>{{selected.coverageQuality || '—'}}</strong></div><div><small>Next Scout</small><strong>{{selected.nextScoutDate | date:'d MMM y'}}</strong></div><div class="wide"><small>Coverage Observations</small><strong>{{selected.coverageObservations || '—'}}</strong></div><div class="wide"><small>Incidents / Notes</small><strong>{{selected.incidentsNotes || 'No incidents recorded.'}}</strong></div></div></section>
+          <section>
+            <h3>Field Evidence</h3>
+            <div class="photos">
+              @if (selected.photo1Url) {
+                <img [src]="selected.photo1Url" alt="Application evidence photo 1">
+              }
+              @if (selected.photo2Url) {
+                <img [src]="selected.photo2Url" alt="Application evidence photo 2">
+              }
+            </div>
+          </section>
+        </div>
+        <footer><span>Report status: <strong>{{selected.finalized ? 'FINALIZED':'DRAFT'}}</strong></span>@if(selected.finalized){<div class="report-actions"><button class="icon-button" type="button" aria-label="Edit report" title="Edit report" (click)="edit(selected)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5.5 16.5 4 20Z"></path><path d="m14.5 7.5 2 2"></path></svg></button><button class="icon-button" type="button" aria-label="Download report" title="Download report" (click)="download(selected)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M4 20h16"></path></svg></button></div>}</footer>
+      </article>
+    </div>
+  }
+</div>
+
+</app-operator-shell>

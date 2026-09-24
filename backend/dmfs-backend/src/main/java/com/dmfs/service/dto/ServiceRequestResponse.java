@@ -22,6 +22,7 @@ public class ServiceRequestResponse {
     private String notes;
 
     private String status;
+    private String requestNumber;
     private String controlNumber;
     private java.math.BigDecimal amount;
     private String paymentStatus;
@@ -106,6 +107,9 @@ public class ServiceRequestResponse {
     }
 
 
+    public String getRequestNumber() { return requestNumber; }
+    public void setRequestNumber(String value) { this.requestNumber = value; }
+
     public String getControlNumber() { return controlNumber; }
     public void setControlNumber(String value) { this.controlNumber = value; }
 
@@ -174,10 +178,6 @@ public class ServiceRequestResponse {
         private String phone;
 
         private String status;
-    private String controlNumber;
-    private java.math.BigDecimal amount;
-    private String paymentStatus;
-    private java.time.LocalDateTime paidAt;
 
 
         public CustomerInfo() {
@@ -262,19 +262,6 @@ public class ServiceRequestResponse {
         public void setPhone(String phone) {
             this.phone = phone;
         }
-
-
-        public String getControlNumber() { return controlNumber; }
-    public void setControlNumber(String value) { this.controlNumber = value; }
-
-    public java.math.BigDecimal getAmount() { return amount; }
-    public void setAmount(java.math.BigDecimal value) { this.amount = value; }
-
-    public String getPaymentStatus() { return paymentStatus; }
-    public void setPaymentStatus(String value) { this.paymentStatus = value; }
-
-    public java.time.LocalDateTime getPaidAt() { return paidAt; }
-    public void setPaidAt(java.time.LocalDateTime value) { this.paidAt = value; }
     public String getStatus() {
             return status;
         }
@@ -446,10 +433,6 @@ public class ServiceRequestResponse {
         private String description;
 
         private String status;
-    private String controlNumber;
-    private java.math.BigDecimal amount;
-    private String paymentStatus;
-    private java.time.LocalDateTime paidAt;
 
         private String unitOfMeasurement;
 
@@ -500,19 +483,6 @@ public class ServiceRequestResponse {
         ) {
             this.description = description;
         }
-
-
-        public String getControlNumber() { return controlNumber; }
-    public void setControlNumber(String value) { this.controlNumber = value; }
-
-    public java.math.BigDecimal getAmount() { return amount; }
-    public void setAmount(java.math.BigDecimal value) { this.amount = value; }
-
-    public String getPaymentStatus() { return paymentStatus; }
-    public void setPaymentStatus(String value) { this.paymentStatus = value; }
-
-    public java.time.LocalDateTime getPaidAt() { return paidAt; }
-    public void setPaidAt(java.time.LocalDateTime value) { this.paidAt = value; }
     public String getStatus() {
             return status;
         }

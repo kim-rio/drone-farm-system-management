@@ -1,9 +1,10 @@
-﻿import { Injectable, inject } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface ServiceRequest {
   id: number;
+  requestNumber?: string;
 
   client: {
     id: number;
@@ -132,20 +133,6 @@ export class ServiceRequestService {
       `${this.apiUrl}/${id}`,
       request,
       {
-        withCredentials: true
-      }
-    );
-  }
-
-  updateStatus(
-    id: number,
-    status: string
-  ): Observable<void> {
-    return this.http.patch<void>(
-      `${this.apiUrl}/${id}/status`,
-      {},
-      {
-        params: { status },
         withCredentials: true
       }
     );

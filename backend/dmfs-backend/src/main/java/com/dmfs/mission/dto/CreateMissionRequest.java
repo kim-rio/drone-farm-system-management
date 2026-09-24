@@ -13,6 +13,9 @@ public class CreateMissionRequest {
     @NotNull(message = "Drone operator is required")
     private Long operatorId;
 
+    @NotNull(message = "Category is required")
+    private String category;
+
     @NotNull(message = "Scheduled date is required")
     private LocalDate scheduledDate;
 
@@ -38,6 +41,15 @@ public class CreateMissionRequest {
 
     public void setOperatorId(Long operatorId) {
         this.operatorId = operatorId;
+    }
+
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 
 

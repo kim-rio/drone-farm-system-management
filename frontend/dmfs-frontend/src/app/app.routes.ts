@@ -201,6 +201,22 @@ export const routes: Routes = [
 },
 
 {
+  path: 'drone-operator/agriculture-reports',
+  canActivate: [roleGuard(['DRONE_OPERATOR'])],
+  loadComponent: () =>
+    import('./drone-operator/agriculture-reports/agriculture-reports')
+      .then(m => m.AgricultureReportsPage)
+},
+
+{
+  path: 'drone-operator/agriculture-reports/mission/:missionId',
+  canActivate: [roleGuard(['DRONE_OPERATOR'])],
+  loadComponent: () =>
+    import('./drone-operator/agriculture-report/agriculture-report')
+      .then(m => m.AgricultureReportPage)
+},
+
+{
   path: 'drone-operator/operations',
   canActivate: [roleGuard(['DRONE_OPERATOR'])],
   loadComponent: () =>

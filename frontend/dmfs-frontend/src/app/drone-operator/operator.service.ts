@@ -4,11 +4,28 @@ import { HttpClient } from '@angular/common/http';
 export type MissionStatus = 'PLANNED' | 'ASSIGNED' | 'ACCEPTED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
 
 export interface Mission {
-  id: number; missionCode: string; status: MissionStatus; scheduledDate: string; notes?: string;
+  id: number; missionCode: string; status: MissionStatus; category: 'MINING' | 'AGRICULTURE'; scheduledDate: string; notes?: string;
   customer?: { clientCode?: string }; farm?: { name?: string; areaHectares?: number };
   farmBlock?: { name?: string; areaHectares?: number; centerLatitude?: number; centerLongitude?: number };
   drone?: { name?: string; model?: string; serialNumber?: string; status?: string };
   serviceRequest?: { id: number };
+}
+
+
+export interface AgricultureReport {
+  id?: number; missionId: number; missionCode: string; category?: string; reportCode?: string;
+  farmId?: number; farmName?: string; farmAreaHa?: number; farmBlockId?: number; farmBlockName?: string; blockAreaHa?: number;
+  operatorId?: number; operatorName?: string; operatorLicense?: string;
+  applicationDate?: string; nextScoutDate?: string;
+  cropType?: string; growthStage?: string; totalAreaTreatedHa?: number; targetProblem?: string;
+  applicationStartTime?: string; applicationEndTime?: string; temperatureC?: number; windSpeedKmh?: number;
+  windDirection?: string; relativeHumidity?: number; skyConditions?: string; rainForecast?: string;
+  tradeName?: string; registrationNumber?: string; activeIngredient?: string; totalProductUsedL?: number;
+  totalWaterVolumeL?: number; productRateLHa?: number; waterRateLHa?: number; adjuvants?: string;
+  equipmentUsed?: string; nozzleType?: string; dropletSizeMicrons?: number;
+  preHarvestIntervalDays?: number; restrictedEntryIntervalHours?: number; bufferZoneNotes?: string;
+  coverageQuality?: string; coverageObservations?: string; incidentsNotes?: string; applicatorSignature?: string;
+  photo1Url?: string; photo2Url?: string; finalized: boolean; createdAt?: string; updatedAt?: string;
 }
 
 export interface Survey {
@@ -74,5 +91,17 @@ submitSurveyDataPackage(packageId: number) {
     {},
     this.options
   );
+}
+
+getAgricultureReports() {
+  return this.http.get<AgricultureReport[]>(`${this.api}/agriculture-reports`, this.options);
+}
+
+getAgricultureReportForMission(missionId: number) {
+  return this.http.get<AgricultureReport>(`${this.api}/agriculture-reports/mission/${missionId}`, this.options);
+}
+
+saveAgricultureReport(missionId: number, data: FormData) {
+  return this.http.post<AgricultureReport>(`${this.api}/agriculture-reports/mission/${missionId}`, data, this.options);
 }
 }

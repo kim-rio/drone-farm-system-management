@@ -64,26 +64,32 @@ public class ServiceRequestController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ServiceRequest createServiceRequest(
+    public ServiceRequestResponse createServiceRequest(
             @RequestBody ServiceRequest serviceRequest
     ) {
 
-        return serviceRequestService
-                .createServiceRequest(serviceRequest);
+        ServiceRequest created =
+                serviceRequestService
+                        .createServiceRequest(serviceRequest);
+
+        return ServiceRequestMapper.toResponse(created);
     }
 
 
     @PutMapping("/{id}")
-    public ServiceRequest updateServiceRequest(
+    public ServiceRequestResponse updateServiceRequest(
             @PathVariable Long id,
             @RequestBody ServiceRequest serviceRequest
     ) {
 
-        return serviceRequestService
-                .updateServiceRequest(
-                        id,
-                        serviceRequest
-                );
+        ServiceRequest updated =
+                serviceRequestService
+                        .updateServiceRequest(
+                                id,
+                                serviceRequest
+                        );
+
+        return ServiceRequestMapper.toResponse(updated);
     }
 
 

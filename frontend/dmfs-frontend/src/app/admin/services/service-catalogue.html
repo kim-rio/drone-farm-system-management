@@ -365,15 +365,25 @@
               <label>
 
                 <span>
-                  Category
+                  Service Category
                 </span>
 
-                <input
-                  type="text"
+                <select
                   name="category"
                   [(ngModel)]="form.category"
-                  required
-                  placeholder="e.g. Agriculture">
+                  required>
+
+                  @for (category of serviceCategories; track category.value) {
+                    <option [ngValue]="category.value">
+                      {{ category.label }}
+                    </option>
+                  }
+
+                </select>
+
+                <small class="field-help">
+                  Every service must belong to one of the two DMFS service domains.
+                </small>
 
               </label>
 

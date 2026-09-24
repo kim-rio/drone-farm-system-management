@@ -53,6 +53,8 @@ export class CreateMission implements OnInit {
 
   selectedOperatorId: number | null = null;
 
+  category: 'MINING' | 'AGRICULTURE' = 'MINING';
+
   scheduledDate = '';
 
   notes = '';
@@ -121,6 +123,15 @@ export class CreateMission implements OnInit {
   }
 
 
+  onRequestSelected(): void {
+    const request = this.getSelectedRequest();
+    const category = request?.serviceCatalogue?.category?.toUpperCase();
+    if (category === 'MINING' || category === 'AGRICULTURE') {
+      this.category = category;
+    }
+  }
+
+
   getSelectedRequest():
     ServiceRequest | undefined {
 
@@ -179,6 +190,8 @@ export class CreateMission implements OnInit {
 
       operatorId:
         this.selectedOperatorId,
+
+      category: this.category,
 
       scheduledDate:
         this.scheduledDate,

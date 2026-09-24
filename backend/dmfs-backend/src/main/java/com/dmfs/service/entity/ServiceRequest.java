@@ -55,6 +55,9 @@ public class ServiceRequest {
     @Column(nullable = false, length = 30)
     private String status = "PENDING";
 
+    @Column(name = "request_number", nullable = false, length = 30)
+    private String requestNumber;
+
     @Column(name = "control_number", length = 50)
     private String controlNumber;
 
@@ -152,6 +155,10 @@ public class ServiceRequest {
     public void setStatus(String status) {
         this.status = status;
     }
+    public String getRequestNumber() { return requestNumber; }
+
+    public void setRequestNumber(String requestNumber) { this.requestNumber = requestNumber; }
+
     public String getControlNumber() { return controlNumber; }
     public void setControlNumber(String controlNumber) { this.controlNumber = controlNumber; }
 

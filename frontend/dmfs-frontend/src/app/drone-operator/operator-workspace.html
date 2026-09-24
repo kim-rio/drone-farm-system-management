@@ -695,7 +695,7 @@
             </div>
 
 
-            <!-- SURVEY -->
+            <!-- ACTIVE FIELD WORKFLOW -->
 
             <div
               class="action-box"
@@ -703,24 +703,30 @@
             >
 
               <div>
-
-                <strong>
-                  Field operation active
-                </strong>
-
-                <p>
-                  Continue the field workflow by opening the survey assigned to this mission.
+                <strong>Field operation active</strong>
+                <p *ngIf="selected.category === 'AGRICULTURE'">
+                  Complete the agricultural application record, including the required field evidence, before closing this mission.
                 </p>
-
+                <p *ngIf="selected.category !== 'AGRICULTURE'">
+                  Continue the mining field workflow by opening the survey assigned to this mission.
+                </p>
               </div>
-
 
               <button
                 class="primary"
                 [disabled]="busy"
+                *ngIf="selected.category === 'AGRICULTURE'"
+                (click)="openAgricultureReport(selected.id)"
+              >
+                Open agriculture report
+              </button>
+
+              <button
+                class="primary"
+                [disabled]="busy"
+                *ngIf="selected.category !== 'AGRICULTURE'"
                 (click)="launchSurvey(selected)"
               >
-
                 {{
                   surveyFor(selected)
                     ? (surveyFor(selected)?.status === 'COMPLETED'
@@ -728,7 +734,6 @@
                       : 'Open field survey')
                     : 'Create field survey'
                 }}
-
               </button>
 
             </div>
@@ -742,10 +747,20 @@
             >
               <div>
                 <strong>Mission complete</strong>
-                <p>
-                  The survey data package has been submitted and the mission has been completed.
+                <p *ngIf="selected.category === 'AGRICULTURE'">
+                  The agricultural application report has been finalized and is available in Agricultural Reports.
+                </p>
+                <p *ngIf="selected.category !== 'AGRICULTURE'">
+                  The survey data package has been submitted and the mining mission has been completed.
                 </p>
               </div>
+              <button
+                *ngIf="selected.category === 'AGRICULTURE'"
+                class="outline"
+                type="button"
+                (click)="openAgricultureReports()">
+                View report
+              </button>
             </div>
 
 
@@ -846,36 +861,21 @@
 
             <p class="eyebrow">MISSION FLOW</p>
 
-            <ol>
-              <li [class.done]="selected.status !== 'ASSIGNED'">
-                <i>1</i>
-                Accept assignment
-              </li>
+            <ol *ngIf="selected.category === 'AGRICULTURE'">
+              <li [class.done]="selected.status !== 'ASSIGNED'"><i>1</i>Accept assignment</li>
+              <li [class.done]="selected.status === 'IN_PROGRESS' || selected.status === 'COMPLETED'"><i>2</i>Start mission</li>
+              <li [class.done]="selected.status === 'COMPLETED'"><i>3</i>Complete agriculture report</li>
+              <li [class.done]="selected.status === 'COMPLETED'"><i>4</i>Upload field evidence</li>
+              <li [class.done]="selected.status === 'COMPLETED'"><i>5</i>Finalize report & close mission</li>
+            </ol>
 
-              <li [class.done]="selected.status === 'IN_PROGRESS' || selected.status === 'COMPLETED'">
-                <i>2</i>
-                Start mission
-              </li>
-
-              <li [class.done]="surveyFor(selected)?.status === 'IN_PROGRESS' || surveyFor(selected)?.status === 'COMPLETED'">
-                <i>3</i>
-                Start survey
-              </li>
-
-              <li [class.done]="surveyFor(selected)?.status === 'COMPLETED'">
-                <i>4</i>
-                Complete survey
-              </li>
-
-              <li [class.done]="selected.status === 'COMPLETED'">
-                <i>5</i>
-                Submit survey data
-              </li>
-
-              <li [class.done]="selected.status === 'COMPLETED'">
-                <i>6</i>
-                Complete mission
-              </li>
+            <ol *ngIf="selected.category !== 'AGRICULTURE'">
+              <li [class.done]="selected.status !== 'ASSIGNED'"><i>1</i>Accept assignment</li>
+              <li [class.done]="selected.status === 'IN_PROGRESS' || selected.status === 'COMPLETED'"><i>2</i>Start mission</li>
+              <li [class.done]="surveyFor(selected)?.status === 'IN_PROGRESS' || surveyFor(selected)?.status === 'COMPLETED'"><i>3</i>Start survey</li>
+              <li [class.done]="surveyFor(selected)?.status === 'COMPLETED'"><i>4</i>Complete survey</li>
+              <li [class.done]="selected.status === 'COMPLETED'"><i>5</i>Submit survey data</li>
+              <li [class.done]="selected.status === 'COMPLETED'"><i>6</i>Complete mission</li>
             </ol>
 
             <span *ngIf="selected.status === 'COMPLETED'" class="done-text">Mission workflow completed.</span>

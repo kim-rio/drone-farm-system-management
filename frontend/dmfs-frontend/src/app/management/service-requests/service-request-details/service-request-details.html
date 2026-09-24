@@ -1,4 +1,4 @@
-﻿<div class="page">
+<div class="page">
 
   @if (loading) {
 
@@ -24,7 +24,7 @@
         </button>
 
         <p class="eyebrow">
-          SERVICE REQUEST #{{ request.id }}
+          SERVICE REQUEST {{ getRequestNumber() }}
         </p>
 
         <h1>
@@ -85,75 +85,6 @@
 
 
     @if (!editing) {
-
-      <!-- STATUS -->
-
-      <section class="status-card">
-
-        <div>
-
-          <span>
-            Current Status
-          </span>
-
-          <strong>
-            {{ request.status }}
-          </strong>
-
-        </div>
-
-
-        <div class="status-actions">
-
-          <button
-            type="button"
-            [class.active]="request.status === 'PENDING'"
-            (click)="changeStatus('PENDING')">
-
-            Pending
-
-          </button>
-
-          <button
-            type="button"
-            [class.active]="request.status === 'APPROVED'"
-            (click)="changeStatus('APPROVED')">
-
-            Approved
-
-          </button>
-
-          <button
-            type="button"
-            [class.active]="request.status === 'IN_PROGRESS'"
-            (click)="changeStatus('IN_PROGRESS')">
-
-            In Progress
-
-          </button>
-
-          <button
-            type="button"
-            [class.active]="request.status === 'COMPLETED'"
-            (click)="changeStatus('COMPLETED')">
-
-            Completed
-
-          </button>
-
-          <button
-            type="button"
-            [class.active]="request.status === 'CANCELLED'"
-            (click)="changeStatus('CANCELLED')">
-
-            Cancelled
-
-          </button>
-
-        </div>
-
-      </section>
-
 
       <!-- MAIN GRID -->
 
