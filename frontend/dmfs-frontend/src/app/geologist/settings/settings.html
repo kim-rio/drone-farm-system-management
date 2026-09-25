@@ -1,0 +1,33 @@
+<div class="eyebrow">Geologist portal</div>
+<h1>Settings</h1>
+<p class="subtitle">Your account details.</p>
+
+<div class="panel account-panel" *ngIf="user; else noUser">
+  <div class="account-header">
+    <div class="avatar">{{ initials }}</div>
+    <div>
+      <strong>{{ user.firstName }} {{ user.lastName }}</strong>
+      <span class="role-badge">{{ user.role }}</span>
+    </div>
+  </div>
+
+  <div class="info-row">
+    <span class="info-label">Email</span>
+    <span class="info-value">{{ user.email }}</span>
+  </div>
+
+  <div class="info-row">
+    <span class="info-label">User ID</span>
+    <span class="info-value">{{ user.userId }}</span>
+  </div>
+
+  <button type="button" class="logout-btn" [disabled]="loggingOut" (click)="logout()">
+    {{ loggingOut ? 'Logging out…' : 'Log out' }}
+  </button>
+</div>
+
+<ng-template #noUser>
+  <div class="panel">
+    <p>You're not signed in.</p>
+  </div>
+</ng-template>

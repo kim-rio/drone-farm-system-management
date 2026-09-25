@@ -2,8 +2,7 @@ import {
   Component,
   OnInit,
   AfterViewInit,
-  OnDestroy,
-  inject
+  OnDestroy
 } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
@@ -18,7 +17,9 @@ import * as L from 'leaflet';
 
 import {
   AnomalyMap,
-  GeologistService
+  AnomalyGeoJson,
+  GeologistService,
+  SurveyReviewData
 } from '../../services/geologist.service';
 
 type Status =
@@ -26,6 +27,18 @@ type Status =
   | 'REPROCESSED'
   | 'APPROVED'
   | 'REJECTED';
+
+/** The four filter labels the geologist sees. COMPLETED maps to the
+ * backend's APPROVED decision -- there's no separate "completed" decision
+ * state, approving a map *is* completing its review. */
+type StatusFilterLabel = 'ALL' | 'PENDING' | 'COMPLETED' | 'REJECTED';
+
+const FILTER_TO_BACKEND_STATUS: Record<StatusFilterLabel, string | undefined> = {
+  ALL: undefined,
+  PENDING: 'PENDING',
+  COMPLETED: 'APPROVED',
+  REJECTED: 'REJECTED'
+};
 
 interface AnomalySurvey extends AnomalyMap {
   title: string;
@@ -54,23 +67,6 @@ interface AnomalyCandidate {
   requires_geologist_review: boolean;
 }
 
-interface AnomalyGeoJsonFeature {
-  type: 'Feature';
-
-  geometry: {
-    type: 'Point';
-    coordinates: [number, number];
-  };
-
-  properties: AnomalyCandidate;
-}
-
-interface AnomalyGeoJson {
-  type: 'FeatureCollection';
-
-  features: AnomalyGeoJsonFeature[];
-}
-
 @Component({
   selector: 'app-anomally-map-review',
   standalone: true,
@@ -84,29 +80,28 @@ interface AnomalyGeoJson {
 export class AnomallyMapReview
   implements OnInit, AfterViewInit, OnDestroy {
 
-  private readonly geologist =
-    inject(GeologistService);
-
   surveys: AnomalySurvey[] = [];
 
-  statusOptions:
-    Array<'ALL' | Status> = [
-      'ALL',
-      'PENDING',
-      'REPROCESSED',
-      'APPROVED',
-      'REJECTED'
-    ];
+  statusOptions: StatusFilterLabel[] = [
+    'ALL',
+    'PENDING',
+    'COMPLETED',
+    'REJECTED'
+  ];
 
-  statusFilter:
-    'ALL' | Status = 'ALL';
+  statusFilter: StatusFilterLabel = 'ALL';
 
   searchTerm = '';
 
-  selected:
-    AnomalySurvey | null = null;
+  selected: AnomalySurvey | null = null;
+
+  /** Everything the detail view needs -- map, anomalies, processed + raw data. */
+  reviewData: SurveyReviewData | null = null;
+  reviewDataLoading = false;
+  reviewDataError = '';
 
   reviewComment = '';
+  submittingReview = false;
 
   // =========================================================
   // LEAFLET
@@ -126,146 +121,87 @@ export class AnomallyMapReview
 
   private viewReady = false;
 
+  constructor(
+    private geologist: GeologistService,
+    private route: ActivatedRoute,
+    private router: Router
+  ) {}
+
   // =========================================================
   // INIT
   // =========================================================
 
   ngOnInit(): void {
 
-    this.route.queryParamMap.subscribe(
-      (params) => {
-
-        const id =
-          params.get('id');
-
-        this.selected =
-          id
-            ? this.surveys.find(
-                survey =>
-                  survey.id === Number(id)
-              ) ?? null
-            : null;
-
-        if (
-          this.selected &&
-          this.viewReady
-        ) {
-
-          setTimeout(() => {
-            this.initializeMap();
-          });
-        }
+    this.route.queryParamMap.subscribe((params) => {
+      const id = params.get('id');
+      if (id) {
+        this.openSurveyById(Number(id));
+      } else {
+        this.selected = null;
+        this.reviewData = null;
+        this.destroyMap();
       }
-    );
+    });
 
     this.loadMaps();
   }
 
   ngAfterViewInit(): void {
-
     this.viewReady = true;
 
     if (this.selected) {
-
-      setTimeout(() => {
-        this.initializeMap();
-      });
+      setTimeout(() => this.initializeMap());
     }
   }
 
   ngOnDestroy(): void {
+    this.destroyMap();
+  }
 
-    if (this.map) {
+  // =========================================================
+  // FILTERING (search only -- status filtering happens
+  // server-side via loadMaps(), see onStatusFilterChange())
+  // =========================================================
 
-      this.map.remove();
+  get filteredSurveys(): AnomalySurvey[] {
+    const term = this.searchTerm.trim().toLowerCase();
 
-      this.map = null;
+    if (!term) {
+      return this.surveys;
     }
-  }
 
-  // =========================================================
-  // FILTERING
-  // =========================================================
-
-  get filteredSurveys():
-    AnomalySurvey[] {
-
-    const term =
-      this.searchTerm
-        .trim()
-        .toLowerCase();
-
-    return this.surveys.filter(
-      survey => {
-
-        const matchesStatus =
-          this.statusFilter === 'ALL'
-          ||
-          survey.status ===
-            this.statusFilter;
-
-        const matchesTerm =
-          !term
-          ||
-          survey.surveyCode
-            .toLowerCase()
-            .includes(term)
-          ||
-          survey.companyName
-            .toLowerCase()
-            .includes(term)
-          ||
-          survey.surveyName
-            .toLowerCase()
-            .includes(term);
-
-        return (
-          matchesStatus
-          &&
-          matchesTerm
-        );
-      }
+    return this.surveys.filter((survey) =>
+      survey.surveyCode.toLowerCase().includes(term) ||
+      survey.companyName.toLowerCase().includes(term) ||
+      survey.surveyName.toLowerCase().includes(term)
     );
   }
 
-  // =========================================================
-  // OPEN SURVEY
-  // =========================================================
-
-  openSurvey(
-    survey: AnomalySurvey
-  ): void {
-
-    this.router.navigate(
-      [],
-      {
-        relativeTo: this.route,
-        queryParams: {
-          id: survey.id
-        }
-      }
-    );
+  onStatusFilterChange(): void {
+    this.loadMaps();
   }
 
   // =========================================================
-  // BACK
+  // OPEN / BACK
   // =========================================================
+
+  openSurvey(survey: AnomalySurvey): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { id: survey.surveyId }
+    });
+  }
 
   backToList(): void {
-
     this.reviewComment = '';
-
     this.selectedCandidate = null;
-
     this.destroyMap();
 
-    this.router.navigate(
-      [],
-      {
-        relativeTo: this.route,
-        queryParams: {}
-      }
-    );
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {}
+    });
   }
 
   // =========================================================
@@ -273,102 +209,115 @@ export class AnomallyMapReview
   // =========================================================
 
   approve(): void {
-
-    this.submitReview(
-      'APPROVED'
-    );
+    this.submitReview('APPROVED');
   }
 
   reject(): void {
-
-    this.submitReview(
-      'REJECTED'
-    );
+    this.submitReview('REJECTED');
   }
 
   // =========================================================
-  // MAP IMAGE URL
+  // FILE URLS
   // =========================================================
 
-  mapFileUrl(
-    mapId: number
-  ): string {
+  mapFileUrl(mapId: number): string {
+    return this.geologist.mapFileUrl(mapId);
+  }
 
-    return this.geologist.mapFileUrl(
-      mapId
-    );
+  rawFileUrl(fileId: number): string {
+    return this.geologist.rawDataFileUrl(fileId);
   }
 
   // =========================================================
-  // LOAD MAPS
+  // LOAD MAPS (left-hand list)
   // =========================================================
 
   private loadMaps(): void {
+    const backendStatus = FILTER_TO_BACKEND_STATUS[this.statusFilter];
 
-    this.geologist.maps()
-      .subscribe({
+    this.geologist.maps(backendStatus).subscribe({
+      next: (maps) => {
+        this.surveys = maps.map((map) => this.toAnomalySurvey(map));
 
-        next: maps => {
-
-          this.surveys =
-            maps.map(
-              map => ({
-
-                ...map,
-
-                title:
-                  map.surveyName
-                  ||
-                  map.mapName,
-
-                client:
-                  map.companyName,
-
-                date:
-                  new Date(
-                    map.generatedAt
-                  ).toLocaleDateString(),
-
-                status:
-                  map.decision as Status
-
-              })
-            );
-
-          const id =
-            this.route
-              .snapshot
-              .queryParamMap
-              .get('id');
-
-          this.selected =
-            id
-              ? this.surveys.find(
-                  survey =>
-                    survey.id ===
-                    Number(id)
-                ) ?? null
-              : null;
-
-          if (
-            this.selected &&
-            this.viewReady
-          ) {
-
-            setTimeout(() => {
-              this.initializeMap();
-            });
-          }
-        },
-
-        error: error => {
-
-          console.error(
-            'Failed to load anomaly maps:',
-            error
+        // keep the open detail view's summary card in sync if it's
+        // still present in the freshly filtered list
+        if (this.selected) {
+          const stillPresent = this.surveys.find(
+            (s) => s.surveyId === this.selected!.surveyId
           );
+          if (stillPresent) {
+            this.selected = stillPresent;
+          }
         }
-      });
+      },
+
+      error: (error) => {
+        console.error('Failed to load anomaly maps:', error);
+      }
+    });
+  }
+
+  private toAnomalySurvey(map: AnomalyMap): AnomalySurvey {
+    return {
+      ...map,
+      title: map.surveyName || map.mapName,
+      client: map.companyName,
+      date: new Date(map.generatedAt).toLocaleDateString(),
+      status: map.decision as Status
+    };
+  }
+
+  // =========================================================
+  // OPEN SURVEY BY ID (from the ?id= query param) --
+  // fetches the whole review bundle in one call.
+  // =========================================================
+
+  private openSurveyById(surveyId: number): void {
+    this.reviewDataLoading = true;
+    this.reviewDataError = '';
+
+    this.geologist.surveyReviewData(surveyId).subscribe({
+      next: (data) => {
+        this.reviewData = data;
+        this.reviewDataLoading = false;
+
+        this.selected = data.map
+          ? this.toAnomalySurvey(data.map)
+          : {
+              // No anomaly map exists yet for this survey -- still show
+              // survey metadata so the geologist knows why the map/review
+              // panels are empty.
+              id: 0,
+              surveyId: data.survey.id,
+              surveyCode: data.survey.surveyCode,
+              surveyName: data.survey.surveyName,
+              companyName: data.survey.companyName,
+              mapName: '',
+              filePath: '',
+              anomalyCount: 0,
+              decision: 'PENDING',
+              reviewComment: undefined,
+              generatedAt: data.survey.startedAt,
+              reviewedAt: undefined,
+              title: data.survey.surveyName,
+              client: data.survey.companyName,
+              date: new Date(data.survey.startedAt).toLocaleDateString(),
+              status: 'PENDING'
+            };
+
+        this.reviewComment = data.map?.reviewComment ?? '';
+
+        if (this.viewReady) {
+          setTimeout(() => this.initializeMap());
+        }
+      },
+
+      error: (error) => {
+        console.error('Failed to load survey review data:', error);
+        this.reviewDataLoading = false;
+        this.reviewDataError = 'Unable to load this survey.';
+      }
+    });
   }
 
   // =========================================================
@@ -376,16 +325,11 @@ export class AnomallyMapReview
   // =========================================================
 
   private initializeMap(): void {
-
     if (!this.selected) {
       return;
     }
 
-    const element =
-      document.getElementById(
-        'anomaly-map'
-      );
-
+    const element = document.getElementById('anomaly-map');
     if (!element) {
       return;
     }
@@ -393,262 +337,65 @@ export class AnomallyMapReview
     this.destroyMap();
 
     this.mapLoading = true;
-
     this.mapError = '';
 
-    // -------------------------------------------------------
-    // Create map
-    // -------------------------------------------------------
+    this.map = L.map(element, { zoomControl: true });
 
-    this.map =
-      L.map(
-        element,
-        {
-          zoomControl: true
-        }
-      );
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
+      maxZoom: 19
+    }).addTo(this.map);
 
-    // -------------------------------------------------------
-    // OpenStreetMap base layer
-    // -------------------------------------------------------
+    this.anomalyLayer = L.layerGroup().addTo(this.map);
 
-    L.tileLayer(
-      'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-      {
-        attribution:
-          '&copy; OpenStreetMap contributors',
-
-        maxZoom: 19
-      }
-    ).addTo(
-      this.map
-    );
-
-    // -------------------------------------------------------
-    // Empty layer for anomaly candidates
-    // -------------------------------------------------------
-
-    this.anomalyLayer =
-      L.layerGroup().addTo(
-        this.map
-      );
-
-    // -------------------------------------------------------
-    // Load anomaly GeoJSON
-    // -------------------------------------------------------
-
-    this.loadAnomalyGeoJson();
-  }
-
-  // =========================================================
-  // LOAD GEOJSON
-  // =========================================================
-
-  private loadAnomalyGeoJson(): void {
-
-    if (
-      !this.map ||
-      !this.selected
-    ) {
-      return;
+    if (this.reviewData?.anomalies) {
+      this.renderAnomalies(this.reviewData.anomalies);
+      this.mapLoading = false;
+    } else {
+      this.mapLoading = false;
+      this.map.setView([0, 0], 2);
     }
-
-    this.mapLoading = true;
-
-    /*
-     * Temporary development URL.
-     *
-     * This will be replaced with the Spring Boot
-     * geologist GeoJSON endpoint once that endpoint
-     * is connected to the generated anomaly product.
-     */
-
-    const url =
-      this.anomalyGeoJsonUrl(
-        this.selected.id
-      );
-
-    fetch(url)
-      .then(response => {
-
-        if (!response.ok) {
-
-          throw new Error(
-            `Unable to load anomaly GeoJSON (${response.status})`
-          );
-        }
-
-        return response.json();
-      })
-      .then(
-        (geojson: AnomalyGeoJson) => {
-
-          this.renderAnomalies(
-            geojson
-          );
-
-          this.mapLoading = false;
-        }
-      )
-      .catch(error => {
-
-        console.error(
-          'Anomaly GeoJSON error:',
-          error
-        );
-
-        this.mapLoading = false;
-
-        this.mapError =
-          'Unable to load anomaly candidates.';
-      });
-  }
-
-  // =========================================================
-  // GEOJSON URL
-  // =========================================================
-
-  private anomalyGeoJsonUrl(
-    mapId: number
-  ): string {
-
-    /*
-     * This endpoint is the next backend connection.
-     *
-     * Expected final endpoint:
-     *
-     * GET /api/geologist/maps/{mapId}/anomalies
-     *
-     * It should return the GeoJSON generated by
-     * anomaly.py.
-     */
-
-    return `/api/geologist/maps/${mapId}/anomalies`;
   }
 
   // =========================================================
   // RENDER ANOMALIES
   // =========================================================
 
-  private renderAnomalies(
-    geojson: AnomalyGeoJson
-  ): void {
-
-    if (
-      !this.map ||
-      !this.anomalyLayer
-    ) {
+  private renderAnomalies(geojson: AnomalyGeoJson): void {
+    if (!this.map || !this.anomalyLayer) {
       return;
     }
 
     this.anomalyLayer.clearLayers();
 
-    const bounds =
-      L.latLngBounds([]);
+    const bounds = L.latLngBounds([]);
 
-    for (
-      const feature
-      of geojson.features
-    ) {
+    for (const feature of geojson.features) {
+      const [longitude, latitude] = feature.geometry.coordinates;
+      const candidate = feature.properties as unknown as AnomalyCandidate;
 
-      const [
-        longitude,
-        latitude
-      ] = feature.geometry.coordinates;
+      const marker = L.circleMarker([latitude, longitude], {
+        radius: 8,
+        color: '#000000',
+        weight: 2,
+        fillColor: '#16a34a',
+        fillOpacity: 0.9
+      });
 
-      const candidate =
-        feature.properties;
+      marker.bindPopup(this.createCandidatePopup(candidate));
 
-      // -----------------------------------------------------
-      // Green anomaly marker
-      // -----------------------------------------------------
+      marker.on('click', () => {
+        this.selectedCandidate = candidate;
+      });
 
-      const marker =
-        L.circleMarker(
-          [
-            latitude,
-            longitude
-          ],
-          {
-            radius: 8,
-
-            color: '#000000',
-
-            weight: 2,
-
-            fillColor: '#16a34a',
-
-            fillOpacity: 0.9
-          }
-        );
-
-      // -----------------------------------------------------
-      // Candidate popup
-      // -----------------------------------------------------
-
-      marker.bindPopup(
-        this.createCandidatePopup(
-          candidate
-        )
-      );
-
-      // -----------------------------------------------------
-      // Candidate click
-      // -----------------------------------------------------
-
-      marker.on(
-        'click',
-        () => {
-
-          this.selectedCandidate =
-            candidate;
-        }
-      );
-
-      marker.addTo(
-        this.anomalyLayer
-      );
-
-      bounds.extend(
-        [
-          latitude,
-          longitude
-        ]
-      );
+      marker.addTo(this.anomalyLayer);
+      bounds.extend([latitude, longitude]);
     }
 
-    // -------------------------------------------------------
-    // Zoom map to anomalies
-    // -------------------------------------------------------
-
-    if (
-      geojson.features.length > 0
-      &&
-      bounds.isValid()
-    ) {
-
-      this.map.fitBounds(
-        bounds,
-        {
-          padding: [
-            40,
-            40
-          ]
-        }
-      );
-
+    if (geojson.features.length > 0 && bounds.isValid()) {
+      this.map.fitBounds(bounds, { padding: [40, 40] });
     } else {
-
-      // Default world view if there
-      // are no candidates.
-
-      this.map.setView(
-        [
-          0,
-          0
-        ],
-        2
-      );
+      this.map.setView([0, 0], 2);
     }
   }
 
@@ -656,65 +403,24 @@ export class AnomallyMapReview
   // POPUP
   // =========================================================
 
-  private createCandidatePopup(
-    candidate: AnomalyCandidate
-  ): string {
-
+  private createCandidatePopup(candidate: AnomalyCandidate): string {
     return `
-      <div style="
-        min-width: 190px;
-        font-family: Arial, sans-serif;
-        color: #000;
-      ">
-
-        <div style="
-          font-size: 13px;
-          font-weight: 700;
-          margin-bottom: 8px;
-        ">
+      <div style="min-width: 190px; font-family: Arial, sans-serif; color: #000;">
+        <div style="font-size: 13px; font-weight: 700; margin-bottom: 8px;">
           Anomaly Candidate #${candidate.id}
         </div>
-
-        <div style="
-          font-size: 12px;
-          margin-bottom: 4px;
-        ">
-          Peak residual:
-          <strong>
-            ${candidate.peak_residual_nT.toFixed(2)} nT
-          </strong>
+        <div style="font-size: 12px; margin-bottom: 4px;">
+          Peak residual: <strong>${candidate.peak_residual_nT?.toFixed(2)} nT</strong>
         </div>
-
-        <div style="
-          font-size: 12px;
-          margin-bottom: 4px;
-        ">
-          Analytic signal:
-          <strong>
-            ${candidate.max_analytic_signal.toFixed(2)}
-          </strong>
+        <div style="font-size: 12px; margin-bottom: 4px;">
+          Analytic signal: <strong>${candidate.max_analytic_signal?.toFixed(2)}</strong>
         </div>
-
-        <div style="
-          font-size: 12px;
-          margin-bottom: 4px;
-        ">
-          Area:
-          <strong>
-            ${candidate.area_m2.toFixed(2)} m²
-          </strong>
+        <div style="font-size: 12px; margin-bottom: 4px;">
+          Area: <strong>${candidate.area_m2?.toFixed(2)} m²</strong>
         </div>
-
-        <div style="
-          font-size: 12px;
-          margin-bottom: 4px;
-        ">
-          Estimated depth:
-          <strong>
-            ${candidate.estimated_depth_m.toFixed(2)} m
-          </strong>
+        <div style="font-size: 12px; margin-bottom: 4px;">
+          Estimated depth: <strong>${candidate.estimated_depth_m?.toFixed(2)} m</strong>
         </div>
-
       </div>
     `;
   }
@@ -724,16 +430,12 @@ export class AnomallyMapReview
   // =========================================================
 
   private destroyMap(): void {
-
     if (this.map) {
-
       this.map.remove();
-
       this.map = null;
     }
 
     this.anomalyLayer = null;
-
     this.selectedCandidate = null;
   }
 
@@ -741,80 +443,35 @@ export class AnomallyMapReview
   // REVIEW SUBMISSION
   // =========================================================
 
-  private submitReview(
-    decision:
-      'APPROVED'
-      | 'REJECTED'
-  ): void {
-
-    if (!this.selected) {
+  private submitReview(decision: 'APPROVED' | 'REJECTED'): void {
+    if (!this.selected || !this.selected.id) {
       return;
     }
 
-    this.geologist
-      .review(
-        this.selected.id,
-        decision,
-        this.reviewComment
-      )
-      .subscribe({
+    this.submittingReview = true;
 
-        next: updated => {
+    this.geologist.review(this.selected.id, decision, this.reviewComment).subscribe({
+      next: (updated) => {
+        this.submittingReview = false;
 
-          const index =
-            this.surveys.findIndex(
-              survey =>
-                survey.id ===
-                updated.id
-            );
+        const survey = this.toAnomalySurvey(updated);
 
-          const survey =
-            {
-              ...updated,
-
-              title:
-                updated.surveyName
-                ||
-                updated.mapName,
-
-              client:
-                updated.companyName,
-
-              date:
-                new Date(
-                  updated.generatedAt
-                ).toLocaleDateString(),
-
-              status:
-                updated.decision as Status
-            };
-
-          if (index >= 0) {
-
-            this.surveys[index] =
-              survey;
-          }
-
-          this.selected =
-            survey;
-
-          this.reviewComment = '';
-
-          this.initializeMap();
-        },
-
-        error: error => {
-
-          console.error(
-            'Failed to submit review:',
-            error
-          );
+        const index = this.surveys.findIndex((s) => s.id === updated.id);
+        if (index >= 0) {
+          this.surveys[index] = survey;
         }
-      });
-  }
 
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router
-  ) {}
+        this.selected = survey;
+
+        if (this.reviewData) {
+          this.reviewData = { ...this.reviewData, map: updated };
+        }
+      },
+
+      error: (error) => {
+        console.error('Failed to submit review:', error);
+        this.submittingReview = false;
+      }
+    });
+  }
 }

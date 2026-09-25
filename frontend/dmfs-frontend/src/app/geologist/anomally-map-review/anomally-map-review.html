@@ -162,6 +162,20 @@
 
 <ng-template #detail>
 
+  <div
+    class="detail-loading"
+    *ngIf="reviewDataLoading"
+  >
+    Loading survey&hellip;
+  </div>
+
+  <div
+    class="detail-error"
+    *ngIf="reviewDataError"
+  >
+    {{ reviewDataError }}
+  </div>
+
   <a
     class="back-link"
     (click)="backToList()"
@@ -324,12 +338,15 @@
           </div>
 
 
-          <button
-            type="button"
+          <a
+            *ngIf="selected && selected.id"
             class="ghost-btn"
+            [href]="mapFileUrl(selected.id)"
+            target="_blank"
+            rel="noopener"
           >
-            Full screen
-          </button>
+            View full image
+          </a>
 
         </div>
 
@@ -518,32 +535,55 @@
           Survey Data
         </div>
 
+        <ng-container *ngIf="reviewData as data; else noData">
 
-        <a
-          class="data-link"
-          href="#"
-        >
-          Raw magnetometer data
-          <span>&rarr;</span>
-        </a>
+          <!-- Raw files the drone operator uploaded -->
+          <ng-container *ngFor="let pkg of data.rawData">
+            <a
+              class="data-link"
+              *ngFor="let file of pkg.files"
+              [href]="rawFileUrl(file.fileId)"
+              target="_blank"
+              rel="noopener"
+            >
+              Raw: {{ file.fileName }}
+              <span>&rarr;</span>
+            </a>
+          </ng-container>
 
+          <div
+            class="empty-inline"
+            *ngIf="data.rawData.length === 0"
+          >
+            No raw data uploaded yet.
+          </div>
 
-        <a
-          class="data-link"
-          href="#"
-        >
-          Processed data
-          <span>&rarr;</span>
-        </a>
+          <!-- Processed feature-stack data -->
+          <a
+            class="data-link"
+            *ngIf="data.processedData as processed"
+            [href]="mapFileUrl(selected!.id)"
+            target="_blank"
+            rel="noopener"
+          >
+            Processed: {{ processed.fileName }} ({{ processed.recordCount }} records)
+            <span>&rarr;</span>
+          </a>
 
+          <div
+            class="empty-inline"
+            *ngIf="!data.processedData"
+          >
+            Not processed yet.
+          </div>
 
-        <a
-          class="data-link"
-          href="#"
-        >
-          Processing metadata
-          <span>&rarr;</span>
-        </a>
+        </ng-container>
+
+        <ng-template #noData>
+          <div class="empty-inline">
+            Loading survey data&hellip;
+          </div>
+        </ng-template>
 
       </div>
 
@@ -570,23 +610,32 @@
         ></textarea>
 
 
+        <div
+          class="empty-inline"
+          *ngIf="selected && !selected.id"
+        >
+          No anomaly map has been generated for this survey yet -- nothing to review.
+        </div>
+
         <div class="review-actions">
 
           <button
             type="button"
             class="reject-btn"
+            [disabled]="!selected || !selected.id || submittingReview"
             (click)="reject()"
           >
-            Reject map
+            {{ submittingReview ? 'Submitting…' : 'Reject map' }}
           </button>
 
 
           <button
             type="button"
             class="approve-btn"
+            [disabled]="!selected || !selected.id || submittingReview"
             (click)="approve()"
           >
-            Approve map
+            {{ submittingReview ? 'Submitting…' : 'Approve map' }}
           </button>
 
         </div>

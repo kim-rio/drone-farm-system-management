@@ -29,10 +29,12 @@ public class SurveyDataStorageService {
                 .normalize();
     }
 
-    /**
-     * Stores an uploaded survey input file and returns
-     * the storage key used to locate the file.
+    /*
+     * ============================================================
+     * Store uploaded survey file
+     * ============================================================
      */
+
     public String store(
             MultipartFile file,
             String packageCode
@@ -44,7 +46,8 @@ public class SurveyDataStorageService {
             );
         }
 
-        String originalFileName = file.getOriginalFilename();
+        String originalFileName =
+                file.getOriginalFilename();
 
         if (originalFileName == null
                 || originalFileName.isBlank()) {
@@ -54,13 +57,8 @@ public class SurveyDataStorageService {
             );
         }
 
-        /*
-         * Generate a safe storage file name rather than
-         * trusting the original client-provided name.
-         */
-        String extension = extractExtension(
-                originalFileName
-        );
+        String extension =
+                extractExtension(originalFileName);
 
         String safeFileName =
                 UUID.randomUUID()
@@ -68,14 +66,19 @@ public class SurveyDataStorageService {
                         + "."
                         + extension;
 
-        Path packageDirectory = storageDirectory
-                .resolve(packageCode)
-                .normalize();
+        Path packageDirectory =
+                storageDirectory
+                        .resolve(packageCode)
+                        .normalize();
 
         /*
          * Prevent path traversal.
          */
-        if (!packageDirectory.startsWith(storageDirectory)) {
+
+        if (!packageDirectory.startsWith(
+                storageDirectory
+        )) {
+
             throw new IllegalArgumentException(
                     "Invalid storage path."
             );
@@ -87,11 +90,19 @@ public class SurveyDataStorageService {
                     packageDirectory
             );
 
-            Path targetPath = packageDirectory
-                    .resolve(safeFileName)
-                    .normalize();
+            Path targetPath =
+                    packageDirectory
+                            .resolve(safeFileName)
+                            .normalize();
 
-            if (!targetPath.startsWith(packageDirectory)) {
+            /*
+             * Prevent path traversal.
+             */
+
+            if (!targetPath.startsWith(
+                    packageDirectory
+            )) {
+
                 throw new IllegalArgumentException(
                         "Invalid file storage path."
                 );
@@ -103,10 +114,6 @@ public class SurveyDataStorageService {
                     StandardCopyOption.REPLACE_EXISTING
             );
 
-            /*
-             * Storage key is relative to the configured
-             * survey-data storage directory.
-             */
             return packageCode
                     + "/"
                     + safeFileName;
@@ -120,14 +127,79 @@ public class SurveyDataStorageService {
         }
     }
 
-    /**
-     * Calculates SHA-256 checksum of the uploaded file.
+    /*
+     * ============================================================
+     * Resolve storage key
+     * ============================================================
      */
+
+    public Path resolveStorageKey(
+            String storageKey
+    ) {
+
+        if (storageKey == null
+                || storageKey.isBlank()) {
+
+            throw new IllegalArgumentException(
+                    "Storage key is required."
+            );
+        }
+
+        Path resolvedPath =
+                storageDirectory
+                        .resolve(storageKey)
+                        .normalize();
+
+        /*
+         * Prevent path traversal.
+         */
+
+        if (!resolvedPath.startsWith(
+                storageDirectory
+        )) {
+
+            throw new IllegalArgumentException(
+                    "Invalid storage key."
+            );
+        }
+
+        return resolvedPath;
+    }
+
+    /*
+     * ============================================================
+     * Backwards-compatible resolve method
+     *
+     * Existing GeologistService uses:
+     *
+     * rawDataStorage.resolve(...)
+     *
+     * Keep this method so existing geologist functionality
+     * continues working.
+     * ============================================================
+     */
+
+    public Path resolve(
+            String storageKey
+    ) {
+
+        return resolveStorageKey(
+                storageKey
+        );
+    }
+
+    /*
+     * ============================================================
+     * Calculate SHA-256 checksum
+     * ============================================================
+     */
+
     public String calculateChecksum(
             MultipartFile file
     ) {
 
         if (file == null || file.isEmpty()) {
+
             throw new IllegalArgumentException(
                     "Cannot calculate checksum for an empty file."
             );
@@ -136,17 +208,25 @@ public class SurveyDataStorageService {
         try {
 
             MessageDigest digest =
-                    MessageDigest.getInstance("SHA-256");
+                    MessageDigest.getInstance(
+                            "SHA-256"
+                    );
 
-            try (InputStream inputStream =
-                         file.getInputStream()) {
+            try (
+                    InputStream inputStream =
+                            file.getInputStream()
+            ) {
 
-                byte[] buffer = new byte[8192];
+                byte[] buffer =
+                        new byte[8192];
 
                 int bytesRead;
 
-                while ((bytesRead =
-                        inputStream.read(buffer)) != -1) {
+                while (
+                        (bytesRead =
+                                inputStream.read(buffer))
+                                != -1
+                ) {
 
                     digest.update(
                             buffer,
@@ -177,9 +257,12 @@ public class SurveyDataStorageService {
         }
     }
 
-    /**
-     * Extracts a file extension without the dot.
+    /*
+     * ============================================================
+     * Extract file extension
+     * ============================================================
      */
+
     private String extractExtension(
             String fileName
     ) {

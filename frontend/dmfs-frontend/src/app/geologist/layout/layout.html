@@ -31,7 +31,7 @@
     </nav>
 
     <div class="sidebar-bottom">
-      <button type="button" class="account">
+      <button type="button" class="account" (click)="openSettings()">
         <div class="account-avatar">{{ initials }}</div>
         <div class="account-details">
           <strong>{{ user?.firstName }} {{ user?.lastName }}</strong>
@@ -63,7 +63,36 @@
       </div>
 
       <div class="topbar-right">
-        <div class="top-user">
+        <div class="notification-wrap">
+          <button
+            type="button"
+            class="notification-btn"
+            (click)="toggleNotifications()"
+            aria-label="Notifications">
+            🔔
+            @if (notifications.length > 0) {
+              <span class="notification-badge">{{ notifications.length }}</span>
+            }
+          </button>
+
+          @if (notificationsOpen) {
+            <div class="notification-dropdown">
+              <div class="notification-dropdown-title">Notifications</div>
+              @if (notifications.length === 0) {
+                <div class="notification-empty">No new notifications</div>
+              } @else {
+                @for (note of notifications; track note.id) {
+                  <div class="notification-item">
+                    <span>{{ note.message }}</span>
+                    <span class="notification-time">{{ note.time }}</span>
+                  </div>
+                }
+              }
+            </div>
+          }
+        </div>
+
+        <div class="top-user" (click)="openSettings()">
           <div class="top-avatar">{{ initials }}</div>
           <div class="top-user-details">
             <strong>{{ user?.firstName }} {{ user?.lastName }}</strong>

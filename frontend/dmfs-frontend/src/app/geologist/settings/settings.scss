@@ -1,0 +1,21 @@
+:host { display: block; color: #000; }
+.eyebrow { font-size: 11px; letter-spacing: .06em; color: #15803d; font-weight: 700; text-transform: uppercase; }
+h1 { font-size: 22px; margin: 4px 0 6px; color: #000; }
+.subtitle { font-size: 13.5px; color: #6b7280; margin-bottom: 20px; }
+.panel { background: #fff; border: 1px solid #d1d5db; border-radius: 8px; padding: 18px; }
+
+.account-panel { max-width: 420px; display: flex; flex-direction: column; gap: 16px; }
+
+.account-header { display: flex; align-items: center; gap: 12px; padding-bottom: 14px; border-bottom: 1px solid #e5e7eb; }
+.account-header strong { display: block; font-size: 15px; }
+.avatar { width: 44px; height: 44px; border-radius: 50%; background: #111; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; flex: 0 0 44px; }
+
+.role-badge { display: inline-block; margin-top: 4px; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 20px; background: #dcfce7; color: #15803d; border: 1px solid #16a34a; text-transform: uppercase; letter-spacing: .04em; }
+
+.info-row { display: flex; align-items: center; justify-content: space-between; font-size: 13px; }
+.info-label { color: #6b7280; }
+.info-value { font-weight: 600; }
+
+.logout-btn { margin-top: 6px; padding: 10px 14px; border-radius: 7px; border: 1px solid #000; background: #111; color: #fff; font-size: 13px; font-weight: 700; cursor: pointer; }
+.logout-btn:hover { background: #000; }
+.logout-btn:disabled { opacity: 0.6; cursor: not-allowed; }

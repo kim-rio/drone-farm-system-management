@@ -75,3 +75,8 @@ textarea::placeholder { color: #9ca3af; }
 @media (max-width: 1050px) { .row { grid-template-columns: 2fr 1.2fr 1fr auto; } .row-cell:nth-child(3), .row-cell:nth-child(4) { display: none; } .detail-grid { grid-template-columns: 1fr; } }
 @media (max-width: 800px) { .filters { flex-direction: column; } .info-grid { grid-template-columns: repeat(2, 1fr); } .candidate-grid { grid-template-columns: repeat(2, 1fr); } .row { grid-template-columns: 1fr auto; } .row-cell { display: none !important; } }
 @media (max-width: 600px) { .detail-head { flex-direction: column; } .info-grid, .candidate-grid { grid-template-columns: 1fr; } .anomaly-map { height: 350px; } .map-wrapper { min-height: 350px; } .review-actions { flex-direction: column; } }
+
+.empty-inline { padding: 10px 0; color: #6b7280; font-size: 12.5px; }
+.detail-loading { padding: 14px 16px; margin-bottom: 12px; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; color: #6b7280; font-size: 13px; }
+.detail-error { padding: 14px 16px; margin-bottom: 12px; background: #fff; border: 1px solid #000; border-radius: 8px; color: #000; font-size: 13px; }
+button[disabled] { opacity: 0.5; cursor: not-allowed; }

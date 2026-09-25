@@ -35,6 +35,13 @@ export const GEOLOGIST_ROUTES: Routes = [
           import('./ai-reports/ai-reports').then(
             (m) => m.AiReports
           )
+      },
+      {
+        path: 'settings',
+        loadComponent: () =>
+          import('./settings/settings').then(
+            (m) => m.Settings
+          )
       }
     ]
   }

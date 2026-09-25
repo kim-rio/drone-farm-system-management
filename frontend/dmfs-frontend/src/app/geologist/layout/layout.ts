@@ -42,8 +42,22 @@ export class Layout {
     { label: 'Dashboard', route: '/geologist/dashboard' },
     { label: 'Survey History', route: '/geologist/survey-history' },
     { label: 'Anomaly Map Review', route: '/geologist/anomaly-map-review' },
-    { label: 'AI Reports', route: '/geologist/ai-reports' }
+    { label: 'AI Reports', route: '/geologist/ai-reports' },
+    { label: 'Settings', route: '/geologist/settings' }
   ];
+
+  /** No notifications backend/table exists yet -- this is a UI affordance
+   * only, ready to wire up once one does. */
+  notificationsOpen = false;
+  notifications: Array<{ id: number; message: string; time: string }> = [];
+
+  toggleNotifications(): void {
+    this.notificationsOpen = !this.notificationsOpen;
+  }
+
+  openSettings(): void {
+    this.router.navigateByUrl('/geologist/settings');
+  }
 
   activeRoute = this.router.url;
 

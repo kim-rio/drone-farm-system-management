@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.dmfs.auth.entity.User;
 import com.dmfs.auth.repository.UserRepository;
 import com.dmfs.mission.service.MissionService;
+import com.dmfs.survey.dto.ProcessingResultResponse;
 import com.dmfs.survey.dto.SurveyDataFileResponse;
 import com.dmfs.survey.dto.SurveyDataPackageResponse;
 import com.dmfs.survey.entity.SurveyDataFile;
@@ -38,6 +39,11 @@ public class SurveyDataPackageService {
     private final UserRepository userRepository;
     private final MissionService missionService;
 
+    /*
+     * Python / survey processing service
+     */
+    private final SurveyProcessingService surveyProcessingService;
+
     public SurveyDataPackageService(
             SurveyyRepository surveyyRepository,
             SurveyDataPackageRepository packageRepository,
@@ -45,7 +51,8 @@ public class SurveyDataPackageService {
             List<SurveyDataFileValidator> validators,
             SurveyDataStorageService storageService,
             UserRepository userRepository,
-            MissionService missionService
+            MissionService missionService,
+            SurveyProcessingService surveyProcessingService
     ) {
         this.surveyyRepository = surveyyRepository;
         this.packageRepository = packageRepository;
@@ -54,6 +61,7 @@ public class SurveyDataPackageService {
         this.storageService = storageService;
         this.userRepository = userRepository;
         this.missionService = missionService;
+        this.surveyProcessingService = surveyProcessingService;
     }
 
     @Transactional
@@ -472,10 +480,64 @@ public class SurveyDataPackageService {
 
         /*
          * --------------------------------------------------------
-         * 9. Complete the associated mission
+         * 9. Process UAV survey data
          *
-         * The mission is completed only after the survey
-         * data package has successfully been submitted.
+         * The submitted UAV file is now sent to the Python
+         * processing service.
+         *
+         * Python performs:
+         *
+         * UAV parsing
+         *      ↓
+         * coordinate validation
+         *      ↓
+         * data cleaning
+         *      ↓
+         * magnetic processing
+         *      ↓
+         * anomaly calculation
+         *      ↓
+         * grid generation
+         *      ↓
+         * GeoTIFF generation
+         *      ↓
+         * anomaly candidates
+         *
+         * The resulting products are persisted by
+         * SurveyProcessingService.
+         * --------------------------------------------------------
+         */
+
+        ProcessingResultResponse processingResult =
+                surveyProcessingService.processPackage(
+                        submittedPackage
+                );
+
+        /*
+         * --------------------------------------------------------
+         * 10. Verify processing succeeded
+         * --------------------------------------------------------
+         */
+
+        if (processingResult == null
+                || !processingResult.isSuccess()) {
+
+            throw new IllegalStateException(
+                    "Survey data processing failed."
+            );
+        }
+
+        /*
+         * --------------------------------------------------------
+         * 11. Complete the associated mission
+         *
+         * The mission is completed only after:
+         *
+         * 1. Data package is submitted
+         * 2. UAV processing succeeds
+         * 3. Processed magnetic data is stored
+         * 4. Magnetic anomaly map is created
+         *
          * --------------------------------------------------------
          */
 
@@ -493,7 +555,7 @@ public class SurveyDataPackageService {
 
         /*
          * --------------------------------------------------------
-         * 10. Return submitted package
+         * 12. Return submitted package
          * --------------------------------------------------------
          */
 
